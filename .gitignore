@@ -1,0 +1,45 @@
+# --- Next.js ---
+.next/
+out/
+dist/
+build/
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Env files ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- Logs ---
+logs
+*.log
+*.log.*
+debug.log
+
+# --- OS / Editor files ---
+.DS_Store
+Thumbs.db
+
+# --- Vercel / Deployment ---
+.vercel
+.vercel_build_output/
+
+# --- TypeScript ---
+*.tsbuildinfo
+
+# --- IDE / Editor Specific ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Optional: Next Image Cache ---
+public/cache/
