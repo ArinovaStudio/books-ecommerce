@@ -7,7 +7,7 @@ export async function PUT(req: NextRequest, { params }: { params: { productId: s
     try {
         const auth = await verifyAdmin(req);
                 
-        if (!auth){
+        if (!auth.success){
             return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
         }
 
@@ -68,7 +68,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { productId
     try {
         const auth = await verifyAdmin(req);
                 
-        if (!auth){
+        if (!auth.success){
             return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
         }
 

@@ -12,7 +12,7 @@ export async function PUT(req: NextRequest, { params }: { params: { classId: str
     try {
         const auth = await verifyAdmin(req);
 
-        if (!auth){
+        if (!auth.success){
             return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
         }
 
@@ -47,7 +47,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { classId: 
     try {
         const auth = await verifyAdmin(req);
 
-        if (!auth){
+        if (!auth.success){
             return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
         }
 
@@ -63,7 +63,11 @@ export async function DELETE(req: NextRequest, { params }: { params: { classId: 
             return NextResponse.json({ success: false, message: "Class not found" }, { status: 404 });
         }
 
+        const schoolId = existingClass.schoolId;
+
         await prisma.class.delete({ where: { id: classId }});
+
+        await prisma.school.update({ where: { id: schoolId }, data: { numberOfClasses: { decrement: 1 } } });
 
         return NextResponse.json({ success: true, message: "Class deleted successfully" }, { status: 200 });
     } catch (error) {

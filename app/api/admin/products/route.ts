@@ -7,7 +7,7 @@ export async function POST(req: NextRequest){
     try {
         const auth = await verifyAdmin(req);
         
-        if (!auth){
+        if (!auth.success){
             return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
         }
 

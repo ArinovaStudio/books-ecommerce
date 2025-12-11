@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/verify-admin';
-import { saveImage } from '@/lib/upload';
+import { getFullImageUrl, saveImage } from '@/lib/upload';
 import prisma from '@/lib/prisma';
 
 export async function POST(req: NextRequest){
     try {
         const auth = await verifyAdmin(req);
 
-        if (!auth){
+        if (!auth.success){
             return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
         }
 
@@ -31,7 +31,9 @@ export async function POST(req: NextRequest){
             }
         }
 
-         const newSchool = await prisma.school.create({ data: { name, board, address: addressJson, image: imageUrl }});
+        const newSchool = await prisma.school.create({ data: { name, board, address: addressJson, image: imageUrl }});
+
+        newSchool.image = getFullImageUrl(newSchool.image as string, req);
 
         return NextResponse.json({ success: true, message: "School created successfully", school: newSchool }, { status: 201 });
         

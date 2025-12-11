@@ -16,13 +16,13 @@ export async function verifyAdmin(req: NextRequest): Promise<{ success: boolean,
 
     const decoded = jwt.verify(token, SECRET_KEY) as { id: string, email: string };
 
-    if (!decoded.email && !decoded.id) {
+    if (!decoded.id) {
        return { success: false, message: "Invalid Token", status: 403 };
     }
     
     const adminId = decoded.id;
 
-    const user = await prisma.user.findUnique({ where: { id: adminId },});
+    const user = await prisma.user.findUnique({ where: { id: adminId }});
 
     if (!user || user.role !== "ADMIN") {
       return { success: false, message: "Admin access required", status: 403 };

@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { deleteImage, saveImage } from "@/lib/upload";
+import { deleteImage, getFullImageUrl, saveImage } from "@/lib/upload";
 import { verifyAdmin } from "@/lib/verify-admin";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,7 +7,7 @@ export async function PUT(req: NextRequest, { params }: { params: { schoolId: st
   try {
     const auth = await verifyAdmin(req);
 
-    if (!auth){
+    if (!auth.success){
         return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
     }
 
@@ -49,6 +49,8 @@ export async function PUT(req: NextRequest, { params }: { params: { schoolId: st
       },
     });
 
+    updatedSchool.image = getFullImageUrl(updatedSchool.image as string, req);
+
     return NextResponse.json({ success: true, message: "School updated successfully", school: updatedSchool }, { status: 200 });
 
   } catch (error) {
@@ -61,7 +63,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { schoolId:
   try {
     const auth = await verifyAdmin(req);
 
-    if (!auth){
+    if (!auth.success){
         return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
     }
 

@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   try {
     const auth = await verifyAdmin(req);
 
-    if (!auth){
+    if (!auth.success){
         return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
     }
 
@@ -40,6 +40,8 @@ export async function POST(req: NextRequest) {
     }
 
     const newClass = await prisma.class.create({ data: { name, schoolId, sections }});
+
+    await prisma.school.update({ where: { id: schoolId }, data: { numberOfClasses: { increment: 1 } }});
 
     return NextResponse.json( { success: true, message: "Class created successfully", class: newClass }, { status: 201 } );
 
