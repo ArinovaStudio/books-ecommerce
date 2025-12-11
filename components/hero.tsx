@@ -3,7 +3,7 @@ import { ArrowRight, CheckCircle } from "lucide-react"
 
 export default function Hero() {
   return (
-    <section className="bg-linear-to-br from-blue-950 via-blue-800 to-blue-300
+    <section id="home" className="bg-linear-to-br from-blue-950 via-blue-800 to-blue-300
 text-white py-12 md:py-24 relative overflow-hidden">
       <svg
         className="absolute bottom-0 left-0 w-full h-24 text-white"
@@ -14,7 +14,7 @@ text-white py-12 md:py-24 relative overflow-hidden">
       </svg>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 relative z-10">
-        <div className="grid md:grid-cols-2 gap-20 items-center pb-20 justify-between">
+        <div className="grid lg:grid-cols-2 gap-20 items-center pb-20 justify-between">
 
           {/* Left Content */}
           <div className="space-y-7 ">
@@ -26,7 +26,7 @@ text-white py-12 md:py-24 relative overflow-hidden">
 
             {/* Headline */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-balance">
-              School Books & Stationery, <span className="text-amber-400">Delivered</span> to Your Door
+              School Books & Stationery, <span className="text-amber-400">Delivered to Your Door</span>
             </h1>
 
             {/* Description */}
@@ -72,7 +72,7 @@ text-white py-12 md:py-24 relative overflow-hidden">
           </div>
 
           {/* Right Visual - Product Card */}
-          <div className="hidden md:flex justify-center">
+          <div className="hidden lg:flex justify-center">
             <div className="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full">
               <div className="absolute left-150 bg-amber-500 text-white px-4 py-2 rounded-full font-bold text-sm">
                 20% OFF

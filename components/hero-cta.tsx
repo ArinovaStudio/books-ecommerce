@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react"
 
 export default function HeroCTA() {
   return (
-    <section className="bg-blue-950 text-white py-20 md:py-32">
+    <section id="contact" className="bg-blue-950 text-white py-20 md:py-32">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
         {/* Heading */}
         <h2 className="text-4xl md:text-5xl font-bold leading-tight text-balance">Ready to Get Started?</h2>

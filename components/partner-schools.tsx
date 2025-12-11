@@ -12,10 +12,10 @@ const schools = [
 
 export default function PartnerSchools() {
   return (
-    <section className="py-20 md:py-32 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="schools" className="py-20 md:py-32 bg-gray-50 ">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex justify-between items-start mb-16">
+        <div className="flex flex-col md:flex-row justify-between items-start mb-16">
           <div className="space-y-2">
             <h2 className="text-4xl md:text-5xl font-bold text-blue-950 text-balance">Partner Schools</h2>
             <p className="text-lg text-gray-600 max-w-2xl leading-relaxed">
@@ -24,7 +24,7 @@ export default function PartnerSchools() {
           </div>
           <Button
             variant="outline"
-            className="border-2 border-blue-900 text-blue-950 hover:bg-blue-950 hover:text-white rounded-lg px-6 hidden md:flex gap-2 bg-transparent cursor-pointer"
+            className="border-2 border-blue-900 text-blue-950 hover:bg-blue-950 hover:text-white rounded-lg px-6 flex gap-2 bg-transparent cursor-pointer mt-5 md:mt-0 w-full md:w-auto py-5"
           >
             View All Schools
             <ArrowRight size={18} />

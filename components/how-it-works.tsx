@@ -41,21 +41,21 @@ export default function HowItWorks() {
         </div>
 
         {/* Steps Grid */}
-        <div className="grid md:grid-cols-4 gap-6 relative">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative px-5">
           {/* Connection Line */}
-          <div className="hidden md:block absolute top-12 left-0 right-0 h-1 bg-linear-to-r from-amber-500 via-amber-500/50 to-transparent -z-10"></div>
+          <div className="hidden lg:block absolute top-12 left-10 right-0 h-1 bg-linear-to-r from-amber-500 via-amber-500/50 to-transparent -z-10 "></div>
 
           {steps.map((step, index) => {
             const Icon = step.icon
             return (
               <div key={index} className="relative">
                 {/* Step Number Badge */}
-                <div className="absolute -top-6 -right-3 w-12 h-12 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
+                <div className="absolute -top-3 -right-3 w-8 h-8 md:w-12 md:h-12 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
                   {step.number}
                 </div>
 
                 {/* Card */}
-                <Card className="p-8 h-full border border-gray-200 hover:shadow-lg transition-shadow flex flex-col items-start text-left gap-3">
+                <Card className="py-8 px-4 h-full border border-gray-200 hover:shadow-lg transition-shadow flex flex-col items-start text-left gap-3">
                   <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
                     <Icon className="text-blue-950" size={32} />
                   </div>
