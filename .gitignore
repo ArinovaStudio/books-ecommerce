@@ -45,3 +45,4 @@ Thumbs.db
 public/cache/
 
 /lib/generated/prisma
+/public/uploads
