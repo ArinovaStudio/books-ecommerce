@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  phone String @unique
+  name String
+  password String
+  studentClass Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Otp {
+  id String @id @default(uuid())
+  email String 
+  otp String
+  expiredAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model School {
+  id String @id @default(uuid())
+  name String
+  address Json?
+  image String?
+  board String
+  numberOfClasses Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classes Class[]
+}
+
+model Class {
+  id String @id @default(uuid())
+  name String
+  sections String[]
+  schoolId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school School @relation(fields: [schoolId], references: [id])
+  kits Kit[]
+}
+
+enum ProductCategory {
+  BOOK
+  STATIONARY
+  OTHER
+}
+
+model Product {
+  id String @id @default(uuid())
+  name String
+  description String
+  price Float
+  category ProductCategory
+  stock Int
+  image String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  kitItems KitItem[]
+}
+
+enum KitType {
+  BASIC
+  MEDIUM
+  ADVANCE
+}
+
+model Kit {
+  id String @id @default(uuid())
+  type KitType
+  classId String
+  totalPrize Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school Class @relation(fields: [classId], references: [id])
+
+  items KitItem[]
+}
+
+model KitItem {
+  id String @id @default(uuid())
+  kitId String
+  productId String
+  quantity Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  kit Kit @relation(fields: [kitId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}

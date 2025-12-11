@@ -43,3 +43,5 @@ Thumbs.db
 
 # --- Optional: Next Image Cache ---
 public/cache/
+
+/lib/generated/prisma
