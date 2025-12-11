@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { MapPin, ArrowRight } from "lucide-react"
+import Link from "next/link"
 
 const schools = [
   { name: "Delhi Public School", location: "New Delhi", icon: "🏫" },
@@ -22,13 +23,15 @@ export default function PartnerSchools() {
               We work with top schools across India to bring you the exact books and supplies your child needs.
             </p>
           </div>
-          <Button
-            variant="outline"
-            className="border-2 border-blue-900 text-blue-950 hover:bg-blue-950 hover:text-white rounded-lg px-6 flex gap-2 bg-transparent cursor-pointer mt-5 md:mt-0 w-full md:w-auto py-5"
-          >
-            View All Schools
-            <ArrowRight size={18} />
-          </Button>
+          <Link href="/schools" className="w-full md:w-auto">
+            <Button
+              variant="outline"
+              className="border-2 border-blue-900 text-blue-950 hover:bg-blue-950 hover:text-white rounded-lg px-6 flex gap-2 bg-transparent cursor-pointer mt-5 md:mt-0 w-full py-5"
+            >
+              View All Schools
+              <ArrowRight size={18} />
+            </Button>
+          </Link>
         </div>
 
         {/* Schools Grid */}
