@@ -1,0 +1,54 @@
+import prisma from "@/lib/prisma";
+import { getFullImageUrl, saveImage } from "@/lib/upload";
+import { verifyAdmin } from "@/lib/verify-admin";
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(req: NextRequest){
+    try {
+        const auth = await verifyAdmin(req);
+        
+        if (!auth){
+            return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+        }
+
+        const formData = await req.formData();
+        const name = formData.get("name") as string;
+        const description = formData.get("description") as string;
+        const price = formData.get("price") as string;
+        const category = formData.get("category") as string;
+        const stock = formData.get("stock") as string;
+        const imageFile = formData.get("image") as File | null;
+
+        if (!name || !description || !price || !category || !stock) {
+            return NextResponse.json({ success: false, message: "All fields are required" }, { status: 400 });
+        }
+
+        let imageUrl = null;
+        if (imageFile) {
+            try {
+                imageUrl = await saveImage(imageFile);
+            } catch (error: any) {
+                return NextResponse.json({ success: false, message: "Image upload failed", error: error.message }, { status: 400 });
+            }
+        }
+
+        const newProduct = await prisma.product.create({ 
+            data: { 
+                name, 
+                description, 
+                price: parseFloat(price), 
+                category: category as "BOOK" | "STATIONARY" | "OTHER", 
+                stock: parseInt(stock), 
+                image: imageUrl 
+            }
+        });
+
+        newProduct.image = getFullImageUrl(imageUrl as string, req);
+
+        return NextResponse.json({ success: true, message: "Product added successfully", product: newProduct }, { status: 200 });
+
+    } catch (error) {
+        console.error("Product add error:", error);
+        return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
+    }
+}

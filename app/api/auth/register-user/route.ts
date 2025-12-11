@@ -23,9 +23,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     const validation = signupValidation.safeParse(body);
-
     if (!validation.success) {
-      return NextResponse.json({ success: false, message: "validation error" }, { status: 400 } );
+        const errors = validation.error.errors.map((error) => ({ field: error.path[0], message: error.message }));;
+        return NextResponse.json({ success: false, message: "Vlidation error", errors }, { status: 400 });
     }
 
     const { name, email, phone, password, studentClass } = validation.data;
@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
     const existing = await prisma.user.findFirst({ where: { OR: [{ email }, { phone }] }});
 
     if (existing) {
-      return NextResponse.json( { success: false, message: "User with this email or phone already exists" }, { status: 400 })};
+      return NextResponse.json( { success: false, message: "User with this email or phone already exists" }, { status: 400 })
+    };
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
