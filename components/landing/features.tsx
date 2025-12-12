@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card"
-import { CheckCircle, DollarSign, Clock, Package, RotateCcw, Headphones } from "lucide-react"
+import { CheckCircle, IndianRupee, Clock, Package, RefreshCw , Headphones } from "lucide-react"
 
 const features = [
   {
@@ -8,7 +8,7 @@ const features = [
     description: "All books are sourced directly from authorized publishers and distributors",
   },
   {
-    icon: DollarSign,
+    icon: IndianRupee,
     title: "Best Bundle Pricing",
     description: "Save up to 20% when you buy complete book sets and stationery kits",
   },
@@ -23,7 +23,7 @@ const features = [
     description: "Books are carefully packed to ensure they reach you in perfect condition",
   },
   {
-    icon: RotateCcw,
+    icon: RefreshCw ,
     title: "Easy Returns",
     description: "Hassle-free return policy within 7 days of delivery",
   },
