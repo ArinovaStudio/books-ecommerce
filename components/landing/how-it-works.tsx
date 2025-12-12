@@ -31,7 +31,7 @@ const steps = [
 export default function HowItWorks() {
   return (
     <section className="py-20 md:py-32 ">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0">
         {/* Section Header */}
         <div className="text-center mb-16 space-y-4">
           <h2 className="text-4xl md:text-5xl font-bold text-blue-950 text-balance">How It Works</h2>
@@ -41,16 +41,16 @@ export default function HowItWorks() {
         </div>
 
         {/* Steps Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative px-5">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative px-0">
           {/* Connection Line */}
-          <div className="hidden lg:block absolute top-12 left-10 right-0 h-1 bg-linear-to-r from-amber-500 via-amber-500/50 to-transparent -z-10 "></div>
+          <div className="hidden lg:block absolute top-12 left-10 right-0 h-1 bg-linear-to-r bg-gray-100 -z-10 "></div>
 
           {steps.map((step, index) => {
             const Icon = step.icon
             return (
               <div key={index} className="relative">
                 {/* Step Number Badge */}
-                <div className="absolute -top-3 -right-3 w-8 h-8 md:w-12 md:h-12 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
+                <div className="absolute -top-3 -right-3 w-8 h-8 md:w-12 md:h-12 bg-amber-500 text-black rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
                   {step.number}
                 </div>
 
