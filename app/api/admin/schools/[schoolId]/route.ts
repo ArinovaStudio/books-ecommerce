@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { deleteImage, getFullImageUrl, saveImage } from "@/lib/upload";
-import { verifyAdmin } from "@/lib/verify-admin";
+import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PUT(req: NextRequest, { params }: { params: { schoolId: string } }) {

@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { verifyAdmin } from "@/lib/verify-admin";
+import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 

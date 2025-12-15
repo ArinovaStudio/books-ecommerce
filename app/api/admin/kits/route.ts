@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { verifyAdmin } from "@/lib/verify-admin";
+import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 import  z  from "zod";
 
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest){
 
         const existingProducts = await prisma.product.findMany({ where: { id: { in: productIds } } });
 
-        let totalPrize = 0;
+        let totalPrice = 0;
         const productMap = new Map(existingProducts.map((product) => [product.id, product.price]));
 
         for (const item of items){
@@ -51,10 +51,10 @@ export async function POST(req: NextRequest){
             if (!price){
                 return NextResponse.json({ success: false, message: `Product ID ${item.productId} not found` }, { status: 404 });
             }
-            totalPrize += price * item.quantity;
+            totalPrice += price * item.quantity;
         }
 
-        const newKit = await prisma.kit.create({ data: { classId, totalPrize, type } });
+        const newKit = await prisma.kit.create({ data: { classId, totalPrice, type } });
 
         await prisma.kitItem.createMany({
             data: items.map(item => ({

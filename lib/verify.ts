@@ -34,3 +34,33 @@ export async function verifyAdmin(req: NextRequest): Promise<{ success: boolean,
     return { success: false, message: "Invalid Token", status: 401 };
   }
 }
+
+export async function verifyUser(req: NextRequest): Promise<{ success: boolean, message: string, status: number, user?: any }> {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+      return { success: false, message: "No token provided", status: 401 };
+    }
+
+    const decoded = jwt.verify(token, SECRET_KEY) as { id: string, email: string };
+
+    if (!decoded.id) {
+       return { success: false, message: "Invalid Token", status: 403 };
+    }
+    
+    const userId = decoded.id;
+
+    const user = await prisma.user.findUnique({ where: { id: userId }});
+
+    if (!user) {
+      return { success: false, message: "User not found", status: 404 };
+    }
+
+    return { success: true, message: "User is authenticated", status: 200, user };
+
+  } catch (error) {
+    return { success: false, message: "Invalid or Expired Token", status: 401 };
+  }
+}

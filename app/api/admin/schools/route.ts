@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAdmin } from '@/lib/verify-admin';
+import { verifyAdmin } from '@/lib/verify';
 import { getFullImageUrl, saveImage } from '@/lib/upload';
 import prisma from '@/lib/prisma';
 

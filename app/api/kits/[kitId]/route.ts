@@ -18,6 +18,7 @@ export async function GET(req: NextRequest, { params }: { params: { kitId: strin
 
         const formatKitItems = kit.items.map(item => ({
             id: item.id,
+            productId: item.productId,
             quantity: item.quantity,
             name: item.product.name,
             image: getFullImageUrl(item.product.image as string, req),

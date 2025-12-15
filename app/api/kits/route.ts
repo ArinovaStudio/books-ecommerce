@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
         const formatKits = kits.map(kit => ({
             id: kit.id,
             type: kit.type,
-            totalPrize: kit.totalPrize,
+            totalPrize: kit.totalPrice,
             items: kit.items.map(item => ({
                 id: item.id,
                 quantity: item.quantity,

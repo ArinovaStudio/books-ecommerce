@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { deleteImage, getFullImageUrl, saveImage } from "@/lib/upload";
-import { verifyAdmin } from "@/lib/verify-admin";
+import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PUT(req: NextRequest, { params }: { params: { productId: string } }){
@@ -35,6 +35,8 @@ export async function PUT(req: NextRequest, { params }: { params: { productId: s
             return NextResponse.json({ success: false, message: "All fields are required" }, { status: 400 });
         }
 
+        const newPrice = parseFloat(price);
+
         let imageUrl = existingProduct.image;
         if (imageFile) {
             const newImageUrl = await saveImage(imageFile);
@@ -49,13 +51,24 @@ export async function PUT(req: NextRequest, { params }: { params: { productId: s
         const updatedProduct = await prisma.product.update({ where: { id: productId }, data: { 
                 name, 
                 description, 
-                price: parseFloat(price), 
-                category: category as "BOOK" | "STATIONARY" | "OTHER", 
+                price: newPrice, 
+                category: category as "TEXTBOOK" | "NOTEBOOK" | "STATIONARY" | "OTHER", 
                 stock: parseInt(stock), 
                 image: imageUrl 
         }});
 
         updatedProduct.image = getFullImageUrl(updatedProduct.image as string, req);
+
+        //updating the price of the kit items
+        if (existingProduct.price !== newPrice) {
+            const priceDifference = newPrice - existingProduct.price;
+
+            const affectedItems = await prisma.kitItem.findMany({ where: { productId }});
+
+            for (const item of affectedItems) {
+                await prisma.kit.update({ where: { id: item.kitId }, data: { totalPrice: { increment: priceDifference * item.quantity }}});
+            }
+        }
 
         return NextResponse.json({ success: true, message: "Product updated successfully", product: updatedProduct }, { status: 200 });
     } catch (error) {
@@ -86,6 +99,17 @@ export async function DELETE(req: NextRequest, { params }: { params: { productId
 
         if (existingProduct.image){
             await deleteImage(existingProduct.image);
+        }
+
+        const itemsToDelete = await prisma.kitItem.findMany({ where: { productId } });
+
+        for (const item of itemsToDelete) {
+            await prisma.kit.update({
+                where: { id: item.kitId },
+                data: {
+                    totalPrice: { decrement: existingProduct.price * item.quantity }
+                }
+            });
         }
 
         await prisma.product.delete({ where: { id: productId } });

@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { getFullImageUrl, saveImage } from "@/lib/upload";
-import { verifyAdmin } from "@/lib/verify-admin";
+import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest){
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest){
                 name, 
                 description, 
                 price: parseFloat(price), 
-                category: category as "BOOK" | "STATIONARY" | "OTHER", 
+                category: category as "TEXTBOOK" | "NOTEBOOK" | "STATIONARY" | "OTHER", 
                 stock: parseInt(stock), 
                 image: imageUrl 
             }
