@@ -1,58 +1,90 @@
-import { Button } from "@/components/ui/button"
+"use client"
+
+import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { MapPin, ArrowRight } from "lucide-react"
 import Link from "next/link"
 
-const schools = [
-  { name: "Delhi Public School", location: "New Delhi", icon: "🏫" },
-  { name: "St. Mary's Convent School", location: "Mumbai", icon: "🏫" },
-  { name: "The Heritage School", location: "Bangalore", icon: "🏫" },
-  { name: "Ryan International School", location: "Gurugram", icon: "🏫" },
-  { name: "Kendriya Vidyalaya", location: "Chennai", icon: "🏫" },
-]
+import { schools } from "@/data/demodata"
+import SchoolSearch from "../schoolSearch"
 
 export default function PartnerSchools() {
+  const [search, setSearch] = useState("")
+
+  const filteredSchools = schools.filter((school) =>
+    school.name.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const visibleSchools = filteredSchools.slice(0, 5)
+
   return (
-    <section id="schools" className="py-20 md:py-32 bg-gray-50 ">
+    <section id="schools" className="py-20 md:py-32 bg-gray-50">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start mb-16">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-10 md:mb-16">
           <div className="space-y-2">
-            <h2 className="text-4xl md:text-5xl font-bold text-blue-950 text-balance">Partner Schools</h2>
-            <p className="text-lg text-gray-600 max-w-2xl leading-relaxed">
-              We work with top schools across India to bring you the exact books and supplies your child needs.
+            <h2 className="text-4xl md:text-5xl font-bold text-blue-950">
+              Partner Schools
+            </h2>
+            <p className="text-md md:text-lg text-gray-600 max-w-2xl">
+              We work with top schools across India to bring you the exact books
+              and supplies your child needs.
             </p>
           </div>
-          <Link href="/schools" className="w-full md:w-auto">
-            <Button
-              variant="outline"
-              className="border-2 border-blue-900 text-blue-950 hover:bg-blue-950 hover:text-white rounded-lg px-6 flex gap-2 bg-transparent cursor-pointer mt-5 md:mt-0 w-full py-5"
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-3 md:gap-10 w-full">
+            {/* Search */}
+            <SchoolSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Search Schools..."
+              className="w-full sm:w-72"
+            />
+
+            {/* View all */}
+            <Link
+              href="/schools"
+              className="text-sm text-blue-900 hover:text-blue-700 inline-flex items-center gap-1"
             >
-              View All Schools
-              <ArrowRight size={18} />
-            </Button>
-          </Link>
+              View all schools
+              <ArrowRight size={16} />
+            </Link>
+          </div>
         </div>
 
         {/* Schools Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-          {schools.map((school, index) => (
-            <Card
-              key={index}
-              className="px-6 py-4 hover:shadow-lg transition-shadow cursor-pointer text-left flex flex-col items-start gap-3"
-            >
-              <div className="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center">
-                <span className="text-3xl">{school.icon}</span>
-              </div>
-              <h3 className="font-bold text-sm text-blue-950 mt-2">{school.name}</h3>
-              <div className="flex items-center gap-1 text-gray-600 mt-auto">
-                <MapPin size={16} />
-                <span className="text-sm">{school.location}</span>
-              </div>
-            </Card>
+          {visibleSchools.map((school) => (
+            <Link key={school.id} href={`/schools/${school.id}`} className="block">
+              <Card className="px-6 py-4 hover:shadow-lg transition-shadow flex flex-col gap-3">
+                <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100">
+                  <img
+                    src={school.image || "/school.jpg"}
+                    alt={school.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <h3 className="font-bold text-sm text-blue-950">
+                  {school.name}
+                </h3>
+
+                <div className="flex items-center gap-1 text-gray-600 mt-auto">
+                  <MapPin size={16} />
+                  <span className="text-sm">{school.location}</span>
+                </div>
+              </Card>
+            </Link>
           ))}
         </div>
 
+        {/* Empty State */}
+        {filteredSchools.length === 0 && (
+          <p className="text-center text-gray-500 mt-10">
+            No schools found
+          </p>
+        )}
       </div>
     </section>
   )

@@ -17,6 +17,9 @@ interface Product {
     fixedQuantity?: number
 }
 
+/*  Single source of truth for grid columns */
+const GRID_COLS = "sm:grid-cols-[80px_1fr_140px_140px]"
+
 const products: Record<string, Product[]> = {
     textbooks: [
         {
@@ -99,16 +102,13 @@ interface ProductTableProps {
 export function ProductTables({ planType }: ProductTableProps) {
     const [quantities, setQuantities] = useState<Record<string, number>>({})
 
-    const getQuantity = (productId: string) => {
-        return quantities[productId] || 1
-    }
+    const getQuantity = (id: string) => quantities[id] || 1
 
-    const updateQuantity = (productId: string, delta: number) => {
-        setQuantities((prev) => {
-            const current = prev[productId] || 1
-            const newQuantity = Math.max(1, current + delta)
-            return { ...prev, [productId]: newQuantity }
-        })
+    const updateQuantity = (id: string, delta: number) => {
+        setQuantities((prev) => ({
+            ...prev,
+            [id]: Math.max(1, (prev[id] || 1) + delta),
+        }))
     }
 
     const renderProductRow = (product: Product, isTextbook: boolean) => {
@@ -118,151 +118,113 @@ export function ProductTables({ planType }: ProductTableProps) {
         return (
             <div
                 key={product.id}
-                className="
-    flex flex-col sm:flex-row sm:items-center
-    gap-4 p-4 border-b last:border-b-0
-    hover:bg-muted/50 transition-colors
-    overflow-y-auto
-  "
+                className={`flex flex-col sm:grid ${GRID_COLS} sm:items-center gap-4 p-4 sm:p-5 border-b last:border-b-0 hover:bg-muted/50 transition-colors`}
             >
-                <img
-                    src={product.image || "/placeholder.svg"}
-                    alt={product.name}
-                    className="w-20 h-20 object-cover rounded-md border mx-auto sm:mx-0"
-                />
+                {/* Image + Product */}
+                <div className="flex items-center gap-4 sm:contents">
+                    <img
+                        src={product.image || "/placeholder.svg"}
+                        alt={product.name}
+                        className="w-20 h-20 object-cover rounded-lg border shrink-0"
+                    />
 
-                <div className="flex-1 min-w-0 text-center sm:text-left">
-                    <h4 className="font-semibold text-base truncate">
-                        {product.name}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                        Save {discount}%
-                    </p>
+                    <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold mb-1">{product.name}</h4>
+
+                        {/* Mobile price */}
+                        <div className="flex items-baseline gap-2 sm:hidden">
+                            <span className="font-bold text-lg">₹{product.discountedPrice.toFixed(2)}</span>
+                            <span className="text-sm text-muted-foreground line-through">
+                                ₹{product.actualPrice.toFixed(2)}
+                            </span>
+                            <span className="text-xs text-green-600 font-medium">-{discount}%</span>
+                        </div>
+
+                        <p className="hidden sm:block text-sm text-muted-foreground">Save {discount}%</p>
+                    </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        {isTextbook ? (
-                            <div className="w-24 text-center">
-                                <span className="text-sm font-medium">
-                                    Qty: {quantity}
-                                </span>
-                            </div>
-                        ) : (
-                            <div className="flex items-center gap-2 border rounded-md">
-                                <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8"
-                                    onClick={() => updateQuantity(product.id, -1)}
-                                    disabled={quantity <= 1}
-                                >
-                                    <Minus className="h-4 w-4" />
-                                </Button>
+                {/* Quantity */}
+                <div className="sm:w-[140px] flex justify-between sm:justify-center items-center">
+                    <span className="sm:hidden text-sm text-muted-foreground">Quantity:</span>
 
-                                <span className="w-8 text-center text-sm font-medium">
-                                    {quantity}
-                                </span>
+                    {isTextbook ? (
+                        <span className="text-sm font-semibold">Qty: {quantity}</span>
+                    ) : (
+                        <div className="flex items-center gap-2 border rounded-lg bg-background shadow-sm">
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-9 w-9"
+                                onClick={() => updateQuantity(product.id, -1)}
+                                disabled={quantity <= 1}
+                            >
+                                <Minus className="h-4 w-4" />
+                            </Button>
 
-                                <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8"
-                                    onClick={() => updateQuantity(product.id, 1)}
-                                >
-                                    <Plus className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        )}
-                    </div>
+                            <span className="w-10 text-center font-semibold tabular-nums">{quantity}</span>
 
-                    <div className="text-center sm:text-right min-w-[120px]">
-                        <div className="font-bold text-lg">
-                            ₹{product.discountedPrice.toFixed(2)}
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-9 w-9"
+                                onClick={() => updateQuantity(product.id, 1)}
+                            >
+                                <Plus className="h-4 w-4" />
+                            </Button>
                         </div>
-                        <div className="text-sm text-muted-foreground line-through">
-                            ₹{product.actualPrice.toFixed(2)}
-                        </div>
+                    )}
+                </div>
 
+                {/* Price */}
+                <div className="hidden sm:block text-right w-[140px]">
+                    <div className="font-bold text-lg">₹{product.discountedPrice.toFixed(2)}</div>
+                    <div className="text-sm text-muted-foreground line-through">
+                        ₹{product.actualPrice.toFixed(2)}
                     </div>
                 </div>
             </div>
-
         )
     }
 
     return (
-        <Card className="w-full">
-            <CardHeader>
-                <CardTitle className="text-2xl">
-                    {planType.toUpperCase()} Plan - Product Details
+        <Card className="w-full flex-col border-none shadow-none">
+            <CardHeader className="shrink-0">
+                <CardTitle className="text-xl sm:text-2xl">
+                    Product Details
                 </CardTitle>
             </CardHeader>
 
-            <CardContent>
-                <Tabs defaultValue="textbooks" className="w-full">
-
-                    {/* Tabs */}
-                    <TabsList className="w-full grid grid-cols-3 mb-6 overflow-x-auto">
+            <CardContent className="flex-1 overflow-hidden">
+                <Tabs defaultValue="textbooks" className="h-full flex flex-col">
+                    <TabsList className="grid grid-cols-3 shrink-0 mb-4  w-full">
                         <TabsTrigger value="textbooks">Textbooks</TabsTrigger>
                         <TabsTrigger value="notebooks">Notebooks</TabsTrigger>
                         <TabsTrigger value="stationary">Stationary</TabsTrigger>
                     </TabsList>
 
-                    {/* TEXTBOOKS */}
-                    <TabsContent value="textbooks" className="mt-0">
-                        <div className="border rounded-lg overflow-hidden">
+                    <div className="flex-1 overflow-y-auto overscroll-contain">
+                        {(["textbooks", "notebooks", "stationary"] as const).map((type) => (
+                            <TabsContent key={type} value={type} className="mt-0">
+                                <div className="border rounded-lg overflow-hidden">
+                                    <div
+                                        className={`hidden sm:grid bg-muted/30 p-5 font-semibold ${GRID_COLS} gap-6 text-sm sticky top-0 z-10`}
+                                    >
+                                        <span>Image</span>
+                                        <span>Product</span>
+                                        <span className="pl-10">Quantity</span>
+                                        <span className="text-right">Price</span>
+                                    </div>
 
-                            {/* Table Header (hidden on mobile) */}
-                            <div className="hidden md:grid bg-muted/30 p-4 font-semibold grid-cols-[80px_1fr_160px_auto] gap-4 text-sm">
-                                <span>Image</span>
-                                <span>Product</span>
-                                <span>Quantity</span>
-                                <span className="text-right">Price</span>
-                            </div>
-
-
-                            {products.textbooks.map((product) =>
-                                renderProductRow(product, true)
-                            )}
-                        </div>
-                    </TabsContent>
-
-                    {/* NOTEBOOKS */}
-                    <TabsContent value="notebooks" className="mt-0">
-                        <div className="border rounded-lg overflow-hidden">
-                            <div className="hidden md:grid bg-muted/30 p-4 font-semibold grid-cols-[80px_1fr_auto_auto] gap-4 text-sm">
-                                <span>Image</span>
-                                <span>Product</span>
-                                <span>Quantity</span>
-                                <span className="text-right">Price</span>
-                            </div>
-
-                            {products.notebooks.map((product) =>
-                                renderProductRow(product, false)
-                            )}
-                        </div>
-                    </TabsContent>
-
-                    {/* STATIONARY */}
-                    <TabsContent value="stationary" className="mt-0">
-                        <div className="border rounded-lg overflow-hidden">
-                            <div className="hidden md:grid bg-muted/30 p-4 font-semibold grid-cols-[80px_1fr_auto_auto] gap-4 text-sm">
-                                <span>Image</span>
-                                <span>Product</span>
-                                <span>Quantity</span>
-                                <span className="text-right">Price</span>
-                            </div>
-
-                            {products.stationary.map((product) =>
-                                renderProductRow(product, false)
-                            )}
-                        </div>
-                    </TabsContent>
-
+                                    {products[type].map((p) =>
+                                        renderProductRow(p, type === "textbooks")
+                                    )}
+                                </div>
+                            </TabsContent>
+                        ))}
+                    </div>
                 </Tabs>
             </CardContent>
         </Card>
-
     )
 }
