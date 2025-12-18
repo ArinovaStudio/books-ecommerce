@@ -24,7 +24,7 @@ export async function verifyAdmin(req: NextRequest): Promise<{ success: boolean,
 
     const user = await prisma.user.findUnique({ where: { id: adminId }});
 
-    if (!user || user.role !== "ADMIN") {
+    if (!user || (user.role !== "ADMIN" && user.role !== "SUB_ADMIN")) {
       return { success: false, message: "Admin access required", status: 403 };
     }
 

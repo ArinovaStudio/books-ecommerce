@@ -22,6 +22,13 @@ export async function PUT(req: NextRequest, { params }: { params: { schoolId: st
       return NextResponse.json({ success: false, message: "School not found" }, { status: 404 });
     }
 
+    const isSuperAdmin = auth.user.role === "ADMIN";
+    const isOwner = auth.user.role === "SUB_ADMIN" && auth.user.schoolId === schoolId;
+
+    if (!isSuperAdmin && !isOwner) {
+        return NextResponse.json({ success: false, message: "You can only manage your own school" }, { status: 403 });
+    }
+
     const formData = await req.formData();
     const name = formData.get("name") as string;
     const board = formData.get("board") as string;
@@ -76,6 +83,13 @@ export async function DELETE(req: NextRequest, { params }: { params: { schoolId:
     const existingSchool = await prisma.school.findUnique({ where: { id: schoolId } });
     if (!existingSchool) {
       return NextResponse.json({ success: false, message: "School not found" }, { status: 404 });
+    }
+
+    const isSuperAdmin = auth.user.role === "ADMIN";
+    const isOwner = auth.user.role === "SUB_ADMIN" && auth.user.schoolId === schoolId;
+
+    if (!isSuperAdmin && !isOwner) {
+        return NextResponse.json({ success: false, message: "You can only manage your own school" }, { status: 403 });
     }
 
     if (existingSchool.image) {

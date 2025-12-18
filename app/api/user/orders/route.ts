@@ -112,6 +112,10 @@ export async function GET(req: NextRequest) {
     const orders = await prisma.order.findMany({ where: { userId }, include: { payment: { select: { amount: true, status: true, method: true }},
     items: { include: { product: { select: { name: true, image: true, price: true } }}}}, orderBy: { createdAt: "desc" } });
 
+    if (!orders) {
+      return NextResponse.json({ success: false, message: "No Order history" }, { status: 404 });
+    }
+
     return NextResponse.json({ success: true, orders }, { status: 200 });
 
   } catch (error) {

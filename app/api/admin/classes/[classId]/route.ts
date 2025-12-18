@@ -5,7 +5,8 @@ import z from "zod";
 
 const updateClassValidation = z.object({
   name: z.string().optional(),
-  sections: z.array(z.string()).optional()
+  sections: z.array(z.string()).optional(),
+  academicYear: z.string().optional()
 });
 
 export async function PUT(req: NextRequest, { params }: { params: { classId: string } }) {
@@ -24,7 +25,7 @@ export async function PUT(req: NextRequest, { params }: { params: { classId: str
             return NextResponse.json({ success: false, message: "Vlidation error", errors }, { status: 400 });
         }
 
-        const { name, sections } = validation.data;
+        const { name, sections, academicYear } = validation.data;
         const { classId } = await params;
 
         const existingClass = await prisma.class.findUnique({ where: { id: classId }});
@@ -33,7 +34,30 @@ export async function PUT(req: NextRequest, { params }: { params: { classId: str
             return NextResponse.json( { success: false, message: "Class not found" }, { status: 404 });
         }
 
-        const updatedClass = await prisma.class.update({ where: { id: classId }, data: { name, sections }});
+        // Sub admin check
+        if (auth.user.role === "SUB_ADMIN") {
+            if (!auth.user.schoolId || auth.user.schoolId !== existingClass.schoolId) {
+                return NextResponse.json({ success: false, message: "You can only edit classes in your own school" }, { status: 403 });
+            }
+        }
+
+        // Duplicate name check
+        if (name) {
+            const duplicate = await prisma.class.findFirst({
+                where: {
+                    schoolId: existingClass.schoolId,
+                    name: { equals: name, mode: "insensitive" },
+                    academicYear: academicYear || existingClass.academicYear,
+                    id: { not: classId }
+                }
+            });
+
+            if (duplicate) {
+                return NextResponse.json({ success: false, message: "A class with this name already exists for this year" }, { status: 409 });
+            }
+        }
+
+        const updatedClass = await prisma.class.update({ where: { id: classId }, data: { name, sections, academicYear }});
 
         return NextResponse.json( { success: true, message: "Class updated successfully", class: updatedClass }, { status: 200 });
 
@@ -63,12 +87,21 @@ export async function DELETE(req: NextRequest, { params }: { params: { classId: 
             return NextResponse.json({ success: false, message: "Class not found" }, { status: 404 });
         }
 
+        // Sub admin check
+        if (auth.user.role === "SUB_ADMIN") {
+            if (!auth.user.schoolId || auth.user.schoolId !== existingClass.schoolId) {
+                return NextResponse.json({ success: false, message: "You can only edit classes in your own school" }, { status: 403 });
+            }
+        }
+
         const schoolId = existingClass.schoolId;
 
-        await prisma.class.delete({ where: { id: classId }});
+        await prisma.$transaction(async (tx) => {
+            await tx.class.delete({ where: { id: classId }});
 
-        await prisma.school.update({ where: { id: schoolId }, data: { numberOfClasses: { decrement: 1 } } });
-
+            await tx.school.update({ where: { id: schoolId }, data: { numberOfClasses: { decrement: 1 } } });
+        })
+        
         return NextResponse.json({ success: true, message: "Class deleted successfully" }, { status: 200 });
     } catch (error) {
         console.error("Delete Class Error:", error);

@@ -1,0 +1,41 @@
+import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
+import { verifyAdmin } from '@/lib/verify';
+
+// toggle student status
+export async function PATCH( req: NextRequest, { params }: { params: Promise<{ studentId: string }> } ) {
+  try {
+    const auth = await verifyAdmin(req);
+    if (!auth.success){
+        return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+    }
+
+    const user = auth.user;
+
+    if (user.role !== "SUB_ADMIN" || !user.schoolId) {
+        return NextResponse.json({ success: false, message: "Only School Admins can manage students" }, { status: 403 });
+    }
+
+    const { studentId } = await params;
+
+    const existingStudent = await prisma.student.findUnique({ where: { id: studentId } });
+
+    if (!existingStudent) {
+        return NextResponse.json({ success: false, message: "Student not found" }, { status: 404 });
+    }
+
+    if (existingStudent.schoolId !== user.schoolId) {
+        return NextResponse.json({ success: false, message: "You can only modify students in your own school" }, { status: 403 });
+    }
+
+    const newStatus = !existingStudent.isActive;
+
+    const updatedStudent = await prisma.student.update({ where: { id: studentId }, data: { isActive: newStatus }});
+
+    return NextResponse.json({ success: true, message: `Student ${newStatus ? 'activated' : 'deactivated'} successfully`}, { status: 200 });
+
+  } catch (error) {
+    console.error("Toggle Student Error:", error);
+    return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
+  }
+}

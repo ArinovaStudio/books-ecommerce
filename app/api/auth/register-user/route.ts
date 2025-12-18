@@ -10,10 +10,7 @@ const signupValidation = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  studentClass: z.object({
-    grade: z.string(),
-    section: z.string().optional()
-  }).optional(),
+  address: z.string().min(5, "Address is required and must be valid"),
 });
 
 const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY";
@@ -28,7 +25,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, message: "Vlidation error", errors }, { status: 400 });
     }
 
-    const { name, email, phone, password, studentClass } = validation.data;
+    const { name, email, phone, password, address } = validation.data;
 
     const existing = await prisma.user.findFirst({ where: { OR: [{ email }, { phone }] }});
 
@@ -38,9 +35,12 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const newUser = await prisma.user.create({ data: { name, email, phone, password: hashedPassword, studentClass }});
+    const newUser = await prisma.user.create({ data: { name, email, phone, password: hashedPassword, address }});
 
-    const token = jwt.sign({ id: newUser.id, email: newUser.email }, SECRET_KEY, { expiresIn: "7d" });
+    // Linking students to parent at time of registration
+    await prisma.student.updateMany({ where: { parentEmail: email }, data: { parentId: newUser.id } });
+
+    const token = jwt.sign({ id: newUser.id, email: newUser.email, role: newUser.role }, SECRET_KEY, { expiresIn: "7d" });
     
     const cookieStore = await cookies();
 
