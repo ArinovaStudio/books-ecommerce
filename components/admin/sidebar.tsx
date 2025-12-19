@@ -1,6 +1,6 @@
 "use client"
 
-import { BarChart3, GraduationCap, Users, Moon, Sun } from "lucide-react"
+import { BarChart3, GraduationCap, Users, Moon, Sun, Book, Folders } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useTheme } from "@/components/theme-provider"
@@ -11,11 +11,14 @@ const navItems: {
   id: AdminTab
   label: string
   icon: any
+
 }[] = [
-  { id: "analytics", label: "Analytics", icon: BarChart3 },
-  { id: "users", label: "Users", icon: Users },
-  { id: "schools", label: "Schools", icon: GraduationCap },
-]
+    { id: "analytics", label: "Analytics", icon: BarChart3 },
+    { id: "users", label: "Users", icon: Users },
+    { id: "schools", label: "Schools", icon: GraduationCap },
+    { id: "bundels", label: "Bundels", icon: Book },
+    { id: "orders", label: "Order", icon: Folders }
+  ]
 
 export function AdminSidebar() {
   const { activeTab, setActiveTab, sidebarOpen, setSidebarOpen } = useAdmin()

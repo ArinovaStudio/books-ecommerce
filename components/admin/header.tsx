@@ -10,7 +10,7 @@ export function AdminHeader() {
   const titleMap = {
     analytics: "Analytics",
     users: "Users",
-    schools: "Schools",
+    schools: "Schools"
   }
 
   const descriptionMap = {
