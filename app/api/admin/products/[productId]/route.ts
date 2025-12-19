@@ -11,6 +11,10 @@ export async function PUT(req: NextRequest, { params }: { params: { productId: s
             return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
         }
 
+        if (auth.user.role !== "ADMIN") {
+            return NextResponse.json({ success: false, message: "Only Super Admins can update global products" }, { status: 403 });
+        }
+
         const { productId } = await params;
 
         if (!productId) {
@@ -83,6 +87,10 @@ export async function DELETE(req: NextRequest, { params }: { params: { productId
                 
         if (!auth.success){
             return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+        }
+
+        if (auth.user.role !== "ADMIN") {
+            return NextResponse.json({ success: false, message: "Only Super Admins can delete global products" }, { status: 403 });
         }
 
         const { productId } = await params;

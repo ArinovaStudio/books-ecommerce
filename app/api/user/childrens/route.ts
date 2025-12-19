@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
         }
     });
 
-    return NextResponse.json({ success: true, students }, { status: 200 });
+    return NextResponse.json({ success: true, childrens: students }, { status: 200 });
 
   } catch (error) {
     console.error("Fetch Parent Students Error:", error);

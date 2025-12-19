@@ -12,11 +12,15 @@ const updateKitValidation = z.object({
   ).min(1, "Kit must contain at least one item"),
 });
 
-export async function PUT( req: NextRequest, { params }: { params: { kitId: string } }) {
+export async function PUT( req: NextRequest, { params }: { params: Promise<{ kitId: string }> }) {
   try {
     const auth = await verifyAdmin(req);
     if (!auth.success) {
       return NextResponse.json({ success: false, message: "Admin access required" }, { status: 403 });
+    }
+
+    if (auth.user.role !== "ADMIN") {
+        return NextResponse.json({ success: false, message: "Only Super Admins can update kits" }, { status: 403 });
     }
 
     const { kitId } = await params;
@@ -77,12 +81,16 @@ export async function PUT( req: NextRequest, { params }: { params: { kitId: stri
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { kitId: string } }){
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ kitId: string }> }){
     try {
         const auth = await verifyAdmin(req);
 
         if (!auth.success){
             return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+        }
+
+        if (auth.user.role !== "ADMIN") {
+            return NextResponse.json({ success: false, message: "Only Super Admins can delete kits" }, { status: 403 });
         }
 
         const { kitId } = await params;
