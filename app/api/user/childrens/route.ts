@@ -2,12 +2,13 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyUser } from '@/lib/verify';
 import { getFullImageUrl } from '@/lib/upload';
+import { Wrapper } from "@/lib/api-handler";
 
-export async function GET(req: NextRequest) {
+export const GET = Wrapper(async (req: NextRequest) => {
   try {
     const auth = await verifyUser(req);
     if (!auth.success) {
-        return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        return NextResponse.json({ success: false, message: auth.message || "Unauthorized" }, { status: 401 });
     }
 
     const user = auth.user;
@@ -37,4 +38,4 @@ export async function GET(req: NextRequest) {
     console.error("Fetch Parent Students Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})

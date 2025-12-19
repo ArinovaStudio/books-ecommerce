@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
+import { Wrapper } from "@/lib/api-handler";
 
 const loginValidation = z.object({
   email: z.string().email("Invalid email address"),
@@ -12,7 +13,7 @@ const loginValidation = z.object({
 
 const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY";
 
-export async function POST(req: NextRequest) {
+export const POST = Wrapper(async (req: NextRequest) => {
   try {
     const body = await req.json();
 
@@ -28,6 +29,10 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
+    }
+
+    if (user.status !== "ACTIVE") {
+      return NextResponse.json({ success: false, message: `Account is ${user.status.toLowerCase()}. Contact support.` }, { status: 403 });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -47,10 +52,10 @@ export async function POST(req: NextRequest) {
         path: "/",
     });
 
-    return NextResponse.json({ success: true, message: "User login successfully", user: { id: user.id, name: user.name, email: user.email }}, { status: 201 });
+    return NextResponse.json({ success: true, message: "User login successfully", user: { id: user.id, name: user.name, email: user.email }}, { status: 200 });
 
   } catch (error) {
     console.error("Login Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})

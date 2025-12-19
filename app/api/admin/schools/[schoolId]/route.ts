@@ -1,14 +1,15 @@
+import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { deleteImage, getFullImageUrl, saveImage } from "@/lib/upload";
 import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PUT(req: NextRequest, { params }: { params: { schoolId: string } }) {
+export const PUT = Wrapper(async(req: NextRequest, { params }: { params: Promise<{ schoolId: string }> }) => {
   try {
     const auth = await verifyAdmin(req);
 
     if (!auth.success){
-        return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+        return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
     }
 
     const { schoolId } = await params;
@@ -64,14 +65,14 @@ export async function PUT(req: NextRequest, { params }: { params: { schoolId: st
     console.error("Update School Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})
 
-export async function DELETE(req: NextRequest, { params }: { params: { schoolId: string } }) {
+export const DELETE = Wrapper(async (req: NextRequest, { params }: { params: Promise<{ schoolId: string }> }) => {
   try {
     const auth = await verifyAdmin(req);
 
     if (!auth.success){
-        return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+        return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
     }
 
     const { schoolId } = await params;
@@ -104,4 +105,4 @@ export async function DELETE(req: NextRequest, { params }: { params: { schoolId:
     console.error("Delete School Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})

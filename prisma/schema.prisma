@@ -14,6 +14,11 @@ enum UserRole {
   SUB_ADMIN
 }
 
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model User {
   id String @id @default(uuid())
   email String @unique
@@ -22,6 +27,7 @@ model User {
   password String
   address String?
   role UserRole @default(USER)
+  status UserStatus @default(ACTIVE)
 
   schoolId String?
   createdAt DateTime @default(now())
@@ -196,4 +202,10 @@ model OrderItem {
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model ApiTraffic {
+  id String @id @default(uuid())
+  hour DateTime @unique
+  count Int @default(1)
 }

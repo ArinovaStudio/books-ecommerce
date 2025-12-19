@@ -1,3 +1,4 @@
+import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
@@ -14,12 +15,12 @@ const createKitValidation = z.object({
     ).min(1, "Kit must contain at least one item")
 });
 
-export async function POST(req: NextRequest){
+export const POST = Wrapper(async(req: NextRequest) => {
     try {
         const auth = await verifyAdmin(req);
 
         if (!auth.success){
-            return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+            return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
         }
 
         if (auth.user.role !== "ADMIN") {
@@ -75,4 +76,4 @@ export async function POST(req: NextRequest){
         console.error("Kit create error:", error);
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
     }
-}
+})

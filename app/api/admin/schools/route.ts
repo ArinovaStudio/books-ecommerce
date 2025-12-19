@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/verify';
 import { getFullImageUrl, saveImage } from '@/lib/upload';
 import prisma from '@/lib/prisma';
+import { Wrapper } from '@/lib/api-handler';
 
-export async function POST(req: NextRequest){
+export const POST = Wrapper(async (req: NextRequest) => {
     try {
         const auth = await verifyAdmin(req);
         if (!auth.success){
-            return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+            return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
         }
 
         const currentUser = auth.user;
@@ -63,4 +64,4 @@ export async function POST(req: NextRequest){
         console.error("School add error:", error);
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
     }
-}
+})

@@ -1,7 +1,8 @@
+import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+export const POST = Wrapper(async(req: NextRequest) => {
     try {
         const body = await req.json();
         const { email, otp }: { email: string, otp: string } = body;
@@ -30,4 +31,4 @@ export async function POST(req: NextRequest) {
         console.error("Verify OTP Error:", error);
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
     }
-}
+})

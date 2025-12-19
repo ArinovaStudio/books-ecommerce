@@ -1,14 +1,15 @@
+import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { getFullImageUrl, saveImage } from "@/lib/upload";
 import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest){
+export const POST = Wrapper(async(req: NextRequest) => {
     try {
         const auth = await verifyAdmin(req);
         
         if (!auth.success){
-            return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+            return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
         }
 
         if (auth.user.role !== "ADMIN") {
@@ -55,4 +56,4 @@ export async function POST(req: NextRequest){
         console.error("Product add error:", error);
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
     }
-}
+})

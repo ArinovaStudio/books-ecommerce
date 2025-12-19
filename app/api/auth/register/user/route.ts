@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
+import { Wrapper } from "@/lib/api-handler";
 
 const signupValidation = z.object({
   name: z.string().min(1, "Name is required"),
@@ -15,7 +16,7 @@ const signupValidation = z.object({
 
 const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY";
 
-export async function POST(req: NextRequest) {
+export const POST = Wrapper(async(req: NextRequest) => {
   try {
     const body = await req.json();
 
@@ -57,4 +58,4 @@ export async function POST(req: NextRequest) {
     console.error("Signup Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})
