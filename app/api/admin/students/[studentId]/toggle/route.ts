@@ -8,7 +8,7 @@ export const PATCH = Wrapper(async( req: NextRequest, { params }: { params: Prom
   try {
     const auth = await verifyAdmin(req);
     if (!auth.success){
-        return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+        return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
     }
 
     const user = auth.user;

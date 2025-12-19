@@ -28,6 +28,10 @@ export async function verifyAdmin(req: NextRequest): Promise<{ success: boolean,
       return { success: false, message: "Admin access required", status: 403 };
     }
 
+    if (user.status !== "ACTIVE") {
+       return { success: false, message: `Account is ${user.status.toLowerCase()}. Contact support.`, status: 403 };
+    }
+
     return { success: true, message: "Admin is authenticated", status: 200, user };
 
   } catch (error) {
@@ -56,6 +60,10 @@ export async function verifyUser(req: NextRequest): Promise<{ success: boolean, 
 
     if (!user) {
       return { success: false, message: "User not found", status: 404 };
+    }
+
+    if (user.status !== "ACTIVE") {
+       return { success: false, message: `Account is ${user.status.toLowerCase()}. Contact support.`, status: 403 };
     }
 
     return { success: true, message: "User is authenticated", status: 200, user };

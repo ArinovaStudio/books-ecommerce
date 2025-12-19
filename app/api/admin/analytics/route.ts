@@ -7,7 +7,7 @@ export const GET = Wrapper(async ( req: NextRequest) => {
   try {
     const auth = await verifyAdmin(req);
     if (!auth.success || auth.user.role !== "ADMIN") {
-        return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
+        return NextResponse.json({ success: false, message: auth.message || "Unauthorized" }, { status: 403 });
     }
 
     const now = new Date();

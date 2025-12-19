@@ -9,7 +9,7 @@ export const POST = Wrapper(async(req: NextRequest) => {
         const auth = await verifyAdmin(req);
         
         if (!auth.success){
-            return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+            return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
         }
 
         if (auth.user.role !== "ADMIN") {

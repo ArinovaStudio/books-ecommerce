@@ -9,7 +9,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
   try {
     const auth = await verifyAdmin(req);
         if (!auth.success){
-            return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+            return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
         }
 
     const user = auth.user;
@@ -79,7 +79,7 @@ export const POST = Wrapper(async(req: NextRequest) => {
   try {
     const auth = await verifyAdmin(req);
         if (!auth.success){
-            return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+            return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
         }
 
     const user = auth.user;

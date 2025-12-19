@@ -31,6 +31,10 @@ export const POST = Wrapper(async (req: NextRequest) => {
       return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
     }
 
+    if (user.status !== "ACTIVE") {
+      return NextResponse.json({ success: false, message: `Account is ${user.status.toLowerCase()}. Contact support.` }, { status: 403 });
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -48,7 +52,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
         path: "/",
     });
 
-    return NextResponse.json({ success: true, message: "User login successfully", user: { id: user.id, name: user.name, email: user.email }}, { status: 201 });
+    return NextResponse.json({ success: true, message: "User login successfully", user: { id: user.id, name: user.name, email: user.email }}, { status: 200 });
 
   } catch (error) {
     console.error("Login Error:", error);

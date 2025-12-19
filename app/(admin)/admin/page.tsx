@@ -8,9 +8,9 @@ import { SchoolClasses } from "@/components/admin/school-classes"
 import { SchoolClassUsers } from "@/components/admin/school-users"
 import { AdminHeader } from "@/components/admin/header"
 import { useAdmin } from "@/app/context/admin"
-import LanguageSelector from "@/components/languageSelector"
+// import LanguageSelector from "@/components/languageSelector"
 import { AddSchoolModal } from "@/components/addSchoolModal"
-import { Bundels } from "@/components/Bundels"
+// import { Bundels } from "@/components/Bundels"
 
 export default function AdminDashboard() {
   const { activeTab } = useAdmin()
@@ -89,13 +89,13 @@ export default function AdminDashboard() {
                 />
               )}
 
-              {/* STEP 3: Select Language */}
+              {/* STEP 3: Select Language
               {selectedSchool && selectedClass && !selectedLang && (
                 <LanguageSelector
                   onSelectingLang={setSelectedLang}
                   onBack={() => setSelectedClass(null)}
                 />
-              )}
+              )} */}
 
               {/* STEP 4: select Bundels */}
               {selectedSchool && selectedClass && selectedLang && (
@@ -136,13 +136,13 @@ export default function AdminDashboard() {
                 />
               )}
 
-              {/* STEP 3: Select Language */}
+              {/* STEP 3: Select Language
               {selectedSchool && selectedClass && !selectedLang && (
                 <LanguageSelector
                   onSelectingLang={setSelectedLang}
                   onBack={() => setSelectedClass(null)}
                 />
-              )}
+              )} */}
 
               {/* STEP 4: select Bundels */}
               {/* {selectedSchool && selectedClass && selectedLang && (

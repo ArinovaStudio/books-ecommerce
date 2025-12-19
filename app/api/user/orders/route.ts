@@ -23,7 +23,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
     const auth = await verifyUser(req);
 
     if (!auth.success) {
-        return NextResponse.json({ success: false, message: auth.message }, { status: auth.status });
+        return NextResponse.json({ success: false, message: auth.message || "Unauthorized" }, { status: auth.status });
     }
 
     const userId = auth.user.id;
@@ -121,7 +121,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
     const auth = await verifyUser(req);
 
     if (!auth.success) {
-        return NextResponse.json({ success: false, message: auth.message }, { status: auth.status });
+      return NextResponse.json({ success: false, message: auth.message || "Unauthorized" }, { status: auth.status });
     }
 
     const userId = auth.user.id;

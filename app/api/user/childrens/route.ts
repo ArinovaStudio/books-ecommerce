@@ -8,7 +8,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
   try {
     const auth = await verifyUser(req);
     if (!auth.success) {
-        return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        return NextResponse.json({ success: false, message: auth.message || "Unauthorized" }, { status: 401 });
     }
 
     const user = auth.user;

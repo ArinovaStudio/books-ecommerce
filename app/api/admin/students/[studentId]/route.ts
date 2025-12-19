@@ -22,7 +22,7 @@ export const PUT = Wrapper(async( req: NextRequest,  { params }: { params: Promi
   try {
     const auth = await verifyAdmin(req);
         if (!auth.success){
-            return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+            return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
         }
 
     const user = auth.user;
@@ -98,7 +98,7 @@ export const DELETE = Wrapper(async( req: NextRequest, { params }: { params: Pro
   try {
     const auth = await verifyAdmin(req);
     if (!auth.success){
-        return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+        return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
     }
 
     const user = auth.user;
