@@ -1,3 +1,4 @@
+import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { getFullImageUrl } from "@/lib/upload";
 import { verifyUser } from "@/lib/verify";
@@ -12,7 +13,7 @@ const parentUpdateValidation = z.object({
   address: z.string().optional(),
 });
 
-export async function PUT( req: NextRequest, { params }: { params: Promise<{ studentId: string }> } ) {
+export const PUT = Wrapper(async ( req: NextRequest, { params }: { params: Promise<{ studentId: string }> } ) => {
   try {
     const auth = await verifyUser(req);
     if (!auth.success) {
@@ -56,10 +57,10 @@ export async function PUT( req: NextRequest, { params }: { params: Promise<{ stu
     console.error("Parent Update Student Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})
 
 
-export async function GET( req: NextRequest, { params }: { params: Promise<{ studentId: string }> } ) {
+export const GET = Wrapper(async ( req: NextRequest, { params }: { params: Promise<{ studentId: string }> } )=> {
   try {
     const auth = await verifyUser(req);
     if (!auth.success) {
@@ -97,5 +98,5 @@ export async function GET( req: NextRequest, { params }: { params: Promise<{ stu
     console.error("Fetch Single Student Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})
 

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyUser } from "@/lib/verify";
 import { getFullImageUrl } from "@/lib/upload";
+import { Wrapper } from "@/lib/api-handler";
 
 const createOrderValidation = z.object({
   studentId: z.string().uuid(),
@@ -16,7 +17,7 @@ const createOrderValidation = z.object({
   ).min(1, "Order must contain at least one item") 
 });
 
-export async function POST(req: NextRequest) {
+export const POST = Wrapper(async (req: NextRequest) => {
   try {
 
     const auth = await verifyUser(req);
@@ -113,9 +114,9 @@ export async function POST(req: NextRequest) {
     console.error("Create Order Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})
 
-export async function GET(req: NextRequest) {
+export const GET = Wrapper(async (req: NextRequest) => {
   try {
     const auth = await verifyUser(req);
 
@@ -159,4 +160,4 @@ export async function GET(req: NextRequest) {
     console.error("Fetch Orders Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})

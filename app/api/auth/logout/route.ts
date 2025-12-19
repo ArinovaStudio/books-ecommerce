@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { Wrapper } from "@/lib/api-handler";
 
-export async function POST() {
+export const POST = Wrapper(async() => {
   try {
     const cookieStore = await cookies();
     
@@ -12,4 +13,4 @@ export async function POST() {
     console.error("Logout Error:", error);
      return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})

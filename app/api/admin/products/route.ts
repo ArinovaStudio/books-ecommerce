@@ -1,9 +1,10 @@
+import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { getFullImageUrl, saveImage } from "@/lib/upload";
 import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest){
+export const POST = Wrapper(async(req: NextRequest) => {
     try {
         const auth = await verifyAdmin(req);
         
@@ -55,4 +56,4 @@ export async function POST(req: NextRequest){
         console.error("Product add error:", error);
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
     }
-}
+})

@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 import { verifyAdmin } from '@/lib/verify';
+import { Wrapper } from "@/lib/api-handler";
 
 const updateStudentValidation = z.object({
   name: z.string().optional(),
@@ -17,7 +18,7 @@ const updateStudentValidation = z.object({
 });
 
 // update student details
-export async function PUT( req: NextRequest,  { params }: { params: Promise<{ studentId: string }> }) {
+export const PUT = Wrapper(async( req: NextRequest,  { params }: { params: Promise<{ studentId: string }> }) => {
   try {
     const auth = await verifyAdmin(req);
         if (!auth.success){
@@ -89,11 +90,11 @@ export async function PUT( req: NextRequest,  { params }: { params: Promise<{ st
     console.error("Update Student Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})
 
 
 // Delete student details
-export async function DELETE( req: NextRequest, { params }: { params: Promise<{ studentId: string }> }) {
+export const DELETE = Wrapper(async( req: NextRequest, { params }: { params: Promise<{ studentId: string }> }) => {
   try {
     const auth = await verifyAdmin(req);
     if (!auth.success){
@@ -124,4 +125,4 @@ export async function DELETE( req: NextRequest, { params }: { params: Promise<{ 
     console.error("Delete Student Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})

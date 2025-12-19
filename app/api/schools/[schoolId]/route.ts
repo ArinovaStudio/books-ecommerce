@@ -1,8 +1,9 @@
+import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { getFullImageUrl } from "@/lib/upload";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest, { params }: { params: { schoolId: string } }) {
+export const GET = Wrapper(async (req: NextRequest, { params }: { params: Promise<{ schoolId: string }> }) => {
   try {
     const { schoolId } = await params;
 
@@ -26,4 +27,4 @@ export async function GET(req: NextRequest, { params }: { params: { schoolId: st
     console.error("Get School Detail Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})

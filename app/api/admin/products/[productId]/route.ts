@@ -2,8 +2,9 @@ import prisma from "@/lib/prisma";
 import { deleteImage, getFullImageUrl, saveImage } from "@/lib/upload";
 import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
+import { Wrapper } from '@/lib/api-handler';
 
-export async function PUT(req: NextRequest, { params }: { params: { productId: string } }){
+export const PUT = Wrapper( async (req: NextRequest, { params }: { params: Promise<{ productId: string }> }) => {
     try {
         const auth = await verifyAdmin(req);
                 
@@ -79,9 +80,9 @@ export async function PUT(req: NextRequest, { params }: { params: { productId: s
         console.error("Product update error:", error);
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
     }
-}
+})
 
-export async function DELETE(req: NextRequest, { params }: { params: { productId: string } }){
+export const DELETE = Wrapper(async (req: NextRequest, { params }: { params: Promise<{ productId: string }> }) => {
     try {
         const auth = await verifyAdmin(req);
                 
@@ -128,4 +129,4 @@ export async function DELETE(req: NextRequest, { params }: { params: { productId
         console.error("Product delete error:", error);
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
     }
-}
+})

@@ -1,9 +1,10 @@
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdmin } from '@/lib/verify';
+import { Wrapper } from "@/lib/api-handler";
 
 // toggle student status
-export async function PATCH( req: NextRequest, { params }: { params: Promise<{ studentId: string }> } ) {
+export const PATCH = Wrapper(async( req: NextRequest, { params }: { params: Promise<{ studentId: string }> } ) => {
   try {
     const auth = await verifyAdmin(req);
     if (!auth.success){
@@ -38,4 +39,4 @@ export async function PATCH( req: NextRequest, { params }: { params: Promise<{ s
     console.error("Toggle Student Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})

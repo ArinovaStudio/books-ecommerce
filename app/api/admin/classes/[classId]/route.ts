@@ -1,3 +1,4 @@
+import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
@@ -9,7 +10,7 @@ const updateClassValidation = z.object({
   academicYear: z.string().optional()
 });
 
-export async function PUT(req: NextRequest, { params }: { params: { classId: string } }) {
+export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promise<{ classId: string }> }) => {
     try {
         const auth = await verifyAdmin(req);
 
@@ -65,9 +66,9 @@ export async function PUT(req: NextRequest, { params }: { params: { classId: str
         console.error("Update Class Error:", error);
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
     }
-}
+})
 
-export async function DELETE(req: NextRequest, { params }: { params: { classId: string } }){
+export const DELETE = Wrapper(async (req: NextRequest, { params }: { params: Promise<{ classId: string }> }) => {
     try {
         const auth = await verifyAdmin(req);
 
@@ -107,4 +108,4 @@ export async function DELETE(req: NextRequest, { params }: { params: { classId: 
         console.error("Delete Class Error:", error);
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
     }
-}
+})

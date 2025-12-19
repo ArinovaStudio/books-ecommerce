@@ -1,3 +1,4 @@
+import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
@@ -12,7 +13,7 @@ const updateKitValidation = z.object({
   ).min(1, "Kit must contain at least one item"),
 });
 
-export async function PUT( req: NextRequest, { params }: { params: Promise<{ kitId: string }> }) {
+export const PUT = Wrapper(async( req: NextRequest, { params }: { params: Promise<{ kitId: string }> }) => {
   try {
     const auth = await verifyAdmin(req);
     if (!auth.success) {
@@ -79,9 +80,9 @@ export async function PUT( req: NextRequest, { params }: { params: Promise<{ kit
     console.error("Kit update error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})
 
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ kitId: string }> }){
+export const DELETE = Wrapper(async(req: NextRequest, { params }: { params: Promise<{ kitId: string }> }) => {
     try {
         const auth = await verifyAdmin(req);
 
@@ -114,4 +115,4 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ k
         console.error("Kit delete error:", error);
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
     }
-}
+})

@@ -1,8 +1,9 @@
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { getFullImageUrl } from '@/lib/upload';
+import { Wrapper } from "@/lib/api-handler";
 
-export async function GET(req: NextRequest) {
+export const GET = Wrapper(async(req: NextRequest) => {
     try {
         const { searchParams } = new URL(req.url);
         const classId = searchParams.get("classId");
@@ -44,4 +45,4 @@ export async function GET(req: NextRequest) {
         console.error("Kit fetch error:", error);
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
     }
-}
+})

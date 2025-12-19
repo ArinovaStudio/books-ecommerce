@@ -4,6 +4,7 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 import { cookies } from "next/headers";
+import { Wrapper } from "@/lib/api-handler";
 
 const registerValidation = z.object({
   name: z.string().min(1, "Name is required"),
@@ -15,7 +16,7 @@ const registerValidation = z.object({
 
 const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY";
 
-export async function POST(req: NextRequest) {
+export const POST = Wrapper(async(req: NextRequest) => {
   try {
     const body = await req.json();
 
@@ -55,4 +56,4 @@ export async function POST(req: NextRequest) {
     console.error("Register Sub-Admin Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})

@@ -1,3 +1,4 @@
+import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/verify"; 
 import { NextRequest, NextResponse } from "next/server";
@@ -22,7 +23,7 @@ const createClassValidation = z.object({
   schoolId: z.string().uuid().optional() 
 });
 
-export async function POST(req: NextRequest) {
+export const POST = Wrapper( async (req: NextRequest) => {
   try {
     const auth = await verifyAdmin(req);
     if (!auth.success) {
@@ -80,4 +81,4 @@ export async function POST(req: NextRequest) {
     console.error("Create Class Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+})
