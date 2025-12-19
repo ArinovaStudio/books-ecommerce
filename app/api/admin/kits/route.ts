@@ -11,7 +11,7 @@ const createKitValidation = z.object({
             productId: z.string().uuid("Invalid Product ID"),
             quantity: z.number().min(1, "Quantity must be at least 1")
         })
-    )
+    ).min(1, "Kit must contain at least one item")
 });
 
 export async function POST(req: NextRequest){
@@ -20,6 +20,10 @@ export async function POST(req: NextRequest){
 
         if (!auth.success){
             return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
+        }
+
+        if (auth.user.role !== "ADMIN") {
+            return NextResponse.json({ success: false, message: "Only Super Admins can create kits" }, { status: 403 });
         }
 
         const body = await req.json();
@@ -54,14 +58,16 @@ export async function POST(req: NextRequest){
             totalPrice += price * item.quantity;
         }
 
-        const newKit = await prisma.kit.create({ data: { classId, totalPrice, type } });
+        await prisma.$transaction(async tx => {
+            const newKit = await tx.kit.create({ data: { classId, totalPrice, type } });
 
-        await prisma.kitItem.createMany({
-            data: items.map(item => ({
-                kitId: newKit.id,
-                productId: item.productId,
-                quantity: item.quantity
-            }))
+            await tx.kitItem.createMany({
+                data: items.map(item => ({
+                    kitId: newKit.id,
+                    productId: item.productId,
+                    quantity: item.quantity
+                }))
+            });
         });
 
         return NextResponse.json({ success: true, message: "Kit created successfully" }, { status: 200 });

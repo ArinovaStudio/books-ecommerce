@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { getFullImageUrl } from "@/lib/upload";
 import { verifyUser } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
@@ -56,3 +57,45 @@ export async function PUT( req: NextRequest, { params }: { params: Promise<{ stu
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
 }
+
+
+export async function GET( req: NextRequest, { params }: { params: Promise<{ studentId: string }> } ) {
+  try {
+    const auth = await verifyUser(req);
+    if (!auth.success) {
+        return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    const { studentId } = await params;
+    const user = auth.user;
+
+    const student = await prisma.student.findUnique({
+        where: { id: studentId },
+        include: {
+            school: {
+                select: { name: true, image: true, board: true }
+            },
+            class: {
+                select: { name: true, academicYear: true }
+            }
+        }
+    });
+
+    student?.school.image && (student.school.image = getFullImageUrl(student.school.image, req));
+
+    if (!student) {
+        return NextResponse.json({ success: false, message: "Student not found" }, { status: 404 });
+    }
+
+    if (student.parentId !== user.id) {
+        return NextResponse.json({ success: false, message: "You can only view your own children" }, { status: 403 });
+    }
+
+    return NextResponse.json({ success: true, student }, { status: 200 });
+
+  } catch (error) {
+    console.error("Fetch Single Student Error:", error);
+    return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
+  }
+}
+

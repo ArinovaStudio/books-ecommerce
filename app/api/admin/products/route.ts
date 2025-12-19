@@ -11,6 +11,10 @@ export async function POST(req: NextRequest){
             return NextResponse.json({ success: false, message: "Admin access required", status: 403 });
         }
 
+        if (auth.user.role !== "ADMIN") {
+            return NextResponse.json({ success: false, message: "Only Super Admins can create global products" }, { status: 403 });
+        }
+
         const formData = await req.formData();
         const name = formData.get("name") as string;
         const description = formData.get("description") as string;

@@ -2,8 +2,10 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyUser } from "@/lib/verify";
+import { getFullImageUrl } from "@/lib/upload";
 
 const createOrderValidation = z.object({
+  studentId: z.string().uuid(),
   kitId: z.string().uuid(),
   paymentMethod: z.string().min(1, "Payment method is required"),
   items: z.array(
@@ -11,7 +13,7 @@ const createOrderValidation = z.object({
       productId: z.string().uuid(),
       quantity: z.number().min(1)
     })
-  ).min(1, "Order must contain at least one item")
+  ).min(1, "Order must contain at least one item") 
 });
 
 export async function POST(req: NextRequest) {
@@ -34,7 +36,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, message: "Vlidation error", errors }, { status: 400 });
     }
 
-    const { kitId, items, paymentMethod } = validation.data;
+    const { studentId, kitId, items, paymentMethod } = validation.data;
+
+    const student = await prisma.student.findUnique({ where: { id: studentId } });
+    if (!student || student.parentId !== userId) {
+        return NextResponse.json({ success: false, message: "Invalid Student ID" }, { status: 403 });
+    }
 
     const kit = await prisma.kit.findUnique({ where: { id: kitId }, include: { class: { include: { school: true } }}});
 
@@ -48,7 +55,7 @@ export async function POST(req: NextRequest) {
     let totalAmount = 0;
     const productMap = new Map(dbProducts.map(p => [p.id, p]));
 
-    const validOrderItems: { productId: string, quantity: number }[] = [];
+    const validOrderItems: { productId: string, quantity: number, price: number }[] = [];
 
     for (const item of items) {
       const product = productMap.get(item.productId);
@@ -58,40 +65,49 @@ export async function POST(req: NextRequest) {
       
       totalAmount += product.price * item.quantity;
 
-      validOrderItems.push({ productId: item.productId, quantity: item.quantity });
+      validOrderItems.push({ productId: item.productId, quantity: item.quantity, price: product.price });
     }
 
-    // Create Order
-    const order = await prisma.order.create({
-        data: {
-            userId,
-            school: kit.class.school.name, 
-            class: kit.class.name,       
-            kitType: kit.type,        
-            status: "Ordered",                
-        }
-    });
+    const orderId = await prisma.$transaction(async (tx) => {
+      // Create Order
+      const order = await tx.order.create({
+          data: {
+              userId, studentId,
+              school: kit.class.school.name, 
+              class: kit.class.name,
+              section: student.section,
+              academicYear:  kit.class.academicYear,       
+              kitType: kit.type,        
+              status: "Ordered",
+              totalAmount                
+          }
+      });
 
-    // Create Order Items
-    await prisma.orderItem.createMany({
-        data: validOrderItems.map(item => ({
-            orderId: order.id,
-            productId: item.productId,
-            quantity: item.quantity
-        }))
-    });
+      // Create Order Items
+      await tx.orderItem.createMany({
+          data: validOrderItems.map(item => ({
+              orderId: order.id,
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.price
+          }))
+      });
 
-    // Payment history added
-    await prisma.payment.create({
-        data: {
-            orderId: order.id,
-            amount: totalAmount,
-            method: paymentMethod,
-            status: "PENDING"
-        }
-    });
+      // Payment history added
+      await tx.payment.create({
+          data: {
+              orderId: order.id,
+              amount: totalAmount,
+              method: paymentMethod,
+              status: "PENDING"
+          }
+      });
 
-    return NextResponse.json({ success: true, message: "Order created successfully", orderId: order.id }, { status: 201 });
+      return order.id;
+    })
+    
+
+    return NextResponse.json({ success: true, message: "Order created successfully", orderId }, { status: 201 });
 
   } catch (error) {
     console.error("Create Order Error:", error);
@@ -109,12 +125,33 @@ export async function GET(req: NextRequest) {
 
     const userId = auth.user.id;
 
-    const orders = await prisma.order.findMany({ where: { userId }, include: { payment: { select: { amount: true, status: true, method: true }},
-    items: { include: { product: { select: { name: true, image: true, price: true } }}}}, orderBy: { createdAt: "desc" } });
+    const orders = await prisma.order.findMany({ 
+        where: { userId }, 
+        include: { 
+            student: { select: { name: true, rollNo: true } }, 
+            payment: { select: { amount: true, status: true, method: true }},
+            items: { 
+                include: { 
+                    product: { select: { name: true, image: true } } 
+                }
+            }
+        }, 
+        orderBy: { createdAt: "desc" } 
+    });
 
     if (!orders) {
       return NextResponse.json({ success: false, message: "No Order history" }, { status: 404 });
     }
+
+    orders.forEach((order) => {
+      if (order.items) {
+        order.items.forEach((item) => {
+          if (item.product.image) {
+            item.product.image = getFullImageUrl(item.product.image, req);
+          }
+        });
+      }
+    });
 
     return NextResponse.json({ success: true, orders }, { status: 200 });
 
