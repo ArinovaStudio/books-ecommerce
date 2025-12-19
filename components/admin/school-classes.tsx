@@ -21,25 +21,38 @@ const classes = [
 ]
 
 type Props = {
-    school: {
+    school?: {
         id: number
         name: string
     }
-    onBack: () => void
-    onSelectClass: (className: string) => void
+    onBack?: () => void
+    onSelectClass?: (className: string) => void
 }
 
-export function SchoolClasses({ school, onBack, onSelectClass }: Props) {
+export function SchoolClasses({
+    school,
+    onBack,
+    onSelectClass,
+}: Props) {
     return (
         <div className="space-y-4">
-            <Button variant="ghost" onClick={onBack} className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Back to schools
-            </Button>
+            {onBack && (
+                <Button variant="ghost" onClick={onBack} className="gap-2">
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                </Button>
+            )}
 
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {classes.map((cls) => (
-                    <Card key={cls} onClick={() => onSelectClass(cls)} className="hover:shadow-md transition cursor-pointer">
+                    <Card
+                        key={cls}
+                        onClick={onSelectClass ? () => onSelectClass(cls) : undefined}
+                        className={`transition ${onSelectClass
+                            ? "cursor-pointer hover:shadow-md"
+                            : "cursor-default"
+                            }`}
+                    >
                         <CardHeader>
                             <CardTitle className="text-center text-base">
                                 {cls}

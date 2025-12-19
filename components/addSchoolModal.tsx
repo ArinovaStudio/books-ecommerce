@@ -10,21 +10,40 @@ import {
     DialogPortal,
     DialogOverlay,
 } from "@radix-ui/react-dialog"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
 import { Button } from "./ui/button"
-import { Plus, ImageIcon } from "lucide-react"
+import { Label } from "./ui/label"
+import { Checkbox } from "@radix-ui/react-checkbox"
+import { Plus, ImageIcon, Pencil } from "lucide-react"
 
 export function AddSchoolModal() {
     const [logoPreview, setLogoPreview] = useState<string | null>(null)
+    const [selectedLangs, setSelectedLangs] = useState<string[]>([])
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         // Handle logic
     }
 
+    const toggleLanguage = (lang: string) => {
+        setSelectedLangs((prev) =>
+            prev.includes(lang)
+                ? prev.filter((l) => l !== lang)
+                : [...prev, lang]
+        )
+    }
+
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2 cursor-pointer">
+                <Button variant="outline" className={`gap-2 cursor-pointer`}>
                     <Plus className="h-4 w-4" />
                     Add School
                 </Button>
@@ -81,6 +100,54 @@ export function AddSchoolModal() {
                                         required
                                     />
                                 </div>
+
+                                <div className="flex flex-col md:flex-row gap-4">
+                                    {/* Classes - Added flex-1 to keep sizing consistent */}
+                                    <div className="flex-1 space-y-2">
+                                        <Label className="text-sm font-medium">Classes</Label>
+                                        <Select>
+                                            <SelectTrigger className="rounded-xl h-10">
+                                                <SelectValue placeholder="Select class" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="upto-8">Upto 8</SelectItem>
+                                                <SelectItem value="upto-10">Upto 10</SelectItem>
+                                                <SelectItem value="upto-12">Upto 12</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {/* Languages */}
+                                    <div className="flex-[2] space-y-3">
+                                        <Label className="text-sm font-medium">Languages</Label>
+                                        <div className="flex flex-wrap gap-1">
+                                            {["English", "Hindi", "Telugu"].map((lang) => {
+                                                const isChecked = selectedLangs.includes(lang)
+                                                return (
+                                                    <label
+                                                        key={lang}
+                                                        htmlFor={lang}
+                                                        className={`flex items-center gap-2 rounded-xl border px-4 py-2 cursor-pointer transition-all
+                                                        ${isChecked
+                                                                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                                                : "border-input hover:bg-muted"
+                                                            }`}
+                                                    >
+                                                        <Checkbox
+                                                            id={lang}
+                                                            checked={isChecked}
+                                                            onCheckedChange={() => toggleLanguage(lang)}
+                                                        />
+                                                        <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                                            {lang}
+                                                        </span>
+                                                    </label>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+
 
                                 <div className="grid gap-2">
                                     <label className="text-sm font-medium">Location</label>
