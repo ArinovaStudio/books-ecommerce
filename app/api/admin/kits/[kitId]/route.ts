@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
 const updateKitValidation = z.object({
+  totalPrice: z.number().min(0, "Price cannot be negative").optional(),
   items: z.array(
     z.object({
       productId: z.string().uuid("Invalid Product ID"),
@@ -35,10 +36,10 @@ export const PUT = Wrapper(async( req: NextRequest, { params }: { params: Promis
     
     if (!validation.success) {
         const errors = validation.error.errors.map((error) => ({ field: error.path[0], message: error.message }));;
-        return NextResponse.json({ success: false, message: "Vlidation error", errors }, { status: 400 });
+        return NextResponse.json({ success: false, message: "Validation error", errors }, { status: 400 });
     }
 
-    const { items } = validation.data;
+    const { items, totalPrice } = validation.data;
 
     const existingKit = await prisma.kit.findUnique({ where: { id: kitId } });
 
@@ -47,22 +48,28 @@ export const PUT = Wrapper(async( req: NextRequest, { params }: { params: Promis
     }
 
     const productIds = items.map((item) => item.productId);
-
     const existingProducts = await prisma.product.findMany({ where: { id: { in: productIds } } });
+    
+    if (existingProducts.length !== productIds.length) {
+        return NextResponse.json({ success: false, message: "One or more products not found" }, { status: 404 });
+    }
 
-    let totalPrice = 0;
+    let calculatedCost = 0;
     const productMap = new Map(existingProducts.map((product) => [product.id, product.price]));
 
     for (const item of items){
-        const price = productMap.get(item.productId);
-        if (!price){
-            return NextResponse.json({ success: false, message: `Product ID ${item.productId} not found` }, { status: 404 });
-        }
-        totalPrice += price * item.quantity;
+        const price = productMap.get(item.productId) || 0;
+        calculatedCost += price * item.quantity;
     }
 
+    const finalPrice = totalPrice !== undefined ? totalPrice : calculatedCost;
 
-    await prisma.kit.update({ where: { id: kitId }, data: { totalPrice } });
+    await prisma.kit.update({ 
+        where: { id: kitId }, 
+        data: { 
+            totalPrice: finalPrice 
+        } 
+    });
 
     await prisma.kitItem.deleteMany({ where: { kitId: kitId } });
 

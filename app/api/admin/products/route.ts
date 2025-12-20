@@ -57,3 +57,12 @@ export const POST = Wrapper(async(req: NextRequest) => {
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
     }
 })
+
+export async function GET(req: NextRequest) {
+  try {
+    const products = await prisma.product.findMany({ orderBy: { name: 'asc' }});
+    return NextResponse.json({ success: true, data: products });
+  } catch (error) {
+    return NextResponse.json({ success: false, message: "Failed to fetch products" }, { status: 500 });
+  }
+}

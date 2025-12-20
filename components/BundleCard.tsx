@@ -27,7 +27,7 @@ type Bundle = {
     isPopular?: boolean;
 };
 
-export function BundleCard({ bundle }: { bundle: Bundle }) {
+export function BundleCard({ bundle, onRefresh }: { bundle: Bundle, onRefresh: () => void }) {
     const { title, offeredPrice, items, type, isPopular } = bundle;
 
     const [isEdit, setIsEdit] = useState(false);
@@ -125,6 +125,7 @@ export function BundleCard({ bundle }: { bundle: Bundle }) {
                 bundle={bundle}
                 type={type}
                 updateBundle={(bundle: Bundle) => console.log("Update", bundle)}
+                onSave={onRefresh}
             />
 
         </Card>

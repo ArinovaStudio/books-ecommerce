@@ -1,6 +1,8 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -15,32 +17,43 @@ import {
   YAxis,
 } from "recharts"
 
-const analyticsData = [
-  { month: "Jan", users: 186, schools: 80, revenue: 2400 },
-  { month: "Feb", users: 305, schools: 120, revenue: 1398 },
-  { month: "Mar", users: 237, schools: 150, revenue: 9800 },
-  { month: "Apr", users: 273, schools: 180, revenue: 3908 },
-  { month: "May", users: 209, schools: 200, revenue: 4800 },
-  { month: "Jun", users: 514, schools: 250, revenue: 3800 },
-]
-
-const engagementData = [
-  { time: "00:00", requests: 1200 },
-  { time: "04:00", requests: 800 },
-  { time: "08:00", requests: 2100 },
-  { time: "12:00", requests: 2800 },
-  { time: "16:00", requests: 2400 },
-  { time: "20:00", requests: 1800 },
-]
-
-const statsData = [
-  { label: "Total Users", value: "1,724", change: "+12.5%" },
-  { label: "Active Schools", value: "980", change: "+8.2%" },
-  { label: "Avg Response Time", value: "352ms", change: "-5.1%" },
-  { label: "Success Rate", value: "99.8%", change: "+0.2%" },
-]
+type Stat = { label: string; value: string; change: string }
+type AnalyticsItem = { month: string; users: number; schools: number; revenue: number }
+type EngagementItem = { time: string; requests: number }
 
 export function AnalyticsCharts() {
+  const [loading, setLoading] = useState(true);
+  const [statsData, setStatsData] = useState<Stat[]>([]);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsItem[]>([]);
+  const [engagementData, setEngagementData] = useState<EngagementItem[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/admin/analytics");
+        const data = await res.json();
+        if (data.success) {
+          setStatsData(data.stats);
+          setAnalyticsData(data.analyticsData);
+          setEngagementData(data.engagementData);
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+        <div className="flex items-center justify-center h-[50vh]">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Stats */}

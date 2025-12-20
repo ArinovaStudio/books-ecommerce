@@ -22,7 +22,7 @@ enum UserStatus {
 model User {
   id String @id @default(uuid())
   email String @unique
-  phone String @unique
+  phone String? @unique
   name String
   password String
   address String?
@@ -46,12 +46,21 @@ model Otp {
   createdAt DateTime @default(now())
 }
 
+enum SchoolStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model School {
   id String @id @default(uuid())
   name String
-  address Json?
-  image String?
-  board String
+  email String @unique
+  address String
+  languages String[]
+  classRange String
+  image String
+  board String?
+  status SchoolStatus @default(ACTIVE)
   numberOfClasses Int @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -116,6 +125,8 @@ model Product {
   price Float
   category ProductCategory
   stock Int
+  brand String?
+  type String?
   image String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -135,6 +146,7 @@ model Kit {
   type KitType
   classId String
   totalPrice Float
+  language String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

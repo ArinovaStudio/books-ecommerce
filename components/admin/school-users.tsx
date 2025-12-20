@@ -1,25 +1,62 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MoreHorizontal, Search, Mail, User, ArrowLeft, Plus } from "lucide-react"
+import { MoreHorizontal, Search, Mail, User, ArrowLeft, Plus, Loader2 } from "lucide-react"
 
-const users = [
-    { id: 1, name: "Alex Johnson", email: "alex@example.com", role: "Student", status: "Active", joinDate: "2024-01-15" },
-    { id: 2, name: "Sarah Williams", email: "sarah@example.com", role: "Teacher", status: "Active", joinDate: "2024-02-20" },
-    { id: 3, name: "Michael Brown", email: "michael@example.com", role: "Student", status: "Active", joinDate: "2024-03-10" },
-    { id: 4, name: "Emma Davis", email: "emma@example.com", role: "Teacher", status: "Inactive", joinDate: "2024-01-05" },
-    { id: 5, name: "James Wilson", email: "james@example.com", role: "Student", status: "Active", joinDate: "2024-04-12" }
-]
+type UserType = {
+    id: string
+    name: string
+    email: string
+    phone: string
+    role: string
+    status: string
+    joinDate: string
+}
 
 type Props = {
+    schoolId: string
+    classId: string
     className: string
     onBack: () => void
 }
 
-export function SchoolClassUsers({ className, onBack }: Props) {
+export function SchoolClassUsers({ schoolId, classId, className, onBack }: Props) {
+    const [users, setUsers] = useState<UserType[]>([])
+    const [loading, setLoading] = useState(true)
+    const [search, setSearch] = useState("")
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            setLoading(true)
+            try {
+                const res = await fetch(`/api/admin/schools/${schoolId}/classes/${classId}`)
+                const data = await res.json()
+
+                if (data.success) {
+                    setUsers(data.users)
+                } else {
+                    setUsers([])
+                }
+            } catch (error) {
+                console.error("Failed to fetch users", error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        if (schoolId && classId) {
+            fetchUsers()
+        }
+    }, [schoolId, classId])
+
+
+    const filteredUsers = users.filter(user => 
+        user.name.toLowerCase().includes(search.toLowerCase()) || 
+        user.email.toLowerCase().includes(search.toLowerCase())
+    )
 
     return (
         <div className="space-y-4">
@@ -31,11 +68,20 @@ export function SchoolClassUsers({ className, onBack }: Props) {
             {/* Search */}
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input placeholder="Search users..." className="pl-9" />
+                <Input placeholder="Search users..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)}/>
             </div>
 
-            {/* Cards Grid */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {loading ? (
+                <div className="flex justify-center p-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : filteredUsers.length === 0 ? (
+                <div className="text-center p-8 text-muted-foreground border-2 border-dashed rounded-xl">
+                    No users linked to students in {className}.
+                </div>
+            ) : (
+
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {users.map((user) => (
                     <Card key={user.id} className="relative hover:shadow-md transition">
                         <CardHeader className="pb-2">
@@ -79,6 +125,8 @@ export function SchoolClassUsers({ className, onBack }: Props) {
                     </Card>
                 ))}
             </div>
+            )}
+            
         </div>
     )
 }

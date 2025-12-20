@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { AdminSidebar } from "@/components/admin/sidebar"
 import { AdminProvider } from "@/app/context/admin"
+import { Toaster } from "@/components/ui/toaster"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [activeTab, setActiveTab] = useState("analytics")
@@ -25,6 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {children}
         </div>
       </div>
+      <Toaster />
     </AdminProvider>
   )
 }
