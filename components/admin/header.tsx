@@ -10,13 +10,17 @@ export function AdminHeader() {
   const titleMap = {
     analytics: "Analytics",
     users: "Users",
-    schools: "Schools"
+    schools: "Schools",
+    bundels: "Bundels",
+    orders: "Orders"
   }
 
   const descriptionMap = {
     analytics: "View comprehensive analytics and insights",
     users: "Manage all registered users",
     schools: "View and manage all schools",
+    bundels: "View and manage all bundels",
+    orders: "View and manage all orders"
   }
 
   return (

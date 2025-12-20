@@ -1,7 +1,6 @@
 "use client"
 
-import { BarChart3, GraduationCap, Users, Moon, Sun, Book, Folders } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { BarChart3, GraduationCap, Users, Moon, Sun, Book, ClipboardList } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTheme } from "@/components/theme-provider"
 import { useAdmin } from "@/app/context/admin"
@@ -17,7 +16,7 @@ const navItems: {
     { id: "users", label: "Users", icon: Users },
     { id: "schools", label: "Schools", icon: GraduationCap },
     { id: "bundels", label: "Bundels", icon: Book },
-    { id: "orders", label: "Order", icon: Folders }
+    { id: "orders", label: "Order", icon: ClipboardList }
   ]
 
 export function AdminSidebar() {

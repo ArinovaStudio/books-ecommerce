@@ -3,96 +3,97 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { MoreHorizontal, Search } from "lucide-react"
 
-const users = [
-  { id: 1, name: "Alex Johnson", email: "alex@example.com", role: "Admin", status: "Active", joinDate: "2024-01-15" },
+/* ================= DEMO DATA ================= */
+const orders = [
+  {
+    id: 1,
+    schoolName: "Greenwood High School",
+    orderNumber: "ORD-1001",
+    orderDate: "2025-01-15",
+    totalAmount: 4500,
+    status: "Pending",
+  },
   {
     id: 2,
-    name: "Sarah Williams",
-    email: "sarah@example.com",
-    role: "Teacher",
-    status: "Active",
-    joinDate: "2024-02-20",
+    schoolName: "Sunrise Academy",
+    orderNumber: "ORD-1002",
+    orderDate: "2025-01-20",
+    totalAmount: 3200,
+    status: "Completed",
   },
   {
     id: 3,
-    name: "Michael Brown",
-    email: "michael@example.com",
-    role: "Student",
-    status: "Active",
-    joinDate: "2024-03-10",
-  },
-  { id: 4, name: "Emma Davis", email: "emma@example.com", role: "Teacher", status: "Inactive", joinDate: "2024-01-05" },
-  {
-    id: 5,
-    name: "James Wilson",
-    email: "james@example.com",
-    role: "Student",
-    status: "Active",
-    joinDate: "2024-04-12",
+    schoolName: "Maple Leaf School",
+    orderNumber: "ORD-1003",
+    orderDate: "2025-01-25",
+    totalAmount: 5000,
+    status: "Cancelled",
   },
   {
-    id: 6,
-    name: "Olivia Martinez",
-    email: "olivia@example.com",
-    role: "Admin",
-    status: "Active",
-    joinDate: "2024-02-28",
-  },
-  {
-    id: 7,
-    name: "William Taylor",
-    email: "william@example.com",
-    role: "Student",
-    status: "Active",
-    joinDate: "2024-03-15",
-  },
-  {
-    id: 8,
-    name: "Sophia Anderson",
-    email: "sophia@example.com",
-    role: "Teacher",
-    status: "Active",
-    joinDate: "2024-01-20",
+    id: 4,
+    schoolName: "Riverdale High",
+    orderNumber: "ORD-1004",
+    orderDate: "2025-02-01",
+    totalAmount: 2800,
+    status: "Pending",
   },
 ]
 
-export function UsersTable() {
+/* ================= COMPONENT ================= */
+export function OrdersTable() {
   return (
     <div className="space-y-4">
+      {/* Search */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search users..." className="pl-9" />
+          <Input placeholder="Search orders..." className="pl-9" />
         </div>
       </div>
 
+      {/* Table */}
       <div className="rounded-lg border border-border">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
+              <TableHead>School Name</TableHead>
+              <TableHead>Order Number</TableHead>
+              <TableHead>Order Date</TableHead>
+              <TableHead>Total Amount (₹)</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Join Date</TableHead>
               <TableHead className="w-[70px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell className="font-medium">{user.name}</TableCell>
-                <TableCell className="text-muted-foreground">{user.email}</TableCell>
+            {orders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell className="font-medium">{order.schoolName}</TableCell>
+                <TableCell className="text-muted-foreground">{order.orderNumber}</TableCell>
+                <TableCell className="text-muted-foreground">{order.orderDate}</TableCell>
+                <TableCell className="text-muted-foreground">₹{order.totalAmount}</TableCell>
                 <TableCell>
-                  <Badge variant={user.role === "Admin" ? "default" : "secondary"}>{user.role}</Badge>
+                  <Badge
+                    variant={
+                      order.status === "Completed"
+                        ? "default"
+                        : order.status === "Pending"
+                          ? "secondary"
+                          : "destructive"
+                    }
+                  >
+                    {order.status}
+                  </Badge>
                 </TableCell>
-                <TableCell>
-                  <Badge variant={user.status === "Active" ? "default" : "secondary"}>{user.status}</Badge>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{user.joinDate}</TableCell>
                 <TableCell>
                   <Button variant="ghost" size="icon">
                     <MoreHorizontal className="h-4 w-4" />

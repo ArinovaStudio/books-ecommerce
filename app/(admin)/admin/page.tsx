@@ -10,7 +10,8 @@ import { AdminHeader } from "@/components/admin/header"
 import { useAdmin } from "@/app/context/admin"
 import LanguageSelector from "@/components/languageSelector"
 import { AddSchoolModal } from "@/components/addSchoolModal"
-import { BundleCard } from "@/components/BundleCard"
+import { Bundels } from "@/components/Bundels"
+import { OrdersTable } from "@/components/admin/user-table"
 
 export default function AdminDashboard() {
   const { activeTab } = useAdmin()
@@ -43,7 +44,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               {!selectedSchool && !selectedClass && (
-                <SchoolCards onSelectSchool={setSelectedSchool} />
+                <SchoolCards onSelectSchool={setSelectedSchool} activeTab={activeTab} />
               )}
 
               {selectedSchool && !selectedClass && (
@@ -77,7 +78,7 @@ export default function AdminDashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} />}
+              {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab={activeTab} />}
               {selectedSchool && !selectedClass && (
                 <SchoolClasses
                   school={selectedSchool}
@@ -96,7 +97,7 @@ export default function AdminDashboard() {
               <CardDescription>View and manage all Bundles</CardDescription>
             </CardHeader>
             <CardContent>
-              {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} />}
+              {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab={activeTab} />}
               {selectedSchool && !selectedClass && (
                 <SchoolClasses
                   school={selectedSchool}
@@ -110,13 +111,23 @@ export default function AdminDashboard() {
                   onBack={() => setSelectedClass(null)}
                 />
               )}
+
               {selectedSchool && selectedClass && selectedLang && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-                  <BundleCard title="Basic" price={999} />
-                  <BundleCard title="Standard" price={1999} />
-                  <BundleCard title="Premium" price={2999} />
-                </div>
+                <Bundels onBack={() => setSelectedLang(null)} />
               )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Order Tabs */}
+        {activeTab === "orders" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Orders</CardTitle>
+              <CardDescription>View and manage all Orders</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <OrdersTable />
             </CardContent>
           </Card>
         )}

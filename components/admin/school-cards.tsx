@@ -29,10 +29,11 @@ const schools: School[] = [
 ]
 
 type Props = {
+    activeTab: string
     onSelectSchool: (school: { id: number; name: string }) => void
 }
 
-export function SchoolCards({ onSelectSchool }: Props) {
+export function SchoolCards({ activeTab, onSelectSchool }: Props) {
     const [editingSchool, setEditingSchool] = useState<School | null>(null)
     const [open, setOpen] = useState(false)
 
@@ -57,36 +58,37 @@ export function SchoolCards({ onSelectSchool }: Props) {
                             <div className="flex items-start justify-between">
                                 <CardTitle className="text-base">{school.name}</CardTitle>
 
-                                {/* Dropdown Menu */}
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
-                                            <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
+                                {activeTab === "schools" && (
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+                                                <MoreHorizontal className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
 
-                                    <DropdownMenuContent align="end" className="w-36">
-                                        <DropdownMenuItem
-                                            className="gap-2 cursor-pointer"
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                setEditingSchool(school)
-                                                setOpen(true) // open modal
-                                            }}
-                                        >
-                                            <Pencil className="h-4 w-4" />
-                                            Edit
-                                        </DropdownMenuItem>
+                                        <DropdownMenuContent align="end" className="w-36">
+                                            <DropdownMenuItem
+                                                className="gap-2 cursor-pointer"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    setEditingSchool(school)
+                                                    setOpen(true) // open modal
+                                                }}
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                                Edit
+                                            </DropdownMenuItem>
 
-                                        <DropdownMenuItem
-                                            className="gap-2 text-destructive cursor-pointer"
-                                            onClick={() => console.log("Delete", school.id)}
-                                        >
-                                            <Trash className="h-4 w-4 text-red-400" />
-                                            Delete
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
+                                            <DropdownMenuItem
+                                                className="gap-2 text-destructive cursor-pointer"
+                                                onClick={() => console.log("Delete", school.id)}
+                                            >
+                                                <Trash className="h-4 w-4 text-red-400" />
+                                                Delete
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                )}
                             </div>
 
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -127,16 +129,18 @@ export function SchoolCards({ onSelectSchool }: Props) {
             </div>
 
             {/* Edit School Modal */}
-            {editingSchool && (
-                <EditSchoolModal
-                    school={editingSchool}
-                    open={open}
-                    onOpenChange={(val) => {
-                        setOpen(val)
-                        if (!val) setEditingSchool(null) // clear editing school when modal closes
-                    }}
-                />
-            )}
-        </div>
+            {
+                editingSchool && (
+                    <EditSchoolModal
+                        school={editingSchool}
+                        open={open}
+                        onOpenChange={(val) => {
+                            setOpen(val)
+                            if (!val) setEditingSchool(null) // clear editing school when modal closes
+                        }}
+                    />
+                )
+            }
+        </div >
     )
 }

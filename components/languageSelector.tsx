@@ -1,10 +1,16 @@
 import { Button } from "./ui/button"
 import { ArrowLeft } from "lucide-react"
+import { Card, CardHeader, CardTitle } from "./ui/card"
 
 type Props = {
-    onSelectingLang: (lang: string) => void
+    onSelectingLang?: (lang: string) => void
     onBack: () => void
 }
+
+const Language = [
+    "English",
+    "हिंदी"
+]
 
 export default function LanguageSelector({ onSelectingLang, onBack }: Props) {
     return (
@@ -13,29 +19,23 @@ export default function LanguageSelector({ onSelectingLang, onBack }: Props) {
                 <ArrowLeft className="h-4 w-4" />
                 Back to classes
             </Button>
-            <div className="flex flex-col md:flex-row min-h-[400px] md:h-56 w-full rounded-xl overflow-hidden border mt-4">
-                {/* English */}
-                <Button
-                    variant='outline'
-                    className="flex-1 h-full text-2xl font-semibold cursor-pointer"
-                    onClick={() => onSelectingLang("English")}
-                >
-                    English
-                </Button>
-
-                {/* Divider */}
-                <div className="w-px bg-border" />
-
-                <div className="h-px bg-border" />
-
-                {/* Hindi */}
-                <Button
-                    variant='outline'
-                    className="flex-1 h-full text-2xl font-semibold cursor-pointer"
-                    onClick={() => onSelectingLang("Hindi")}
-                >
-                    हिंदी
-                </Button>
+            <div className="grid mt-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {Language.map((lng) => (
+                    <Card
+                        key={lng}
+                        onClick={onSelectingLang ? () => onSelectingLang(lng) : undefined}
+                        className={`transition ${onSelectingLang
+                            ? "cursor-pointer hover:shadow-md"
+                            : "cursor-default"
+                            }`}
+                    >
+                        <CardHeader>
+                            <CardTitle className="text-center text-base">
+                                {lng}
+                            </CardTitle>
+                        </CardHeader>
+                    </Card>
+                ))}
             </div>
         </div>
     )
