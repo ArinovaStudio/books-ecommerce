@@ -1,10 +1,19 @@
 import { Button } from "@/components/ui/button"
 import { ArrowRight, CheckCircle } from "lucide-react"
+import Image from "next/image"
 
 export default function Hero() {
   return (
-    <section id="home" className="bg-linear-to-br from-[#15203b] via-[#223b63] to-[#2c6b90]
-text-white py-12 md:py-24 relative overflow-hidden">
+    <section
+      className="relative text-white py-12 md:py-24 overflow-hidden"
+      style={{
+        background: `
+      radial-gradient(circle at 70% 40%, rgba(34,197,94,0.25), transparent 45%),
+      radial-gradient(circle at 20% 30%, rgba(20,184,166,0.18), transparent 40%),
+      linear-gradient(135deg, #052e2b 0%, #064e3b 50%, #022c22 100%)
+    `
+      }}
+    >
       <svg
         className="absolute bottom-0 left-0 w-full h-24 text-white"
         viewBox="0 0 1200 120"
@@ -14,10 +23,8 @@ text-white py-12 md:py-24 relative overflow-hidden">
       </svg>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 relative z-10">
-        <div className=" pb-20">
-
-          {/* Left Content */}
-          <div className="space-y-7 ">
+        <div className="pb-20 flex flex-col lg:flex-row items-center w-full gap-12">
+          <div className="space-y-7 max-w-xl lg:max-w-3xl xl:max-w-4xl">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-amber-500/20 border border-amber-500/50 rounded-full px-4 py-2 w-fit">
               <span className="text-amber-400">🎁</span>
@@ -25,9 +32,15 @@ text-white py-12 md:py-24 relative overflow-hidden">
             </div>
 
             {/* Headline */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-balance">
-              School Books & Stationery, <span className="text-amber-400">Delivered to Your Door</span>
-            </h1>
+            <div className="space-y-7 max-w-xl lg:max-w-4xl">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
+                School Books & Stationery,
+                {/* <br className="hidden md:block" /> */}
+                <span className="text-amber-400">Delivered to Your Door</span>
+              </h1>
+            </div>
+
+
 
             {/* Description */}
             <p className="text-lg text-blue-100 leading-relaxed max-w-xl">
@@ -70,43 +83,16 @@ text-white py-12 md:py-24 relative overflow-hidden">
               </div>
             </div>
           </div>
-
-          {/* Right Visual - Product Card */}
-          {/* <div className="hidden lg:flex justify-center">
-            <div className="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full">
-              <div className="absolute left-150 bg-amber-500 text-white px-4 py-2 rounded-full font-bold text-sm">
-                20% OFF
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-blue-900">Class 5 Bundle</h3>
-                <p className="text-sm text-gray-600">Delhi Public School</p>
-
-                <div className="space-y-3 py-4 border-y border-gray-200">
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Books (8)</span>
-                    <span className="font-semibold text-gray-900">₹450</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Stationery Kit</span>
-                    <span className="font-semibold text-gray-900">₹350</span>
-                  </div>
-                  <div className="flex justify-between text-emerald-600">
-                    <span className="font-semibold">Bundle Discount</span>
-                    <span className="font-bold">-₹100</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-gray-700 text-sm">Total</p>
-                  <p className="text-4xl font-bold text-blue-900">₹700</p>
-                </div>
-
-                <Button className="w-full bg-amber-500 hover:bg-amber-600 text-blue-900 font-bold py-6 rounded-lg">
-                  Add to Cart
-                </Button>
-              </div>
-            </div>
-          </div> */}
+          {/* Right Image */}
+          <div className="relative flex-1 flex justify-end items-center w-full h-[300px] md:h-[400px] lg:h-[600px] lg:min-w-[700px]">
+            <Image
+              src="/hero.png"
+              alt="School stationery kit"
+              fill
+              priority
+              className="object-contain object-top mx-29"
+            />
+          </div>
         </div>
       </div>
     </section >

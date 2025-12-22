@@ -41,7 +41,7 @@ export default function HowItWorks() {
         </div>
 
         {/* Steps Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative px-0">
+        <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6 relative px-0">
           {/* Connection Line */}
           <div className="hidden lg:block absolute top-12 left-10 right-0 h-1 bg-linear-to-r bg-gray-100 -z-10 "></div>
 
@@ -50,9 +50,9 @@ export default function HowItWorks() {
             return (
               <div key={index} className="relative">
                 {/* Step Number Badge */}
-                <div className="absolute -top-3 -right-3 w-8 h-8 md:w-12 md:h-12 bg-amber-500 text-black rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
+                {/* <div className="absolute -top-3 -right-3 w-8 h-8 md:w-12 md:h-12 bg-amber-500 text-black rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
                   {step.number}
-                </div>
+                </div> */}
 
                 {/* Card */}
                 <Card className="py-8 px-4 h-full border border-gray-200 hover:shadow-lg transition-shadow flex flex-col items-start text-left gap-3">

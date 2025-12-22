@@ -5,6 +5,7 @@ import { Menu, X, Phone, ShoppingCart, User, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,8 +50,12 @@ export default function Header() {
           {/* LOGO */}
           <Link href="/" scroll={false}>
             <div className="flex items-center gap-2 cursor-pointer">
-              <div className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
-                <BookOpen className="text-white" />
+              <div className="rounded-lg flex items-center justify-center">
+                {/* <BookOpen className="text-white" /> */}
+                <Image src="/logo .png" alt="GlobeNest Logo"
+                  width={55}
+                  height={55}
+                  className="object-contain" />
               </div>
               <div>
                 <div className="font-bold text-lg text-amber-700">
@@ -139,9 +144,8 @@ export default function Header() {
 
         {/* MOBILE NAV */}
         <div
-          className={`md:hidden transition-all overflow-hidden ${
-            isOpen ? "max-h-96" : "max-h-0"
-          }`}
+          className={`md:hidden transition-all overflow-hidden ${isOpen ? "max-h-96" : "max-h-0"
+            }`}
         >
           <div className="pb-4 space-y-2 px-2">
             {["home", "schools", "about", "contact"].map((item) => (
