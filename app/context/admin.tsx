@@ -19,7 +19,7 @@ const AdminContext = createContext<AdminContextType | null>(null)
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [activeTab, setActiveTab] = useState<AdminTab>("analytics")
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [role, setRole] = useState<Role>("SUBADMIN") // default safe role
+  const [role, setRole] = useState<Role>("ADMIN") // default safe role
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

@@ -18,8 +18,8 @@ export default function Home() {
   return (
     <main>
       <Hero />
-      <HowItWorks />
       <PartnerSchools />
+      <HowItWorks />
       <Features />
       <HeroCTA />
     </main>

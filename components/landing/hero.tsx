@@ -24,7 +24,7 @@ export default function Hero() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 relative z-10">
         <div className="pb-20 flex flex-col lg:flex-row items-center w-full gap-12">
-          <div className="space-y-7 max-w-xl lg:max-w-3xl xl:max-w-4xl">
+          <div className="space-y-7 max-w-xl lg:max-w-4xl xl:max-w-4xl">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-amber-500/20 border border-amber-500/50 rounded-full px-4 py-2 w-fit">
               <span className="text-amber-400">🎁</span>
@@ -32,10 +32,11 @@ export default function Hero() {
             </div>
 
             {/* Headline */}
-            <div className="space-y-7 max-w-xl lg:max-w-4xl">
+            <div className="space-y-7 max-w-xl lg:max-w-9xl">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
-                School Books & Stationery,
+                School Books & Stationery
                 {/* <br className="hidden md:block" /> */}
+                <br />
                 <span className="text-amber-400">Delivered to Your Door</span>
               </h1>
             </div>

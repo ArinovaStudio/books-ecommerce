@@ -55,11 +55,11 @@ export default function Header() {
                 <Image src="/logo .png" alt="GlobeNest Logo"
                   width={55}
                   height={55}
-                  className="object-contain" />
+                  className="object-contain " />
               </div>
               <div>
                 <div className="font-bold text-lg text-amber-700">
-                  Globe Nest
+                  Glow Nest
                 </div>
                 <div className="text-xs text-gray-600">
                   School Supplies
