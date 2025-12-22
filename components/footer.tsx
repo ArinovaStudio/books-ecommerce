@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Facebook, Instagram, Twitter,BookOpen } from "lucide-react"
+import { Mail, Phone, MapPin, Facebook, Instagram, Twitter, BookOpen } from "lucide-react"
 
 export default function Footer() {
   return (
@@ -10,7 +10,9 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
-                <span className="text-blue-950 font-bold"><BookOpen/></span>
+                <span className="text-blue-950 font-bold">
+                  <BookOpen />
+                </span>
               </div>
               <div>
                 <div className="font-bold">GlobeNest</div>
@@ -108,11 +110,18 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Security Notice */}
+        <p className="text-sm text-blue-200 bg-blue-900/40 border border-blue-800 rounded-lg px-4 py-3 mb-8">
+          <strong>Security Notice:</strong> Beware of scammers—we never request OTPs, bank details, or card information from our customers. All legitimate communications occur through official channels listed on this platform. Report any suspicious requests immediately to protect your information.
+        </p>
+
         {/* Divider */}
         <div className="border-t border-blue-800 pt-8">
           {/* Bottom Footer */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-blue-100 text-sm">© 2025 GlobeNest Services. All rights reserved.</p>
+            <p className="text-blue-100 text-sm">
+              © 2025 GlobeNest Services. All rights reserved.
+            </p>
             <div className="flex gap-6 text-sm text-blue-100">
               <a href="#" className="hover:text-amber-500 transition">
                 Security

@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
+import { useRouter } from "next/navigation";
 
 export default function HeroCTA() {
+    const router = useRouter();
+  
   return (
     <section id="contact" className="bg-[#15203b] text-white py-20 md:py-32">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
@@ -18,7 +21,7 @@ export default function HeroCTA() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
           <Button
             size="lg"
-            className="bg-amber-500 hover:bg-amber-500 text-blue-950 font-semibold gap-2 rounded-xl py-[30px] px-13! cursor-pointer shadow-[0_0_50px_0px_rgba(255,193,7,0.25)] hover:shadow-none  transition-all duration-300"
+            className="bg-amber-500 hover:bg-amber-500 text-blue-950 font-semibold gap-2 rounded-xl py-[30px] px-13! cursor-pointer shadow-[0_0_50px_0px_rgba(255,193,7,0.25)] hover:shadow-none  transition-all duration-300" onClick={() => router.push("/schools")}
           >
             Shop Now
           </Button>
