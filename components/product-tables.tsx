@@ -1,228 +1,141 @@
 "use client"
-
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Minus, Plus } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "./ui/button"
+import { Trash2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import AddProductDialog from "./AddProduct"
 
 type PlanType = "basic" | "medium" | "advanced"
 
 interface Product {
     id: string
-    name: string
-    image: string
-    discountedPrice: number
-    actualPrice: number
-    fixedQuantity?: number
-}
-
-/*  Single source of truth for grid columns */
-const GRID_COLS = "sm:grid-cols-[80px_1fr_140px_140px]"
-
-const products: Record<string, Product[]> = {
-    textbooks: [
-        {
-            id: "tb1",
-            name: "Mathematics Grade 10",
-            image: "/math-textbook.png",
-            discountedPrice: 29.99,
-            actualPrice: 39.99,
-            fixedQuantity: 1,
-        },
-        {
-            id: "tb2",
-            name: "Science Grade 10",
-            image: "/science-textbook.jpg",
-            discountedPrice: 34.99,
-            actualPrice: 44.99,
-            fixedQuantity: 1,
-        },
-        {
-            id: "tb3",
-            name: "English Literature",
-            image: "/english-textbook.png",
-            discountedPrice: 24.99,
-            actualPrice: 34.99,
-            fixedQuantity: 1,
-        },
-    ],
-    notebooks: [
-        {
-            id: "nb1",
-            name: "Ruled Notebook A4",
-            image: "/ruled-notebook.jpg",
-            discountedPrice: 4.99,
-            actualPrice: 7.99,
-        },
-        {
-            id: "nb2",
-            name: "Graph Notebook",
-            image: "/graph-notebook.jpg",
-            discountedPrice: 5.99,
-            actualPrice: 8.99,
-        },
-        {
-            id: "nb3",
-            name: "Spiral Notebook",
-            image: "/spiral-notebook.jpg",
-            discountedPrice: 6.99,
-            actualPrice: 9.99,
-        },
-    ],
-    stationary: [
-        {
-            id: "st1",
-            name: "Pen Set (10 pcs)",
-            image: "/elegant-pen-set.png",
-            discountedPrice: 8.99,
-            actualPrice: 12.99,
-        },
-        {
-            id: "st2",
-            name: "Pencil Set (12 pcs)",
-            image: "/pencil-set.jpg",
-            discountedPrice: 6.99,
-            actualPrice: 9.99,
-        },
-        {
-            id: "st3",
-            name: "Eraser & Sharpener Kit",
-            image: "/eraser-sharpener.jpg",
-            discountedPrice: 3.99,
-            actualPrice: 5.99,
-        },
-    ],
-}
-
-interface ProductTableProps {
+    type: "textbook" | "notebook" | "stationary"
     planType: PlanType
+    classes?: string
+    productName: string
+    brandName: string
+    image: string | File
+    price: number
 }
 
-export function ProductTables({ planType }: ProductTableProps) {
-    const [quantities, setQuantities] = useState<Record<string, number>>({})
+const products: Product[] = [
+    //  TEXTBOOKS
+    { id: "tb-basic-1", type: "textbook", planType: "basic", productName: "Mathematics Grade 10", classes: "10", brandName: "NCERT", image: "https://m.media-amazon.com/images/I/81ZV9J0tZUL.jpg", price: 299 },
+    { id: "tb-medium-1", type: "textbook", planType: "medium", productName: "Science Grade 10", classes: "10", brandName: "NCERT", image: "https://m.media-amazon.com/images/I/81N7FmJhbhL.jpg", price: 349 },
+    { id: "tb-advanced-1", type: "textbook", planType: "advanced", productName: "English Literature", classes: "10", brandName: "Oxford", image: "https://m.media-amazon.com/images/I/71xU8SxN7jL.jpg", price: 399 },
+    // NOTEBOOKS
+    { id: "nb-basic-1", type: "notebook", planType: "basic", productName: "A4 Ruled Notebook", brandName: "Classmate", image: "https://m.media-amazon.com/images/I/71f8n9cFZOL.jpg", price: 60 },
+    { id: "nb-medium-1", type: "notebook", planType: "medium", productName: "Spiral Notebook", brandName: "Navneet", image: "https://m.media-amazon.com/images/I/61p7zZy7JUL.jpg", price: 90 },
+    { id: "nb-advanced-1", type: "notebook", planType: "advanced", productName: "Hardcover Notebook", brandName: "Paperkraft", image: "https://m.media-amazon.com/images/I/71ZrX0z8JOL.jpg", price: 150 },
+    // STATIONARY
+    { id: "st-basic-1", type: "stationary", planType: "basic", productName: "Ball Pen Pack (10 pcs)", brandName: "Cello", image: "https://m.media-amazon.com/images/I/71XqkF2wZOL.jpg", price: 120 },
+    { id: "st-medium-1", type: "stationary", planType: "medium", productName: "Exam Writing Kit", brandName: "Reynolds", image: "https://m.media-amazon.com/images/I/61u0zVZ5hUL.jpg", price: 199 },
+    { id: "st-advanced-1", type: "stationary", planType: "advanced", productName: "Premium Geometry Box", brandName: "Camlin", image: "https://m.media-amazon.com/images/I/71y3g9n8HVL.jpg", price: 249 },
+]
 
-    const getQuantity = (id: string) => quantities[id] || 1
+const GRID_STYLE = "grid grid-cols-[80px_1fr_120px_100px_100px] gap-4 items-center"
 
-    const updateQuantity = (id: string, delta: number) => {
-        setQuantities((prev) => ({
-            ...prev,
-            [id]: Math.max(1, (prev[id] || 1) + delta),
-        }))
+export default function ProductTable({ planType = "basic" }: { planType?: PlanType }) {
+
+    const handleAddProduct = (product: Product) => {
+        console.log(product);
     }
 
-    const renderProductRow = (product: Product, isTextbook: boolean) => {
-        const quantity = isTextbook ? product.fixedQuantity! : getQuantity(product.id)
-        const discount = (((product.actualPrice - product.discountedPrice) / product.actualPrice) * 100).toFixed(0)
-
-        return (
-            <div
-                key={product.id}
-                className={`flex flex-col sm:grid ${GRID_COLS} sm:items-center gap-4 p-4 sm:p-5 border-b last:border-b-0 hover:bg-muted/50 transition-colors`}
-            >
-                {/* Image + Product */}
-                <div className="flex items-center gap-4 sm:contents">
-                    <img
-                        src={product.image || "/placeholder.svg"}
-                        alt={product.name}
-                        className="w-20 h-20 object-cover rounded-lg border shrink-0"
-                    />
-
-                    <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold mb-1">{product.name}</h4>
-
-                        {/* Mobile price */}
-                        <div className="flex items-baseline gap-2 sm:hidden">
-                            <span className="font-bold text-lg">₹{product.discountedPrice.toFixed(2)}</span>
-                            <span className="text-sm text-muted-foreground line-through">
-                                ₹{product.actualPrice.toFixed(2)}
-                            </span>
-                            <span className="text-xs text-green-600 font-medium">-{discount}%</span>
-                        </div>
-
-                        <p className="hidden sm:block text-sm text-muted-foreground">Save {discount}%</p>
-                    </div>
-                </div>
-
-                {/* Quantity */}
-                <div className="sm:w-[140px] flex justify-between sm:justify-center items-center">
-                    <span className="sm:hidden text-sm text-muted-foreground">Quantity:</span>
-
-                    {isTextbook ? (
-                        <span className="text-sm font-semibold">Qty: {quantity}</span>
-                    ) : (
-                        <div className="flex items-center gap-2 border rounded-lg bg-background shadow-sm">
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-9 w-9"
-                                onClick={() => updateQuantity(product.id, -1)}
-                                disabled={quantity <= 1}
-                            >
-                                <Minus className="h-4 w-4" />
-                            </Button>
-
-                            <span className="w-10 text-center font-semibold tabular-nums">{quantity}</span>
-
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-9 w-9"
-                                onClick={() => updateQuantity(product.id, 1)}
-                            >
-                                <Plus className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    )}
-                </div>
-
-                {/* Price */}
-                <div className="hidden sm:block text-right w-[140px]">
-                    <div className="font-bold text-lg">₹{product.discountedPrice.toFixed(2)}</div>
-                    <div className="text-sm text-muted-foreground line-through">
-                        ₹{product.actualPrice.toFixed(2)}
-                    </div>
-                </div>
+    const renderRow = (product: Product) => (
+        <div
+            key={product.id}
+            className={`${GRID_STYLE} px-6 py-4 hover:bg-muted/30 transition-colors border-b last:border-0`}
+        >
+            {/* Image Column */}
+            <div className="flex justify-start">
+                <img
+                    src={product.image}
+                    alt={product.productName}
+                    className="w-12 h-12 object-cover rounded-md border shadow-sm bg-white"
+                />
             </div>
-        )
-    }
+
+            {/* Product Column */}
+            <div className="flex flex-col">
+                <span className="font-medium text-sm text-foreground leading-none">
+                    {product.productName}
+                </span>
+            </div>
+
+            {/* Brand Column */}
+            <div className="flex justify-center">
+                <Badge variant="secondary" className="font-normal text-[11px] uppercase tracking-wider">
+                    {product.brandName}
+                </Badge>
+            </div>
+
+            {/* Price Column */}
+            <div className="text-right">
+                <span className="font-bold text-sm">₹{product.price}</span>
+            </div>
+
+            {/* Action Column */}
+            <div className="flex justify-end">
+                <Button
+                    variant="outline"
+                    size="icon"
+                    className="w-8 h-8 cursor-pointer"
+                // onClick={() => handleDelete(product.id)}
+                >
+                    <Trash2 className="w-4 h-4" />
+                </Button>
+            </div>
+        </div>
+    )
 
     return (
-        <Card className="w-full flex-col border-none shadow-none">
-            <CardHeader className="shrink-0">
-                <CardTitle className="text-xl sm:text-2xl">
-                    Product Details
-                </CardTitle>
+        <Card className="w-full border-none shadow-none bg-transparent">
+            <CardHeader className="px-0 pb-6">
+                <div className="flex items-center justify-between">
+                    <CardTitle className="text-2xl font-bold tracking-tight">Included Items</CardTitle>
+                    <AddProductDialog onAdd={handleAddProduct} />
+                </div>
             </CardHeader>
 
-            <CardContent className="flex-1 overflow-hidden">
-                <Tabs defaultValue="textbooks" className="h-full flex flex-col">
-                    <TabsList className="grid grid-cols-3 shrink-0 mb-4  w-full">
-                        <TabsTrigger value="textbooks">Textbooks</TabsTrigger>
-                        <TabsTrigger value="notebooks">Notebooks</TabsTrigger>
-                        <TabsTrigger value="stationary">Stationary</TabsTrigger>
+            <CardContent className="px-0">
+                <Tabs defaultValue="textbook" className="w-full">
+                    <TabsList className="mb-6 bg-muted/50 p-1">
+                        <TabsTrigger value="textbook" className="px-6 cursor-pointer">Textbooks</TabsTrigger>
+                        <TabsTrigger value="notebook" className="px-6 cursor-pointer">Notebooks</TabsTrigger>
+                        <TabsTrigger value="stationary" className="px-6 cursor-pointer">Stationary</TabsTrigger>
                     </TabsList>
 
-                    <div className="flex-1 overflow-y-auto overscroll-contain">
-                        {(["textbooks", "notebooks", "stationary"] as const).map((type) => (
-                            <TabsContent key={type} value={type} className="mt-0">
-                                <div className="border rounded-lg overflow-hidden">
-                                    <div
-                                        className={`hidden sm:grid bg-muted/30 p-5 font-semibold ${GRID_COLS} gap-6 text-sm sticky top-0 z-10`}
-                                    >
-                                        <span>Image</span>
-                                        <span>Product</span>
-                                        <span className="pl-10">Quantity</span>
-                                        <span className="text-right">Price</span>
-                                    </div>
+                    {(["textbook", "notebook", "stationary"] as const).map((category) => (
+                        <TabsContent key={category} value={category} className="mt-0 ring-offset-background focus-visible:outline-none">
+                            <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+                                {/* Table Header */}
+                                <div className={`${GRID_STYLE} bg-muted/50 px-6 py-3 border-b`}>
+                                    <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Preview</span>
+                                    <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Product Name</span>
+                                    <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-center">Brand</span>
+                                    <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-right">Price</span>
+                                    <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-right">Action</span>
+                                </div>
 
-                                    {products[type].map((p) =>
-                                        renderProductRow(p, type === "textbooks")
+                                {/* Table Body */}
+                                <div className="divide-y divide-border">
+                                    {products
+                                        .filter(p => p.type === category && p.planType === planType)
+                                        .map(renderRow)
+                                    }
+
+                                    {/* Empty State */}
+                                    {products.filter(p => p.type === category && p.planType === planType).length === 0 && (
+                                        <div className="py-12 text-center text-sm text-muted-foreground">
+                                            No {category} items found for this plan.
+                                        </div>
                                     )}
                                 </div>
-                            </TabsContent>
-                        ))}
-                    </div>
+                            </div>
+                        </TabsContent>
+                    ))}
                 </Tabs>
             </CardContent>
         </Card>

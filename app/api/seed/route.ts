@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 // Helper: Generate class list
 function getClassNames(range: string): string[] {
     const basics = ["Nursery", "LKG", "UKG"];
-    const upTo8 = ["Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8"];
+    const upTo8 = [...basics, "Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8"];
     const upTo10 = [...upTo8, "Class 9", "Class 10"];
     const upTo12 = [...upTo10, "Class 11", "Class 12"];
 
@@ -31,11 +31,11 @@ export async function GET(req: NextRequest) {
         // --- 1. SEED INDIVIDUAL PRODUCTS FIRST ---
         // We need products in the DB before we can put them into Kits
         const productList = [
-            { name: "Mathematics Textbook", description: "NCERT Math Book", price: 250, category: "TEXTBOOK", stock: 500 , brand: "NCERT",},
+            { name: "Mathematics Textbook", description: "NCERT Math Book", price: 250, category: "TEXTBOOK", stock: 500, brand: "NCERT", },
             { name: "Science Textbook", description: "NCERT Science Book", price: 300, category: "TEXTBOOK", stock: 500, brand: "NCERT", },
             { name: "English Reader", description: "Literature Reader", price: 200, category: "TEXTBOOK", stock: 500, brand: "NCERT", },
             { name: "Single Line Notebook", description: "140 Pages Notebook", price: 50, category: "NOTEBOOK", stock: 1000, brand: "Classmate", type: "Ruled", },
-            { name: "Drawing File", description: "A3 Size Drawing File", price: 80, category: "NOTEBOOK", stock: 500 , brand: "Navneet", type: "Math"},
+            { name: "Drawing File", description: "A3 Size Drawing File", price: 80, category: "NOTEBOOK", stock: 500, brand: "Navneet", type: "Math" },
             { name: "Geometry Box", description: "Complete Geometry Set", price: 150, category: "STATIONARY", stock: 300 },
             { name: "Blue Gel Pen Set", description: "Pack of 5 Pens", price: 50, category: "STATIONARY", stock: 1000 },
             { name: "School Bag", description: "Waterproof School Bag", price: 800, category: "OTHER", stock: 100 },
@@ -49,15 +49,15 @@ export async function GET(req: NextRequest) {
             });
             createdProducts.push(product);
         }
-        
+
         // Helper to find a product ID by partial name match
         const findProdId = (namePart: string) => createdProducts.find(p => p.name.includes(namePart))?.id;
 
-        
+
         // --- 2. CREATE ADMIN ---
         const adminEmail = "admin@globe.com";
         const adminPass = await bcrypt.hash("admin123", 12);
-        
+
         await prisma.user.upsert({
             where: { email: adminEmail },
             update: {},
@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
                         board: s.board,
                         numberOfClasses: classesList.length,
                         status: "ACTIVE",
-                        image: "" 
+                        image: ""
                     }
                 });
 
@@ -107,7 +107,7 @@ export async function GET(req: NextRequest) {
                 await prisma.user.create({
                     data: {
                         name: `${s.name} Admin`,
-                        email: `admin.${s.email}`, 
+                        email: `admin.${s.email}`,
                         password: subAdminPass,
                         role: "SUB_ADMIN",
                         schoolId: school.id,
@@ -133,7 +133,7 @@ export async function GET(req: NextRequest) {
                 // --- 6. CREATE KITS FOR EACH CLASS ---
                 // For every class, we create a 'BASIC' and 'ADVANCE' kit
                 for (const cls of fetchedClasses) {
-                    
+
                     // A. Create BASIC Kit
                     // Contains: 1 Math Book, 1 English Book, 2 Notebooks
                     const basicItems = [
@@ -141,9 +141,9 @@ export async function GET(req: NextRequest) {
                         { productId: findProdId("English")!, quantity: 1 },
                         { productId: findProdId("Notebook")!, quantity: 2 },
                     ];
-                    
+
                     // Calculate random total price roughly based on items
-                    const basicPrice = 250 + 200 + (50 * 2); 
+                    const basicPrice = 250 + 200 + (50 * 2);
 
                     await prisma.kit.create({
                         data: {
@@ -179,13 +179,13 @@ export async function GET(req: NextRequest) {
                         }
                     });
                 }
-                
+
                 // --- 7. CREATE USERS (PARENTS & STUDENTS) ---
                 for (let i = 1; i <= 5; i++) {
                     const parentPass = await bcrypt.hash("user123", 12);
                     const parentName = getRandomName('parent');
                     const parentEmail = `parent${i}.${school.name.split(" ")[0].toLowerCase()}@test.com`;
-                    
+
                     const parent = await prisma.user.create({
                         data: {
                             name: parentName,
@@ -220,13 +220,13 @@ export async function GET(req: NextRequest) {
             createdSchools.push(school);
         }
 
-        return NextResponse.json({ 
-            success: true, 
-            message: "Database seeded successfully with Products, Schools, Classes, Kits, and Users!", 
-            data: { 
+        return NextResponse.json({
+            success: true,
+            message: "Database seeded successfully with Products, Schools, Classes, Kits, and Users!",
+            data: {
                 admin: { email: adminEmail, password: "admin123" },
                 schools: createdSchools.map(s => s.name)
-            } 
+            }
         });
 
     } catch (error: any) {

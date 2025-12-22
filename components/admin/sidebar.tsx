@@ -6,6 +6,7 @@ import {
   Users,
   Book,
   ClipboardList,
+  SquareChartGantt
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTheme } from "@/components/theme-provider"
@@ -20,12 +21,13 @@ const navItems: {
   icon: any
   roles: Role[]
 }[] = [
-  { id: "analytics", label: "Analytics", icon: BarChart3, roles: ["ADMIN"] },
-  { id: "users", label: "Users", icon: Users, roles: ["ADMIN", "SUBADMIN"] },
-  { id: "schools", label: "Schools", icon: GraduationCap, roles: ["ADMIN"] },
-  { id: "bundels", label: "Bundels", icon: Book, roles: ["ADMIN", "SUBADMIN"] },
-  { id: "orders", label: "Order", icon: ClipboardList, roles: ["ADMIN", "SUBADMIN"] },
-]
+    { id: "analytics", label: "Analytics", icon: BarChart3, roles: ["ADMIN"] },
+    { id: "users", label: "Users", icon: Users, roles: ["ADMIN", "SUBADMIN"] },
+    { id: "schools", label: "Schools", icon: GraduationCap, roles: ["ADMIN"] },
+    { id: "bundels", label: "Bundels", icon: Book, roles: ["ADMIN", "SUBADMIN"] },
+    { id: "orders", label: "Order", icon: ClipboardList, roles: ["ADMIN", "SUBADMIN"] },
+    { id: "products", label: "Products", icon: SquareChartGantt, roles: ["ADMIN", "SUBADMIN"] },
+  ]
 
 export function AdminSidebar() {
   const {
@@ -33,7 +35,7 @@ export function AdminSidebar() {
     setActiveTab,
     sidebarOpen,
     setSidebarOpen,
-    role, 
+    role,
   } = useAdmin()
 
   const { theme, setTheme } = useTheme()

@@ -1,31 +1,33 @@
 "use client"
 
 import { Button } from "./ui/button"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2, Plus } from "lucide-react"
 import { BundleCard, BundleItem } from "./BundleCard"
 import { StationeryItems } from "@/data/demoBundleItems"
 import { getItemsByBundleType } from "@/lib/filterBundleItems"
 import { useCallback, useEffect, useState } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { BundleModal } from "./AddBundalModal"
 
 type Props = {
-  onBack: () => void;
-  classId: string;
-  language: string;
+    onBack: () => void;
+    classId: string;
+    language: string;
 };
 
 type BundleData = {
-  id: string;
-  title: string;
-  offeredPrice: number;
-  items: BundleItem[];
-  type: string;
-  isPopular?: boolean;
+    id: string;
+    title: string;
+    offeredPrice: number;
+    items: BundleItem[];
+    type: string;
+    isPopular?: boolean;
 };
 
 export function Bundels({ onBack, classId, language }: Props) {
-   const { toast } = useToast();
+    const { toast } = useToast();
     const [bundles, setBundles] = useState<BundleData[]>([]);
+    const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const fetchBundles = useCallback(async () => {
@@ -47,21 +49,28 @@ export function Bundels({ onBack, classId, language }: Props) {
 
     useEffect(() => {
         if (classId && language) {
-            setLoading(true); 
+            setLoading(true);
             fetchBundles();
         }
     }, [fetchBundles, classId, language]);
 
     return (
         <div>
-            <Button variant="ghost" onClick={onBack} className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Back to Language
-            </Button>
+            <div className="flex justify-between items-center mb-4">
+                <Button variant="ghost" onClick={onBack} className="gap-2">
+                    <ArrowLeft className="h-4 w-4" />
+                    Back to Language
+                </Button>
+
+                <Button variant="default" onClick={() => setOpen(true)} className="gap-2 cursor-pointer">
+                    <Plus className="h-4 w-4" />
+                    Add Bundle
+                </Button>
+            </div>
 
             {loading ? (
                 <div className="flex justify-center items-center h-40">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
             ) : (bundles?.length || 0) === 0 ? (
                 <div className="text-center p-8 border rounded-lg bg-muted/20">
@@ -75,6 +84,14 @@ export function Bundels({ onBack, classId, language }: Props) {
                     ))}
                 </div>
             )}
+
+            <BundleModal
+                open={open}
+                onOpenChange={setOpen}
+                mode="create"
+                onSave={fetchBundles}
+            />
         </div>
+
     )
 }

@@ -12,6 +12,8 @@ import LanguageSelector from "@/components/languageSelector"
 import { AddSchoolModal } from "@/components/addSchoolModal"
 import { Bundels } from "@/components/Bundels"
 import { OrdersTable } from "@/components/admin/user-table"
+import SchoolSection from "@/components/admin/school-section"
+import ProductTables from "@/components/product-tables"
 
 export default function AdminDashboard() {
   const { activeTab } = useAdmin()
@@ -19,6 +21,7 @@ export default function AdminDashboard() {
 
   const [selectedSchool, setSelectedSchool] = useState<{ id: string; name: string } | null>(null)
   const [selectedClass, setSelectedClass] = useState<{ id: string; name: string } | null>(null)
+  const [selectedSection, setSelectedSection] = useState<{ id: string; name: string } | null>(null)
   const [selectedLang, setSelectedLang] = useState<string | null>(null)
 
   // Reset selections when switching tabs
@@ -56,12 +59,23 @@ export default function AdminDashboard() {
                 />
               )}
 
-              {selectedSchool && selectedClass && (
+              {selectedSchool && selectedClass && !selectedSection && (
+                <SchoolSection
+                  school={selectedSchool.name}
+                  classes={selectedClass.name}
+                  onSelectSection={setSelectedSection}
+                  onBack={() => setSelectedClass(null)}
+                />
+              )}
+
+              {selectedSchool && selectedClass && selectedSection && (
                 <SchoolClassUsers
-                    schoolId={selectedSchool.id.toString()}
-                    classId={selectedClass.id}              
-                    className={selectedClass.name}          
-                    onBack={() => setSelectedClass(null)}
+                  activeTab={activeTab}
+                  schoolId={selectedSchool.id.toString()}
+                  classId={selectedClass.id}
+                  sectionId={selectedSection.id}
+                  className={selectedClass.name}
+                  onBack={() => setSelectedSection(null)}
                 />
               )}
             </CardContent>
@@ -77,11 +91,11 @@ export default function AdminDashboard() {
                   <CardTitle>Schools</CardTitle>
                   <CardDescription>View and manage all schools</CardDescription>
                 </div>
-                <AddSchoolModal onSchoolAdded={() => setRefreshTrigger(prev => prev + 1)}/>
+                <AddSchoolModal onSchoolAdded={() => setRefreshTrigger(prev => prev + 1)} />
               </div>
             </CardHeader>
             <CardContent>
-              {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab={activeTab} refreshTrigger={refreshTrigger}/>}
+              {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab={activeTab} refreshTrigger={refreshTrigger} />}
               {selectedSchool && !selectedClass && (
                 <SchoolClasses
                   school={selectedSchool}
@@ -134,6 +148,19 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <OrdersTable />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Product Tab */}
+        {activeTab === "products" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Products</CardTitle>
+              <CardDescription>View and manage all Products</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProductTables />
             </CardContent>
           </Card>
         )}

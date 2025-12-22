@@ -43,19 +43,20 @@ type Bundle = {
 type Props = {
     open: boolean
     onOpenChange: (open: boolean) => void
-    bundle: Bundle
+    bundle?: Bundle
+    mode: "create" | "update"
     onSave: (bundle: Bundle) => void
 }
 
-export function BundleModal({ open, onOpenChange, bundle, onSave }: Props) {
+export function BundleModal({ open, onOpenChange, bundle, mode, onSave }: Props) {
     const { toast } = useToast();
     const [isLoadingCatalog, setIsLoadingCatalog] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    
+
     const [bundleName, setBundleName] = useState("")
     const [offeredPrice, setOfferedPrice] = useState(0)
 
-    const [catalog, setCatalog] = useState<Product[]>([]); 
+    const [catalog, setCatalog] = useState<Product[]>([]);
     const [selectedItems, setSelectedItems] = useState<BundleItem[]>([])
 
     const [notebookBrand, setNotebookBrand] = useState("")
@@ -86,7 +87,7 @@ export function BundleModal({ open, onOpenChange, bundle, onSave }: Props) {
 
     useEffect(() => {
         if (!open || !bundle) return;
-        
+
         setBundleName(bundle.title || "");
         setOfferedPrice(bundle.offeredPrice || 0);
 
@@ -101,14 +102,14 @@ export function BundleModal({ open, onOpenChange, bundle, onSave }: Props) {
             image: i.image || null,
             description: i.description || ""
         }));
-        
+
         setSelectedItems(mappedItems);
     }, [open, bundle]);
 
     const textbooks = catalog.filter(p => p.category === "TEXTBOOK");
 
     const allNotebooks = catalog.filter(p => p.category === "NOTEBOOK");
-    
+
     const notebookBrandsList = [...new Set(allNotebooks.map(n => n.brand).filter(Boolean))] as string[];
     const notebookTypesList = [...new Set(allNotebooks.map(n => n.type).filter(Boolean))] as string[];
 
@@ -119,10 +120,10 @@ export function BundleModal({ open, onOpenChange, bundle, onSave }: Props) {
     });
 
     const allStationery = catalog.filter(p => p.category === "STATIONARY" || p.category === "OTHER");
-    
+
     const stationeryBrandsList = [...new Set(allStationery.map(s => s.brand).filter(Boolean))] as string[];
 
-    const filteredStationery = allStationery.filter(s => 
+    const filteredStationery = allStationery.filter(s =>
         !stationeryBrand || s.brand === stationeryBrand
     );
 
@@ -135,7 +136,7 @@ export function BundleModal({ open, onOpenChange, bundle, onSave }: Props) {
         const existing = selectedItems.find(i => i.id === product.id);
 
         if (existing) {
-            newItems = selectedItems.map(i => 
+            newItems = selectedItems.map(i =>
                 i.id === product.id ? { ...i, qty: i.qty + 1 } : i
             );
         } else {
@@ -161,7 +162,7 @@ export function BundleModal({ open, onOpenChange, bundle, onSave }: Props) {
 
     const removeItem = (id: string) => {
         const newItems = selectedItems.filter(i => i.id !== id);
-        
+
         setSelectedItems(newItems);
         setOfferedPrice(calculateTotal(newItems));
     };
@@ -169,9 +170,9 @@ export function BundleModal({ open, onOpenChange, bundle, onSave }: Props) {
     const handleSave = async () => {
         try {
             setIsSaving(true);
-            
+
             const payload = {
-                totalPrice: offeredPrice, 
+                totalPrice: offeredPrice,
                 items: selectedItems.map(item => ({
                     productId: item.id,
                     quantity: item.qty
@@ -187,7 +188,7 @@ export function BundleModal({ open, onOpenChange, bundle, onSave }: Props) {
             const data = await res.json();
             if (data.success) {
                 toast({ title: "Success", description: "Bundle updated successfully" });
-                if (onSave) onSave(); 
+                if (onSave) onSave();
                 onOpenChange(false);
             } else {
                 toast({ title: "Error", description: data.message, variant: "destructive" });
@@ -234,13 +235,13 @@ export function BundleModal({ open, onOpenChange, bundle, onSave }: Props) {
                                     </div>
                                 </div>
                             </div>
-                            <Button 
-                                className="w-full h-12 mt-4 shrink-0 font-bold" 
-                                onClick={handleSave} 
+                            <Button
+                                className="w-full h-12 mt-4 shrink-0 font-bold cursor-pointer"
+                                onClick={handleSave}
                                 disabled={isSaving}
                             >
                                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    {isSaving ? "Saving..." : "Save Bundle"}
+                                {isSaving ? "Saving..." : `${mode === "create" ? "Create Bundle" : "Update Bundle"}`}
                             </Button>
                         </aside>
 
@@ -264,107 +265,107 @@ export function BundleModal({ open, onOpenChange, bundle, onSave }: Props) {
                                         </div>
                                     ) : (
 
-                                    <div className="grid grid-cols-3 h-full divide-x divide-border">
+                                        <div className="grid grid-cols-3 h-full divide-x divide-border">
 
-                                        {/* TEXTBOOKS COLUMN */}
-                                        <div className="flex flex-col h-full min-h-0 p-4">
-                                            <div className="shrink-0 mb-4 flex items-center justify-between">
-                                                <h5 className="font-bold flex items-center gap-2 text-sm">
-                                                    <ChevronRight className="h-4 w-4 text-primary" /> Textbooks
-                                                </h5>
-                                                <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                                                    {textbooks.length} items
-                                                </span>
-                                            </div>
-                                            <ScrollArea className="flex-1 pr-2">
-                                                <div className="space-y-2">
-                                                    {textbooks.map(tb => (
-                                                        <ProductRow 
-                                                            key={tb.id} 
-                                                            product={tb} 
-                                                            isSelected={selectedItems.some(i => i.id === tb.id)}
-                                                            onAdd={addItem}
-                                                        />
-                                                    ))}
+                                            {/* TEXTBOOKS COLUMN */}
+                                            <div className="flex flex-col h-full min-h-0 p-4">
+                                                <div className="shrink-0 mb-4 flex items-center justify-between">
+                                                    <h5 className="font-bold flex items-center gap-2 text-sm">
+                                                        <ChevronRight className="h-4 w-4 text-primary" /> Textbooks
+                                                    </h5>
+                                                    <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                                                        {textbooks.length} items
+                                                    </span>
                                                 </div>
-                                            </ScrollArea>
-                                        </div>
+                                                <ScrollArea className="flex-1 pr-2">
+                                                    <div className="space-y-2">
+                                                        {textbooks.map(tb => (
+                                                            <ProductRow
+                                                                key={tb.id}
+                                                                product={tb}
+                                                                isSelected={selectedItems.some(i => i.id === tb.id)}
+                                                                onAdd={addItem}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </ScrollArea>
+                                            </div>
 
-                                        {/* NOTEBOOKS COLUMN with restored Filters */}
-                                        <div className="flex flex-col h-full min-h-0 p-4">
-                                            <div className="shrink-0 mb-4 space-y-3">
-                                                <h5 className="font-bold text-sm flex items-center gap-2">
-                                                    <ChevronRight className="h-4 w-4 text-primary" /> Notebooks
-                                                </h5>
-                                                <div className="flex gap-2">
-                                                    <Select value={notebookBrand || "all"} onValueChange={(val) => setNotebookBrand(val === "all" ? "" : val)}>
-                                                        <SelectTrigger className="h-8 text-[10px] w-1/2 bg-background">
-                                                            <SelectValue placeholder="All Brands" />
+                                            {/* NOTEBOOKS COLUMN with restored Filters */}
+                                            <div className="flex flex-col h-full min-h-0 p-4">
+                                                <div className="shrink-0 mb-4 space-y-3">
+                                                    <h5 className="font-bold text-sm flex items-center gap-2">
+                                                        <ChevronRight className="h-4 w-4 text-primary" /> Notebooks
+                                                    </h5>
+                                                    <div className="flex gap-2">
+                                                        <Select value={notebookBrand || "all"} onValueChange={(val) => setNotebookBrand(val === "all" ? "" : val)}>
+                                                            <SelectTrigger className="h-8 text-[10px] w-1/2 bg-background">
+                                                                <SelectValue placeholder="All Brands" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="all" className="text-[10px]">All Brands</SelectItem>
+                                                                {notebookBrandsList.map(b => <SelectItem key={b} value={b} className="text-[10px]">{b}</SelectItem>)}
+                                                            </SelectContent>
+                                                        </Select>
+
+                                                        {/* Type Select */}
+                                                        <Select value={notebookType || "all"} onValueChange={(val) => setNotebookType(val === "all" ? "" : val)}>
+                                                            <SelectTrigger className="h-8 text-[10px] w-1/2 bg-background">
+                                                                <SelectValue placeholder="All Types" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="all" className="text-[10px]">All Types</SelectItem>
+                                                                {notebookTypesList.map(t => <SelectItem key={t} value={t} className="text-[10px]">{t}</SelectItem>)}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                </div>
+                                                <ScrollArea className="flex-1 min-h-0 pr-2">
+                                                    <div className="space-y-2">
+                                                        {filteredNotebooks.map(nb => (
+                                                            <ProductRow
+                                                                key={nb.id}
+                                                                product={nb}
+                                                                isSelected={selectedItems.some(i => i.id === nb.id)}
+                                                                onAdd={addItem}
+                                                                subtext={`${nb.brand || 'Generic'} ${nb.type ? `• ${nb.type}` : ''}`}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </ScrollArea>
+                                            </div>
+
+                                            {/* STATIONERY COLUMN with restored Filter */}
+                                            <div className="flex flex-col h-full min-h-0 p-4">
+                                                <div className="shrink-0 mb-4 space-y-3">
+                                                    <h5 className="font-bold text-sm flex items-center gap-2">
+                                                        <ChevronRight className="h-4 w-4 text-primary" /> Stationery
+                                                    </h5>
+                                                    <Select value={stationeryBrand || "all"} onValueChange={(val) => setStationeryBrand(val === "all" ? "" : val)}>
+                                                        <SelectTrigger className="h-8 text-[10px] w-full bg-background">
+                                                            <SelectValue placeholder="All Stationery Brands" />
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             <SelectItem value="all" className="text-[10px]">All Brands</SelectItem>
-                                                            {notebookBrandsList.map(b => <SelectItem key={b} value={b} className="text-[10px]">{b}</SelectItem>)}
-                                                        </SelectContent>
-                                                    </Select>
-
-                                                    {/* Type Select */}
-                                                    <Select value={notebookType || "all"} onValueChange={(val) => setNotebookType(val === "all" ? "" : val)}>
-                                                        <SelectTrigger className="h-8 text-[10px] w-1/2 bg-background">
-                                                            <SelectValue placeholder="All Types" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="all" className="text-[10px]">All Types</SelectItem>
-                                                            {notebookTypesList.map(t => <SelectItem key={t} value={t} className="text-[10px]">{t}</SelectItem>)}
+                                                            {stationeryBrandsList.map(b => <SelectItem key={b} value={b} className="text-[10px]">{b}</SelectItem>)}
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
+                                                <ScrollArea className="flex-1 min-h-0 pr-2">
+                                                    <div className="space-y-2">
+                                                        {filteredStationery.map(s => (
+                                                            <ProductRow
+                                                                key={s.id}
+                                                                product={s}
+                                                                isSelected={selectedItems.some(i => i.id === s.id)}
+                                                                onAdd={addItem}
+                                                                subtext={s.brand || 'Generic'}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </ScrollArea>
                                             </div>
-                                            <ScrollArea className="flex-1 min-h-0 pr-2">
-                                                <div className="space-y-2">
-                                                    {filteredNotebooks.map(nb => (
-                                                        <ProductRow 
-                                                            key={nb.id} 
-                                                            product={nb} 
-                                                            isSelected={selectedItems.some(i => i.id === nb.id)}
-                                                            onAdd={addItem}
-                                                            subtext={`${nb.brand || 'Generic'} ${nb.type ? `• ${nb.type}` : ''}`}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </ScrollArea>
                                         </div>
-
-                                        {/* STATIONERY COLUMN with restored Filter */}
-                                        <div className="flex flex-col h-full min-h-0 p-4">
-                                            <div className="shrink-0 mb-4 space-y-3">
-                                                <h5 className="font-bold text-sm flex items-center gap-2">
-                                                    <ChevronRight className="h-4 w-4 text-primary" /> Stationery
-                                                </h5>
-                                                <Select value={stationeryBrand || "all"} onValueChange={(val) => setStationeryBrand(val === "all" ? "" : val)}>
-                                                    <SelectTrigger className="h-8 text-[10px] w-full bg-background">
-                                                        <SelectValue placeholder="All Stationery Brands" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="all" className="text-[10px]">All Brands</SelectItem>
-                                                        {stationeryBrandsList.map(b => <SelectItem key={b} value={b} className="text-[10px]">{b}</SelectItem>)}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <ScrollArea className="flex-1 min-h-0 pr-2">
-                                                <div className="space-y-2">
-                                                    {filteredStationery.map(s => (
-                                                        <ProductRow 
-                                                            key={s.id} 
-                                                            product={s} 
-                                                            isSelected={selectedItems.some(i => i.id === s.id)}
-                                                            onAdd={addItem}
-                                                            subtext={s.brand || 'Generic'}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </ScrollArea>
-                                        </div>
-                                    </div>
                                     )}
                                 </TabsContent>
 
@@ -419,9 +420,9 @@ export function BundleModal({ open, onOpenChange, bundle, onSave }: Props) {
 
 function ProductRow({ product, isSelected, onAdd, subtext }: { product: Product, isSelected: boolean, onAdd: (p: Product) => void, subtext?: string }) {
     return (
-        <Button 
-            variant="outline" 
-            className={`w-full cursor-pointer justify-between h-auto py-2.5 text-left bg-background hover:border-primary/50 ${isSelected ? "border-primary bg-primary/5" : ""}`} 
+        <Button
+            variant="outline"
+            className={`w-full cursor-pointer justify-between h-auto py-2.5 text-left bg-background hover:border-primary/50 ${isSelected ? "border-primary bg-primary/5" : ""}`}
             onClick={() => onAdd(product)}
         >
             <div className="truncate pr-2">
@@ -432,8 +433,8 @@ function ProductRow({ product, isSelected, onAdd, subtext }: { product: Product,
                 </div>
             </div>
             <Plus className="h-3 w-3 shrink-0 text-primary hover:font-primary-foreground" />
-            
+
         </Button>
-        
+
     )
 }

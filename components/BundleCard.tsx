@@ -123,7 +123,7 @@ export function BundleCard({ bundle, onRefresh }: { bundle: Bundle, onRefresh: (
                 open={isEdit}
                 onOpenChange={setIsEdit}
                 bundle={bundle}
-                type={type}
+                mode="update"
                 updateBundle={(bundle: Bundle) => console.log("Update", bundle)}
                 onSave={onRefresh}
             />
