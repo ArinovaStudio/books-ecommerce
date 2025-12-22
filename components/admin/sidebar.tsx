@@ -1,27 +1,46 @@
 "use client"
 
-import { BarChart3, GraduationCap, Users, Moon, Sun, Book, ClipboardList } from "lucide-react"
+import {
+  BarChart3,
+  GraduationCap,
+  Users,
+  Book,
+  ClipboardList,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTheme } from "@/components/theme-provider"
 import { useAdmin } from "@/app/context/admin"
 import { AdminTab } from "@/app/types/admin"
 
+type Role = "ADMIN" | "SUBADMIN"
+
 const navItems: {
   id: AdminTab
   label: string
   icon: any
-
+  roles: Role[]
 }[] = [
-    { id: "analytics", label: "Analytics", icon: BarChart3 },
-    { id: "users", label: "Users", icon: Users },
-    { id: "schools", label: "Schools", icon: GraduationCap },
-    { id: "bundels", label: "Bundels", icon: Book },
-    { id: "orders", label: "Order", icon: ClipboardList }
-  ]
+  { id: "analytics", label: "Analytics", icon: BarChart3, roles: ["ADMIN"] },
+  { id: "users", label: "Users", icon: Users, roles: ["ADMIN", "SUBADMIN"] },
+  { id: "schools", label: "Schools", icon: GraduationCap, roles: ["ADMIN"] },
+  { id: "bundels", label: "Bundels", icon: Book, roles: ["ADMIN", "SUBADMIN"] },
+  { id: "orders", label: "Order", icon: ClipboardList, roles: ["ADMIN", "SUBADMIN"] },
+]
 
 export function AdminSidebar() {
-  const { activeTab, setActiveTab, sidebarOpen, setSidebarOpen } = useAdmin()
+  const {
+    activeTab,
+    setActiveTab,
+    sidebarOpen,
+    setSidebarOpen,
+    role, 
+  } = useAdmin()
+
   const { theme, setTheme } = useTheme()
+
+  const visibleNavItems = navItems.filter((item) =>
+    item.roles.includes(role)
+  )
 
   return (
     <>
@@ -50,7 +69,7 @@ export function AdminSidebar() {
 
           {/* Nav */}
           <nav className="flex-1 space-y-1 p-4">
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const Icon = item.icon
               const isActive = activeTab === item.id
 

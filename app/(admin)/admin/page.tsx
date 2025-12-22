@@ -15,9 +15,10 @@ import { OrdersTable } from "@/components/admin/user-table"
 
 export default function AdminDashboard() {
   const { activeTab } = useAdmin()
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const [selectedSchool, setSelectedSchool] = useState<{ id: number; name: string } | null>(null)
-  const [selectedClass, setSelectedClass] = useState<string | null>(null)
+  const [selectedSchool, setSelectedSchool] = useState<{ id: string; name: string } | null>(null)
+  const [selectedClass, setSelectedClass] = useState<{ id: string; name: string } | null>(null)
   const [selectedLang, setSelectedLang] = useState<string | null>(null)
 
   // Reset selections when switching tabs
@@ -57,8 +58,10 @@ export default function AdminDashboard() {
 
               {selectedSchool && selectedClass && (
                 <SchoolClassUsers
-                  className={selectedClass}
-                  onBack={() => setSelectedClass(null)}
+                    schoolId={selectedSchool.id.toString()}
+                    classId={selectedClass.id}              
+                    className={selectedClass.name}          
+                    onBack={() => setSelectedClass(null)}
                 />
               )}
             </CardContent>
@@ -74,11 +77,11 @@ export default function AdminDashboard() {
                   <CardTitle>Schools</CardTitle>
                   <CardDescription>View and manage all schools</CardDescription>
                 </div>
-                <AddSchoolModal />
+                <AddSchoolModal onSchoolAdded={() => setRefreshTrigger(prev => prev + 1)}/>
               </div>
             </CardHeader>
             <CardContent>
-              {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab={activeTab} />}
+              {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab={activeTab} refreshTrigger={refreshTrigger}/>}
               {selectedSchool && !selectedClass && (
                 <SchoolClasses
                   school={selectedSchool}
@@ -113,7 +116,10 @@ export default function AdminDashboard() {
               )}
 
               {selectedSchool && selectedClass && selectedLang && (
-                <Bundels onBack={() => setSelectedLang(null)} />
+                <Bundels
+                  onBack={() => setSelectedLang(null)}
+                  classId={selectedClass.id}
+                  language={selectedLang} />
               )}
             </CardContent>
           </Card>

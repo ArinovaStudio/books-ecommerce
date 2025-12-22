@@ -3,94 +3,118 @@ import prisma from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 
-export const GET = Wrapper(async ( req: NextRequest) => {
+export const GET = Wrapper(async (req: NextRequest) => {
   try {
     const auth = await verifyAdmin(req);
     if (!auth.success || auth.user.role !== "ADMIN") {
-        return NextResponse.json({ success: false, message: auth.message || "Unauthorized" }, { status: 403 });
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
     }
 
     const now = new Date();
-    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
-    const totalUsers = await prisma.user.count();
-    const lastMonthUsers = await prisma.user.count({ where: { createdAt: { lt: startOfCurrentMonth } }});
-    const userGrowth = lastMonthUsers === 0 ? 100 : ((totalUsers - lastMonthUsers) / lastMonthUsers) * 100;
-
-    const totalSchools = await prisma.school.count();
-    const lastMonthSchools = await prisma.school.count({ where: { createdAt: { lt: startOfCurrentMonth } }});
-    const schoolGrowth = lastMonthSchools === 0 ? 100 : ((totalSchools - lastMonthSchools) / lastMonthSchools) * 100;
-
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(now.getMonth() - 5);
-    
-    const monthlyRegistrations = await prisma.user.groupBy({
-        by: ['createdAt'],
-        where: { createdAt: { gte: sixMonthsAgo } },
-        _count: { id: true },
-    });
+    sixMonthsAgo.setDate(1);
 
-    const chartMap = new Map<string, number>();
-    monthlyRegistrations.forEach((entry) => {
-        const month = entry.createdAt.toLocaleString('default', { month: 'short' });
-        chartMap.set(month, (chartMap.get(month) || 0) + entry._count.id);
-    });
+    const [
+        totalUsers, 
+        lastMonthUsersCount, 
+        totalSchools, 
+        lastMonthSchoolsCount, 
+        totalOrders,
+        totalRevenueResult,
+        usersHistory,
+        schoolsHistory,
+        ordersHistory,
+        trafficLogs 
+    ] = await Promise.all([
+        prisma.user.count(),
+        prisma.user.count({ where: { createdAt: { lt: new Date(now.getFullYear(), now.getMonth(), 1) } } }),
+        prisma.school.count(),
+        prisma.school.count({ where: { createdAt: { lt: new Date(now.getFullYear(), now.getMonth(), 1) } } }),
+        prisma.order.count(),
+        prisma.order.aggregate({ _sum: { totalAmount: true }, where: { status: "SUCCESS" } }),
+        prisma.user.findMany({ where: { createdAt: { gte: sixMonthsAgo } }, select: { createdAt: true } }),
+        prisma.school.findMany({ where: { createdAt: { gte: sixMonthsAgo } }, select: { createdAt: true } }),
+        prisma.order.findMany({ where: { createdAt: { gte: sixMonthsAgo }, status: "SUCCESS" }, select: { createdAt: true, totalAmount: true } }),
+        
+        prisma.apiTraffic.findMany({
+            where: { hour: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
+            orderBy: { hour: 'asc' }
+        })
+    ]);
 
-    const userGrowthChart = Array.from(chartMap, ([name, value]) => ({ name, value }));
+    const totalRevenue = totalRevenueResult._sum.totalAmount || 0;
 
-    const yesterday = new Date();
-    yesterday.setHours(yesterday.getHours() - 24);
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const analyticsMap = new Map<string, { users: number, schools: number, revenue: number }>();
 
-    const trafficLogs = await prisma.apiTraffic.findMany({
-        where: { hour: { gte: yesterday } },
-        orderBy: { hour: 'asc' }
-    });
-
-    const totalRequests24h = trafficLogs.reduce((acc, log) => acc + log.count, 0);
-
-    const requestsMap = new Map<string, number>();
-    
-    for (let i = 0; i < 24; i++) {
+    for (let i = 0; i < 6; i++) {
         const d = new Date();
-        d.setHours(d.getHours() - i);
-        const key = `${d.getHours()}:00`;
-        requestsMap.set(key, 0);
+        d.setMonth(now.getMonth() - i);
+        analyticsMap.set(monthNames[d.getMonth()], { users: 0, schools: 0, revenue: 0 });
     }
 
-    trafficLogs.forEach((log) => {
-        const h = new Date(log.hour).getHours();
-        const key = `${h}:00`;
-        if (requestsMap.has(key)) {
-            requestsMap.set(key, log.count);
+    const fillMap = (data: any[], key: 'users' | 'schools') => {
+        data.forEach(item => {
+            const m = monthNames[new Date(item.createdAt).getMonth()];
+            if (analyticsMap.has(m)) {
+                const entry = analyticsMap.get(m)!;
+                entry[key]++;
+                analyticsMap.set(m, entry);
+            }
+        });
+    };
+
+    fillMap(usersHistory, 'users');
+    fillMap(schoolsHistory, 'schools');
+
+    ordersHistory.forEach(order => {
+        const m = monthNames[new Date(order.createdAt).getMonth()];
+        if (analyticsMap.has(m)) {
+            const entry = analyticsMap.get(m)!;
+            entry.revenue += order.totalAmount;
+            analyticsMap.set(m, entry);
         }
     });
 
-    const requestsChart = [];
+    const analyticsData = Array.from(analyticsMap.entries()).map(([month, data]) => ({ month, ...data })).reverse();
+
+    const engagementMap = new Map<string, number>();
+    
     for (let i = 23; i >= 0; i--) {
         const d = new Date();
-        d.setHours(d.getHours() - i);
-        const key = `${d.getHours()}:00`;
-        requestsChart.push({
-            time: key,
-            count: requestsMap.get(key) || 0
-        });
+        d.setHours(now.getHours() - i);
+        const key = `${d.getHours().toString().padStart(2, '0')}:00`;
+        engagementMap.set(key, 0);
     }
 
-    return NextResponse.json({
-        success: true,
-        summary: {
-            users: { value: totalUsers, change: userGrowth.toFixed(1) + "%" },
-            schools: { value: totalSchools, change: schoolGrowth.toFixed(1) + "%" },
-            totalRequests: { value: totalRequests24h, change: "24h" }
-        },
-        charts: {
-            userGrowth: userGrowthChart,
-            recentActivity: requestsChart
+    trafficLogs.forEach(log => {
+        const d = new Date(log.hour);
+        const key = `${d.getHours().toString().padStart(2, '0')}:00`;
+        if (engagementMap.has(key)) {
+            engagementMap.set(key, log.count);
         }
-    }, { status: 200 });
+    });
+
+    const engagementData = Array.from(engagementMap.entries())
+        .map(([time, requests]) => ({ time, requests }));
+
+    const totalRequests24h = trafficLogs.reduce((acc, curr) => acc + curr.count, 0);
+
+    return NextResponse.json({
+      success: true,
+      stats: [
+        { label: "Total Users", value: totalUsers.toLocaleString(), change: "All time" },
+        { label: "Active Schools", value: totalSchools.toLocaleString(), change: "All time" },
+        { label: "Total Revenue", value: "₹" + totalRevenue.toLocaleString(), change: "All time" },
+        { label: "24h Requests", value: totalRequests24h.toLocaleString(), change: "Last 24h" },
+      ],
+      analyticsData,
+      engagementData
+    });
 
   } catch (error) {
-    console.error("Dashboard Stats Error:", error);
+    console.error("Dashboard Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-})
+});

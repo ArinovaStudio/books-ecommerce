@@ -8,6 +8,7 @@ import Link from "next/link"
 import { schools } from "@/data/demodata"
 import SchoolSearch from "../schoolSearch"
 
+
 export default function PartnerSchools() {
   const [search, setSearch] = useState("")
 
@@ -38,6 +39,7 @@ export default function PartnerSchools() {
             <SchoolSearch
               value={search}
               onChange={setSearch}
+              results={filteredSchools}
               placeholder="Search Schools..."
               className="w-full sm:w-72"
             />
@@ -56,8 +58,12 @@ export default function PartnerSchools() {
         {/* Schools Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {visibleSchools.map((school) => (
-            <Link key={school.id} href={`/schools/${school.id}`} className="block">
-              <Card className="px-6 py-4 hover:shadow-lg transition-shadow flex flex-col gap-3">
+            <Link
+              key={school.id}
+              href={`/schools/${school.id}`}
+              className="block h-full"
+            >
+              <Card className="px-6 py-4 hover:shadow-lg transition-shadow flex flex-col gap-3 h-full">
                 <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100">
                   <img
                     src={school.image || "/school.jpg"}
@@ -78,6 +84,7 @@ export default function PartnerSchools() {
             </Link>
           ))}
         </div>
+
 
         {/* Empty State */}
         {filteredSchools.length === 0 && (

@@ -2,16 +2,27 @@
 
 import { Search, X } from "lucide-react"
 
+interface School {
+  id: number
+  slug: string
+  name: string
+  location: string
+  city: string
+  image: string
+}
+
 interface SchoolSearchProps {
   value: string
   onChange: (value: string) => void
+  results?: Pick<School, "id" | "name">[]
   placeholder?: string
   className?: string
 }
 
+
 export default function SchoolSearch({
   value,
-  onChange,
+  onChange,results,
   placeholder = "Search schools...",
   className = "",
 }: SchoolSearchProps) {
@@ -38,6 +49,20 @@ export default function SchoolSearch({
           </button>
         )}
       </div>
+      {value && results && results.length > 0 && (
+        <div className="absolute z-20 mt-2 w-full bg-white border rounded-lg shadow">
+          {results.slice(0, 5).map((school) => (
+            <div
+              key={school.id}
+              className="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100"
+              onClick={() => onChange(school.name)}
+            >
+              {school.name}
+            </div>
+          ))}
+        </div>
+      )}
+
     </div>
   )
 }

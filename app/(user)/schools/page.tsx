@@ -48,8 +48,9 @@ export default function SchoolsPage() {
                 <SchoolSearch
                     value={query}
                     onChange={setQuery}
+                    results={filteredSchools}
                     placeholder="Search by school name, city, or pincode..."
-                    className="mt-10 max-w-3xl"
+                    className="mt-10 max-w-3xl text-black"
                 />
             </div>
             {filteredSchools.length === 0 && (
