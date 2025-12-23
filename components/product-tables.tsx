@@ -2,90 +2,165 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog"
 import { Button } from "./ui/button"
-import { Trash2 } from "lucide-react"
+import { Trash2, Pencil } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import AddProductDialog from "./AddProduct"
+import AddEditProductDialog from "./AddProduct"
+import { useToast } from "@/hooks/use-toast"
 
-type PlanType = "basic" | "medium" | "advanced"
-
-interface Product {
+type Product = {
     id: string
-    type: "textbook" | "notebook" | "stationary"
-    planType: PlanType
-    classes?: string
-    productName: string
-    brandName: string
-    image: string | File
+    name: string
+    description: string
+    category: string
+    class?: string
+    stock: number
+    brand: string
     price: number
+    image: string
 }
 
-const products: Product[] = [
-    //  TEXTBOOKS
-    { id: "tb-basic-1", type: "textbook", planType: "basic", productName: "Mathematics Grade 10", classes: "10", brandName: "NCERT", image: "https://m.media-amazon.com/images/I/81ZV9J0tZUL.jpg", price: 299 },
-    { id: "tb-medium-1", type: "textbook", planType: "medium", productName: "Science Grade 10", classes: "10", brandName: "NCERT", image: "https://m.media-amazon.com/images/I/81N7FmJhbhL.jpg", price: 349 },
-    { id: "tb-advanced-1", type: "textbook", planType: "advanced", productName: "English Literature", classes: "10", brandName: "Oxford", image: "https://m.media-amazon.com/images/I/71xU8SxN7jL.jpg", price: 399 },
-    // NOTEBOOKS
-    { id: "nb-basic-1", type: "notebook", planType: "basic", productName: "A4 Ruled Notebook", brandName: "Classmate", image: "https://m.media-amazon.com/images/I/71f8n9cFZOL.jpg", price: 60 },
-    { id: "nb-medium-1", type: "notebook", planType: "medium", productName: "Spiral Notebook", brandName: "Navneet", image: "https://m.media-amazon.com/images/I/61p7zZy7JUL.jpg", price: 90 },
-    { id: "nb-advanced-1", type: "notebook", planType: "advanced", productName: "Hardcover Notebook", brandName: "Paperkraft", image: "https://m.media-amazon.com/images/I/71ZrX0z8JOL.jpg", price: 150 },
-    // STATIONARY
-    { id: "st-basic-1", type: "stationary", planType: "basic", productName: "Ball Pen Pack (10 pcs)", brandName: "Cello", image: "https://m.media-amazon.com/images/I/71XqkF2wZOL.jpg", price: 120 },
-    { id: "st-medium-1", type: "stationary", planType: "medium", productName: "Exam Writing Kit", brandName: "Reynolds", image: "https://m.media-amazon.com/images/I/61u0zVZ5hUL.jpg", price: 199 },
-    { id: "st-advanced-1", type: "stationary", planType: "advanced", productName: "Premium Geometry Box", brandName: "Camlin", image: "https://m.media-amazon.com/images/I/71y3g9n8HVL.jpg", price: 249 },
-]
+const GRID_STYLE = "grid grid-cols-1 md:grid-cols-[80px_1fr_120px_100px_100px_100px] gap-3 md:gap-4 items-center"
 
-const GRID_STYLE = "grid grid-cols-[80px_1fr_120px_100px_100px] gap-4 items-center"
+export default function ProductTable() {
+    const { toast } = useToast();
+    const [products, setProducts] = useState<Product[]>([])
+    const [loading, setLoading] = useState(false)
 
-export default function ProductTable({ planType = "basic" }: { planType?: PlanType }) {
+    const fetchProducts = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch("/api/admin/products");
+            const data = await res.json();
 
-    const handleAddProduct = (product: Product) => {
-        console.log(product);
+            if (data.success) {
+                console.log("Products", data.data)
+                setProducts(data.data)
+            } else {
+                setProducts([]);
+            }
+        } catch (error) {
+            console.error("Failed to fetch products", error);
+        } finally {
+            setLoading(false);
+        }
     }
+
+    const handleDelete = async (id: string) => {
+        try {
+            const res = await fetch(`/api/admin/products/${id}`, {
+                method: "DELETE",
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                toast({
+                    title: "Success",
+                    description: "Product deleted successfully",
+                    variant: "default",
+                })
+                fetchProducts();
+            } else {
+                toast({
+                    title: "Error",
+                    description: "Failed to delete product",
+                    variant: "destructive",
+                })
+            }
+        } catch (error) {
+            console.error("Failed to delete product", error);
+        }
+    }
+
+    useEffect(() => {
+        fetchProducts();
+    }, [])
 
     const renderRow = (product: Product) => (
         <div
             key={product.id}
-            className={`${GRID_STYLE} px-6 py-4 hover:bg-muted/30 transition-colors border-b last:border-0`}
+            className={`${GRID_STYLE} px-4 py-4 md:px-6 hover:bg-muted/30 transition-colors border-b last:border-0`}
         >
-            {/* Image Column */}
-            <div className="flex justify-start">
-                <img
-                    src={product.image}
-                    alt={product.productName}
-                    className="w-12 h-12 object-cover rounded-md border shadow-sm bg-white"
-                />
+            {/* Image & Name Section */}
+            <div className="flex items-center gap-4 md:contents">
+                <div className="flex justify-start shrink-0">
+                    <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-12 h-12 md:w-14 md:h-14 object-cover rounded-md border shadow-sm bg-white"
+                    />
+                </div>
+
+                <div className="flex flex-col flex-1 min-w-0">
+                    <span className="font-semibold md:font-medium text-sm text-foreground truncate">
+                        {product.name}
+                    </span>
+                    <div className="md:hidden mt-1 flex gap-2 items-center">
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-normal uppercase">
+                            {product.brand}
+                        </Badge>
+                        <span className="text-[10px] text-muted-foreground">Stock: {product.stock}</span>
+                    </div>
+                </div>
             </div>
 
-            {/* Product Column */}
-            <div className="flex flex-col">
-                <span className="font-medium text-sm text-foreground leading-none">
-                    {product.productName}
-                </span>
-            </div>
-
-            {/* Brand Column */}
-            <div className="flex justify-center">
+            {/* Brand Column (Desktop) */}
+            <div className="hidden md:flex justify-center">
                 <Badge variant="secondary" className="font-normal text-[11px] uppercase tracking-wider">
-                    {product.brandName}
+                    {product.brand}
                 </Badge>
             </div>
 
-            {/* Price Column */}
-            <div className="text-right">
-                <span className="font-bold text-sm">₹{product.price}</span>
+            {/* Stock Column (Desktop) */}
+            <div className="hidden md:flex justify-center">
+                <h1 className="font-bold uppercase tracking-wider text-muted-foreground text-center">{product.stock}</h1>
             </div>
 
-            {/* Action Column */}
-            <div className="flex justify-end">
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="w-8 h-8 cursor-pointer"
-                // onClick={() => handleDelete(product.id)}
-                >
-                    <Trash2 className="w-4 h-4" />
-                </Button>
+            {/* Price & Actions */}
+            <div className="flex items-center justify-between md:contents mt-2 md:mt-0 pt-2 md:pt-0 border-t border-dashed md:border-0">
+                <div className="md:text-right">
+                    <span className="text-xs text-muted-foreground md:hidden mr-2">Price:</span>
+                    <span className="font-bold text-sm">₹{product.price}</span>
+                </div>
+
+                <div className="flex items-center justify-end gap-2">
+                    <Button
+                        size="icon"
+                        className="w-8 h-8 text-muted-foreground hover:scale-110 transition-all cursor-pointer"
+                    >
+                        <Dialog>
+                            <DialogTrigger>
+                                <Trash2 className="w-4 h-4" />
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Are you sure you want to delete this product?</DialogTitle>
+                                    <DialogDescription>
+                                        This action cannot be undone. This will permanently delete your product from our database.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <DialogClose>Cancel</DialogClose>
+                                    <DialogClose asChild>
+                                        <Button onClick={() => handleDelete(product.id)} variant="destructive">Delete</Button>
+                                    </DialogClose>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                    </Button>
+                    <AddEditProductDialog
+                        product={product}
+                        onSuccess={fetchProducts}
+                        trigger={<Button
+                            size="icon"
+                            className="w-8 h-8 text-muted-foreground hover:scale-110 transition-all cursor-pointer"
+                        >
+                            <Pencil className="w-4 h-4" />
+                        </Button>}
+                    />
+
+                </div>
             </div>
         </div>
     )
@@ -93,49 +168,53 @@ export default function ProductTable({ planType = "basic" }: { planType?: PlanTy
     return (
         <Card className="w-full border-none shadow-none bg-transparent">
             <CardHeader className="px-0 pb-6">
-                <div className="flex items-center justify-between">
-                    <CardTitle className="text-2xl font-bold tracking-tight">Included Items</CardTitle>
-                    <AddProductDialog onAdd={handleAddProduct} />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <CardTitle className="text-xl md:text-2xl font-bold tracking-tight">Included Items</CardTitle>
+                    <AddEditProductDialog onSuccess={fetchProducts} />
                 </div>
             </CardHeader>
 
             <CardContent className="px-0">
-                <Tabs defaultValue="textbook" className="w-full">
-                    <TabsList className="mb-6 bg-muted/50 p-1">
-                        <TabsTrigger value="textbook" className="px-6 cursor-pointer">Textbooks</TabsTrigger>
-                        <TabsTrigger value="notebook" className="px-6 cursor-pointer">Notebooks</TabsTrigger>
-                        <TabsTrigger value="stationary" className="px-6 cursor-pointer">Stationary</TabsTrigger>
-                    </TabsList>
+                <Tabs defaultValue="TEXTBOOK" className="w-full">
+                    <div className="overflow-x-auto pb-1 scrollbar-hide">
+                        <TabsList className="inline-flex w-full sm:w-auto mb-6 bg-muted/50 p-1">
+                            <TabsTrigger value="TEXTBOOK" className="flex-1 sm:flex-none px-4 md:px-8">Textbooks</TabsTrigger>
+                            <TabsTrigger value="NOTEBOOK" className="flex-1 sm:flex-none px-4 md:px-8">Notebooks</TabsTrigger>
+                            <TabsTrigger value="STATIONARY" className="flex-1 sm:flex-none px-4 md:px-8">Stationary</TabsTrigger>
+                        </TabsList>
+                    </div>
 
-                    {(["textbook", "notebook", "stationary"] as const).map((category) => (
-                        <TabsContent key={category} value={category} className="mt-0 ring-offset-background focus-visible:outline-none">
-                            <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-                                {/* Table Header */}
-                                <div className={`${GRID_STYLE} bg-muted/50 px-6 py-3 border-b`}>
-                                    <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Preview</span>
-                                    <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Product Name</span>
-                                    <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-center">Brand</span>
-                                    <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-right">Price</span>
-                                    <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-right">Action</span>
+                    {loading ? (
+                        <div className="py-20 text-center text-muted-foreground animate-pulse">Loading products...</div>
+                    ) : (
+                        (["TEXTBOOK", "NOTEBOOK", "STATIONARY"] as const).map((catKey) => (
+                            <TabsContent key={catKey} value={catKey} className="mt-0 outline-none">
+                                <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+                                    <div className={`${GRID_STYLE} hidden md:grid bg-muted/50 px-6 py-3 border-b`}>
+                                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Preview</span>
+                                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Product Name</span>
+                                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-center">Brand</span>
+                                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-center">Quantity</span>
+                                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-right">Price</span>
+                                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-right">Action</span>
+                                    </div>
+
+                                    <div className="divide-y divide-border">
+                                        {products
+                                            .filter(p => p.category.toUpperCase() === catKey)
+                                            .map(renderRow)
+                                        }
+
+                                        {products.filter(p => p.category.toUpperCase() === catKey).length === 0 && (
+                                            <div className="py-12 text-center text-sm text-muted-foreground">
+                                                No {catKey.toLowerCase()} items found.
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-
-                                {/* Table Body */}
-                                <div className="divide-y divide-border">
-                                    {products
-                                        .filter(p => p.type === category && p.planType === planType)
-                                        .map(renderRow)
-                                    }
-
-                                    {/* Empty State */}
-                                    {products.filter(p => p.type === category && p.planType === planType).length === 0 && (
-                                        <div className="py-12 text-center text-sm text-muted-foreground">
-                                            No {category} items found for this plan.
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </TabsContent>
-                    ))}
+                            </TabsContent>
+                        ))
+                    )}
                 </Tabs>
             </CardContent>
         </Card>

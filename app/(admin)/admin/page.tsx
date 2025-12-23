@@ -124,6 +124,8 @@ export default function AdminDashboard() {
               )}
               {selectedSchool && selectedClass && !selectedLang && (
                 <LanguageSelector
+                  schoolId={selectedSchool.id}
+                  classId={selectedClass.id}
                   onSelectingLang={setSelectedLang}
                   onBack={() => setSelectedClass(null)}
                 />

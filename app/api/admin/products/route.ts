@@ -4,11 +4,11 @@ import { getFullImageUrl, saveImage } from "@/lib/upload";
 import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 
-export const POST = Wrapper(async(req: NextRequest) => {
+export const POST = Wrapper(async (req: NextRequest) => {
     try {
         const auth = await verifyAdmin(req);
-        
-        if (!auth.success){
+
+        if (!auth.success) {
             return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
         }
 
@@ -19,6 +19,7 @@ export const POST = Wrapper(async(req: NextRequest) => {
         const formData = await req.formData();
         const name = formData.get("name") as string;
         const description = formData.get("description") as string;
+        const brand = formData.get("brand") as string;
         const price = formData.get("price") as string;
         const category = formData.get("category") as string;
         const stock = formData.get("stock") as string;
@@ -37,14 +38,15 @@ export const POST = Wrapper(async(req: NextRequest) => {
             }
         }
 
-        const newProduct = await prisma.product.create({ 
-            data: { 
-                name, 
-                description, 
-                price: parseFloat(price), 
-                category: category as "TEXTBOOK" | "NOTEBOOK" | "STATIONARY" | "OTHER", 
-                stock: parseInt(stock), 
-                image: imageUrl 
+        const newProduct = await prisma.product.create({
+            data: {
+                name,
+                description,
+                price: parseFloat(price),
+                brand,
+                category: category as "TEXTBOOK" | "NOTEBOOK" | "STATIONARY" | "OTHER",
+                stock: parseInt(stock),
+                image: imageUrl
             }
         });
 
@@ -59,10 +61,10 @@ export const POST = Wrapper(async(req: NextRequest) => {
 })
 
 export async function GET(req: NextRequest) {
-  try {
-    const products = await prisma.product.findMany({ orderBy: { name: 'asc' }});
-    return NextResponse.json({ success: true, data: products });
-  } catch (error) {
-    return NextResponse.json({ success: false, message: "Failed to fetch products" }, { status: 500 });
-  }
+    try {
+        const products = await prisma.product.findMany({ orderBy: { name: 'asc' } });
+        return NextResponse.json({ success: true, data: products });
+    } catch (error) {
+        return NextResponse.json({ success: false, message: "Failed to fetch products" }, { status: 500 });
+    }
 }

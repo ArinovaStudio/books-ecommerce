@@ -6,14 +6,13 @@ import {
   Users,
   Book,
   ClipboardList,
-  SquareChartGantt
+  SquareChartGantt,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useTheme } from "@/components/theme-provider"
 import { useAdmin } from "@/app/context/admin"
 import { AdminTab } from "@/app/types/admin"
 
-type Role = "ADMIN" | "SUBADMIN"
+type Role = "ADMIN" | "SUB_ADMIN"
 
 const navItems: {
   id: AdminTab
@@ -22,11 +21,11 @@ const navItems: {
   roles: Role[]
 }[] = [
     { id: "analytics", label: "Analytics", icon: BarChart3, roles: ["ADMIN"] },
-    { id: "users", label: "Users", icon: Users, roles: ["ADMIN", "SUBADMIN"] },
+    { id: "users", label: "Users", icon: Users, roles: ["ADMIN", "SUB_ADMIN"] },
     { id: "schools", label: "Schools", icon: GraduationCap, roles: ["ADMIN"] },
-    { id: "bundels", label: "Bundels", icon: Book, roles: ["ADMIN", "SUBADMIN"] },
-    { id: "orders", label: "Order", icon: ClipboardList, roles: ["ADMIN", "SUBADMIN"] },
-    { id: "products", label: "Products", icon: SquareChartGantt, roles: ["ADMIN", "SUBADMIN"] },
+    { id: "bundels", label: "Bundels", icon: Book, roles: ["ADMIN", "SUB_ADMIN"] },
+    { id: "orders", label: "Orders", icon: ClipboardList, roles: ["ADMIN", "SUB_ADMIN"] },
+    { id: "products", label: "Products", icon: SquareChartGantt, roles: ["ADMIN", "SUB_ADMIN"] },
   ]
 
 export function AdminSidebar() {
@@ -36,13 +35,16 @@ export function AdminSidebar() {
     sidebarOpen,
     setSidebarOpen,
     role,
+    loading,
   } = useAdmin()
 
-  const { theme, setTheme } = useTheme()
+  if (loading || !role) return null
 
   const visibleNavItems = navItems.filter((item) =>
     item.roles.includes(role)
   )
+
+  console.log('subadmin navbar', visibleNavItems)
 
   return (
     <>
@@ -50,21 +52,19 @@ export function AdminSidebar() {
         className={cn(
           "fixed left-0 top-0 z-40 h-screen w-64 border-r bg-background transition-transform duration-300",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
-          "lg:translate-x-0",
+          "lg:translate-x-0"
         )}
       >
         <div className="flex h-full flex-col">
           {/* Header */}
-          <div className="flex items-center gap-3 border-b px-6 py-4 pb-[19.7px]">
+          <div className="flex items-center gap-3 border-b px-6 py-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400/20">
               <BarChart3 className="h-6 w-6 text-amber-500" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-foreground">
-                Admin Panel
-              </h1>
+              <h1 className="text-lg font-semibold">{role === "ADMIN" ? "Admin" : "Sub Admin"}</h1>
               <p className="text-xs text-muted-foreground">
-                Dashboard
+                {role === "ADMIN" ? "Administrator" : "Sub Admin"}
               </p>
             </div>
           </div>
@@ -83,20 +83,13 @@ export function AdminSidebar() {
                     setSidebarOpen(false)
                   }}
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all cursor-pointer",
+                    "flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all",
                     isActive
-                      ? "bg-amber-400/20 text-amber-600 dark:text-amber-400"
-                      : "text-foreground hover:bg-amber-400/10 hover:text-amber-600 dark:hover:text-amber-400",
+                      ? "bg-amber-400/20 text-amber-600"
+                      : "hover:bg-amber-400/10"
                   )}
                 >
-                  <Icon
-                    className={cn(
-                      "h-5 w-5 transition-colors",
-                      isActive
-                        ? "text-amber-500"
-                        : "text-muted-foreground group-hover:text-amber-500",
-                    )}
-                  />
+                  <Icon className="h-5 w-5" />
                   {item.label}
                 </button>
               )

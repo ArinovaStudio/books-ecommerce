@@ -3,7 +3,7 @@
 import { useState } from "react"
 import {
     Dialog,
-    DialogTrigger, 
+    DialogTrigger,
     DialogContent,
     DialogTitle,
     DialogDescription,
@@ -36,6 +36,7 @@ export function AddSchoolModal({ onSchoolAdded }: AddSchoolModalProps) {
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [selectedLangs, setSelectedLangs] = useState<string[]>([]);
+    const [selectedBoard, setSelectedBoard] = useState<string>("");
     const [selectedClassRange, setSelectedClassRange] = useState<string>("");
 
     const toggleLanguage = (lang: string) => {
@@ -58,12 +59,13 @@ export function AddSchoolModal({ onSchoolAdded }: AddSchoolModalProps) {
 
             formData.append("classRange", selectedClassRange);
             formData.append("languages", JSON.stringify(selectedLangs));
-            
+            formData.append("board", selectedBoard);
+
             if (imageFile) {
                 formData.append("image", imageFile);
             }
 
-    
+
             const res = await fetch("/api/admin/schools", {
                 method: "POST",
                 body: formData,
@@ -180,7 +182,7 @@ export function AddSchoolModal({ onSchoolAdded }: AddSchoolModalProps) {
                                                         htmlFor={lang}
                                                         className={`flex items-center gap-2 rounded-xl border px-4 py-2 cursor-pointer transition-all
                                                         ${isChecked
-                                                                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                                                ? "border-primary  bg-primary/5 ring-1 ring-primary"
                                                                 : "border-input hover:bg-muted"
                                                             }`}
                                                     >
@@ -199,19 +201,34 @@ export function AddSchoolModal({ onSchoolAdded }: AddSchoolModalProps) {
                                     </div>
                                 </div>
 
+                                <div className="flex flex-col md:flex-row gap-4 mt-3">
+                                    <div className="flex-1 space-y-2">
+                                        <Label className="text-sm font-medium">Board</Label>
+                                        <Select onValueChange={setSelectedBoard}>
+                                            <SelectTrigger className="rounded-xl h-10">
+                                                <SelectValue placeholder="Select Board" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="ICSE">ICSE</SelectItem>
+                                                <SelectItem value="CBSE">CBSE</SelectItem>
+                                                <SelectItem value="TSBIE">TSBIE</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
 
-                                <div className="grid gap-2">
-                                    <label className="text-sm font-medium">Location</label>
-                                    <input
-                                        name="location"
-                                        type="text"
-                                        placeholder="Mumbai, Maharashtra"
-                                        className="px-3 py-2 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none"
-                                        required
-                                    />
+
+                                    <div className="grid gap-2">
+                                        <label className="text-sm font-medium">Location</label>
+                                        <input
+                                            name="location"
+                                            type="text"
+                                            placeholder="Mumbai, Maharashtra"
+                                            className="px-3 py-2 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none"
+                                            required
+                                        />
+                                    </div>
                                 </div>
                             </div>
-
                             {/* RIGHT: Logo Upload (Spans 1 column) */}
                             <div className="flex flex-col gap-2">
                                 <span className="text-sm font-medium">School Logo</span>
@@ -242,7 +259,7 @@ export function AddSchoolModal({ onSchoolAdded }: AddSchoolModalProps) {
                                     onChange={(e) => {
                                         const file = e.target.files?.[0]
                                         if (file) {
-                                            setImageFile(file) 
+                                            setImageFile(file)
                                             setLogoPreview(URL.createObjectURL(file))
                                         }
                                     }}
@@ -252,10 +269,10 @@ export function AddSchoolModal({ onSchoolAdded }: AddSchoolModalProps) {
 
                         {/* Footer: Outside the field grid for full width alignment */}
                         <div className="flex justify-end gap-3 mt-8 pt-4 border-t">
-                            <Button 
-                                variant="ghost" 
-                                className="cursor-pointer" 
-                                type="button" 
+                            <Button
+                                variant="ghost"
+                                className="cursor-pointer"
+                                type="button"
                                 onClick={() => setOpen(false)}
                                 disabled={loading}
                             >
