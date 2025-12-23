@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, Search, Mail, User, ArrowLeft, Plus, Loader2, Pencil, Trash, ShieldOff } from "lucide-react"
-import AddUserDiaglog from "../AddUser"
+import AddUserDialog from "../AddUser"
 
 type UserType = {
     id: string
@@ -27,7 +27,7 @@ type Props = {
     onBack: () => void
 }
 
-export function SchoolClassUsers({ schoolId, activeTab, classId, className, onBack }: Props) {
+export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, className, onBack }: Props) {
     const [users, setUsers] = useState<UserType[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
@@ -70,7 +70,12 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, className, onBa
                     <ArrowLeft className="h-4 w-4" />
                     <p className="hidden md:block">Back to Section</p>
                 </Button>
-                <AddUserDiaglog />
+                <AddUserDialog 
+                    schoolId={schoolId}
+                    classId={classId}
+                    sectionId={sectionId}
+                    onStudentAdded={() => window.location.reload()}
+                />
             </div>
 
             {/* Search */}
