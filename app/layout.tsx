@@ -1,4 +1,9 @@
+import { Metadata } from "next";
 import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "GlowNest - School Books & Stationary Delivered"
+}
 
 export default function RootLayout({
   children,

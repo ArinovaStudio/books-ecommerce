@@ -36,7 +36,7 @@ export default function Header() {
         href={`/#${target}`}
         scroll={false}
         onClick={onClick}
-        className="text-gray-700 hover:text-amber-700 font-medium text-sm transition cursor-pointer"
+        className="text-white hover:text-amber-700 font-medium text-sm transition cursor-pointer"
       >
         {label}
       </Link>
@@ -44,24 +44,24 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white sticky top-0 z-70 shadow-sm border-b border-amber-400/30">
+    <header className="bg-[#0c2f25]/95 backdrop-blur-sm sticky top-0 z-70 shadow-sm border-b border-amber-400/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0">
         <div className="flex justify-between items-center h-16">
           {/* LOGO */}
           <Link href="/" scroll={false}>
             <div className="flex items-center gap-2 cursor-pointer">
-              <div className="rounded-lg flex items-center justify-center">
+              <div className="rounded-lg flex items-center justify-center ">
                 {/* <BookOpen className="text-white" /> */}
                 <Image src="/logo .png" alt="GlobeNest Logo"
-                  width={55}
-                  height={55}
+                  width={80}
+                  height={80}
                   className="object-contain " />
               </div>
               <div>
                 <div className="font-bold text-lg text-amber-700">
                   Glow Nest
                 </div>
-                <div className="text-xs text-gray-600">
+                <div className="text-xs text-white">
                   School Supplies
                 </div>
               </div>
@@ -78,18 +78,18 @@ export default function Header() {
 
           {/* DESKTOP CTA */}
           <div className="hidden lg:flex items-center gap-6">
-            <div className="flex items-center gap-1 text-amber-700 text-sm">
+            <div className="flex items-center gap-1 text-white text-sm">
               <Phone size={16} />
               <span>+91 98765 43210</span>
             </div>
 
             <ShoppingCart
               size={20}
-              className="text-gray-700 hover:text-amber-600 cursor-pointer transition"
+              className="text-white hover:text-amber-600 cursor-pointer transition"
             />
             <User
               size={20}
-              className="text-gray-700 hover:text-amber-600 cursor-pointer transition"
+              className="text-white hover:text-amber-600 cursor-pointer transition"
             />
 
             <Button
@@ -104,11 +104,11 @@ export default function Header() {
           <div className="hidden md:flex lg:hidden items-center gap-4">
             <ShoppingCart
               size={22}
-              className="text-gray-700 hover:text-amber-600 cursor-pointer transition"
+              className="text-white hover:text-amber-600 cursor-pointer transition"
             />
             <User
               size={22}
-              className="text-gray-700 hover:text-amber-600 cursor-pointer transition"
+              className="text-white hover:text-amber-600 cursor-pointer transition"
             />
 
             <Button
@@ -130,11 +130,11 @@ export default function Header() {
           <div className="flex md:hidden items-center gap-4">
             <ShoppingCart
               size={22}
-              className="text-gray-700 hover:text-amber-600 cursor-pointer transition"
+              className="text-white hover:text-amber-600 cursor-pointer transition"
             />
 
             <button
-              className="p-1 rounded hover:bg-amber-400/20"
+              className="p-1 rounded hover:bg-amber-400/20 text-white"
               onClick={() => setIsOpen(!isOpen)}
             >
               {isOpen ? <X size={26} /> : <Menu size={26} />}
@@ -152,7 +152,7 @@ export default function Header() {
               <button
                 key={item}
                 onClick={() => handleScroll(item)}
-                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-amber-400/20 rounded"
+                className="block w-full text-left px-4 py-2 text-white hover:bg-amber-400/20 rounded"
               >
                 {item === "schools"
                   ? "Browse Schools"

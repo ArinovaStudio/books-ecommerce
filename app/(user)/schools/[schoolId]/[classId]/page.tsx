@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ProductTables } from "@/components/product-tables"
+import  ProductTables  from "@/components/product-tables"
 import { GuardianForm } from "@/components/guardian-form"
 import { cn } from "@/lib/utils"
 import { Globe, Rocket, Zap, X, ArrowRight } from "lucide-react"
@@ -118,7 +118,7 @@ export default function PricingCards() {
                       !expandedPlan && "md:flex-1",
 
                       // expanded
-                      isExpanded && "md:flex-[3] cursor-default",
+                      isExpanded && "md:flex-3 cursor-default",
 
                       // hidden cards
                       isHidden && "hidden md:flex md:flex-0 md:opacity-0",

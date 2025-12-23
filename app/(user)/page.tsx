@@ -6,6 +6,12 @@ import Features from "@/components/landing/features"
 import HowItWorks from "@/components/landing/how-it-works"
 import HeroCTA from "@/components/landing/hero-cta"
 import { useEffect } from "react"
+import AboutUs from "@/components/landing/about-us"
+import Companies from "@/components/landing/companies"
+import Courses from "@/components/landing/courses"
+import Learning from "@/components/landing/learning-path"
+import Cta from "@/components/landing/cta"
+import Event from "@/components/landing/event"
 
 export default function Home() {
   useEffect(() => {
@@ -18,10 +24,17 @@ export default function Home() {
   return (
     <main>
       <Hero />
-      <PartnerSchools />
+      <Companies/>
+      <AboutUs/>
+      <Courses/>
+      <Learning/>
+      <Cta/>
+      <Event/>
+      
+      {/* <PartnerSchools />
       <HowItWorks />
       <Features />
-      <HeroCTA />
+      <HeroCTA />  */}
     </main>
   )
 }
