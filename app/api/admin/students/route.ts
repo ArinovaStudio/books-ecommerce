@@ -1,6 +1,7 @@
 import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { verifyAdmin } from '@/lib/verify';
+import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
@@ -115,9 +116,30 @@ export const POST = Wrapper(async(req: NextRequest) => {
     }
 
     const existingParent = await prisma.user.findUnique({ where: { email: parentEmail } });
+    let parentId: string;
+
+    if (existingParent) {
+        parentId = existingParent.id;
+    } else {
+
+        const randomPassword = Math.random().toString(36).slice(-8) + "1!";
+        const hashedPassword = await bcrypt.hash(randomPassword, 12);
+
+        const newParent = await prisma.user.create({
+            data: {
+                name: `Parent of ${name}`,
+                email: parentEmail,
+                password: hashedPassword,
+                role: "USER",
+                status: "ACTIVE",
+                address: address || "" 
+            }
+        });
+        parentId = newParent.id;
+    }
 
     const newStudent = await prisma.student.create({
-        data: { name, rollNo, section, parentEmail, schoolId, classId, parentId: existingParent ? existingParent.id : null, 
+        data: { name, rollNo, section, parentEmail, schoolId, classId, parentId, 
             dob: dob ? new Date(dob) : null, gender, bloodGroup, address, isActive: false 
         }
     });

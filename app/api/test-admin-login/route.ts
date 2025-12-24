@@ -8,47 +8,63 @@ const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY";
 
 export async function GET() {
   try {
-    const adminEmail = "admin@test.com";
+    // 👇 Use seeded admin credentials
+    const adminEmail = "admin@school.com";
     const adminPassword = "admin123";
 
-    let admin = await prisma.user.findUnique({
-      where: { email: adminEmail }
+    const admin = await prisma.user.findUnique({
+      where: { email: adminEmail },
     });
 
     if (!admin) {
-      const hashedPassword = await bcrypt.hash(adminPassword, 12);
-
-      admin = await prisma.user.create({
-        data: {
-          name: "Super Admin",
-          email: adminEmail,
-          password: hashedPassword,
-          role: "ADMIN",
-          status: "ACTIVE",
-          phone: "9999999999",
-          address: "Test Lab"
-        }
-      });
+      return NextResponse.json(
+        { success: false, message: "Seeded admin not found. Run prisma seed." },
+        { status: 404 }
+      );
     }
 
-    const token = jwt.sign({ id: admin.id, email: admin.email, role: admin.role }, SECRET_KEY, { expiresIn: "1d" });
+    if (admin.role !== "ADMIN") {
+      return NextResponse.json(
+        { success: false, message: "Not an admin account" },
+        { status: 403 }
+      );
+    }
+
+    // ✅ Compare password
+    const isMatch = await bcrypt.compare(adminPassword, admin.password);
+
+    if (!isMatch) {
+      return NextResponse.json(
+        { success: false, message: "Invalid admin credentials" },
+        { status: 401 }
+      );
+    }
+
+    // ✅ Sign JWT
+    const token = jwt.sign(
+      { id: admin.id, email: admin.email, role: admin.role },
+      SECRET_KEY,
+      { expiresIn: "1d" }
+    );
 
     const cookieStore = await cookies();
     cookieStore.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24
+      maxAge: 60 * 60 * 24,
     });
 
     return NextResponse.json({
       success: true,
-      message: "Logged in as Admin successfully",
-      user: { email: admin.email, role: admin.role }
+      message: "Logged in as seeded Admin successfully",
+      user: { email: admin.email, role: admin.role },
     });
-
   } catch (error: any) {
     console.error("Test Login Error:", error);
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: 500 }
+    );
   }
 }
