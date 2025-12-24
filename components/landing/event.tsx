@@ -5,26 +5,21 @@ export default function event() {
     return (
         <section className="py-16 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto relative">
-                <div className="grid grid-cols-1 md:grid-cols-2 items-center">
-
-                    {/* LEFT IMAGE CARD */}
-                    <div className="bg-green-600 overflow-hidden flex items-center justify-center text-white
-                      rounded-none rounded-tr-3xl rounded-bl-3xl
-                      max-h-[260px]">
-                        <Image
-                            src="/parent-child-reading-book-together-family.jpg"
-                            alt="Parent and Child"
-                            width={400}
-                            height={256}
-                            className="w-full h-full object-cover"
-                        />
+                <div className="grid grid-cols-1 md:grid-cols-[5fr_5fr] items-center">
+                    {/* LEFT IMAGE CARD  */}
+                    <div className="relative bg-green-600 overflow-visible rounded-none rounded-tr-3xl rounded-bl-3xl h-[260px] flex justify-center">
+                        <div className="relative h-[312px] w-[510px] -translate-y-13 ">
+                            <Image
+                                src="/kid-mom.png"
+                                alt="Parent and Child"
+                                fill
+                                className="object-fit "
+                            />
+                        </div>
                     </div>
 
-                    {/* RIGHT CONTENT CARD (OVERLAP) */}
-                    <div className="bg-yellow-400 p-8
-                      rounded-none rounded-t-3xl
-                      min-h-[260px]
-                      md:-ml-12 z-10 relative">
+                    {/* RIGHT CONTENT CARD */}
+                    <div className="bg-yellow-400 p-10 rounded-none rounded-t-3xl min-h-[260px] md:-ml-40 z-10 relative">
                         <span className="text-xs font-semibold text-yellow-900 bg-yellow-200 px-3 py-1 rounded-full">
                             Upcoming Event
                         </span>
@@ -42,8 +37,8 @@ export default function event() {
                             <span>07 March 2025</span>
                         </div>
                     </div>
-
                 </div>
+
             </div>
         </section>
 

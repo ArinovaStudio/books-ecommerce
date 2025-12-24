@@ -17,7 +17,7 @@ export default function RootLayout({
         <Header />
 
         {/* PAGE CONTENT */}
-        <main className="grow">
+        <main className="grow bg-[#fffaf3] ">
           {children}
         </main>
 
