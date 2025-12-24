@@ -20,9 +20,9 @@ export default function AdminDashboard() {
   const { activeTab, role } = useAdmin()
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const [selectedSchool, setSelectedSchool] = useState<{ id: string; name: string } | null>(null)
-  const [selectedClass, setSelectedClass] = useState<{ id: string; name: string } | null>(null)
-  const [selectedSection, setSelectedSection] = useState<{ id: string; name: string } | null>(null)
+  const [selectedSchool, setSelectedSchool] = useState<string | null>(null)
+  const [selectedClass, setSelectedClass] = useState<string | null>(null)
+  const [selectedSection, setSelectedSection] = useState<string | null>(null)
   const [selectedLang, setSelectedLang] = useState<string | null>(null)
 
   // Reset selections when switching tabs
@@ -59,7 +59,7 @@ export default function AdminDashboard() {
 
               {selectedSchool && !selectedClass && (
                 <SchoolClasses
-                  school={selectedSchool}
+                  schoolId={selectedSchool}
                   onBack={() => setSelectedSchool(null)}
                   onSelectClass={setSelectedClass}
                 />
@@ -67,8 +67,8 @@ export default function AdminDashboard() {
 
               {selectedSchool && selectedClass && !selectedSection && (
                 <SchoolSection
-                  school={selectedSchool.name}
-                  classes={selectedClass.name}
+                  school={selectedSchool}
+                  classes={selectedClass}
                   onSelectSection={setSelectedSection}
                   onBack={() => setSelectedClass(null)}
                 />
@@ -77,10 +77,10 @@ export default function AdminDashboard() {
               {selectedSchool && selectedClass && selectedSection && (
                 <SchoolClassUsers
                   activeTab={activeTab}
-                  schoolId={selectedSchool.id.toString()}
-                  classId={selectedClass.id}
-                  sectionId={selectedSection.id}
-                  className={selectedClass.name}
+                  schoolId={selectedSchool}
+                  classId={selectedClass}
+                  sectionId={selectedSection}
+                  // className={selectedClass.name}
                   onBack={() => setSelectedSection(null)}
                 />
               )}
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
               {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab={activeTab} refreshTrigger={refreshTrigger} />}
               {selectedSchool && !selectedClass && (
                 <SchoolClasses
-                  school={selectedSchool}
+                  schoolId={selectedSchool}
                   onBack={() => setSelectedSchool(null)}
                 />
               )}
@@ -155,7 +155,7 @@ export default function AdminDashboard() {
               <CardDescription>View and manage all Orders</CardDescription>
             </CardHeader>
             <CardContent>
-              <OrdersTable />
+              <OrdersTable role="ADMIN" />
             </CardContent>
           </Card>
         )}

@@ -7,9 +7,9 @@ import {
     DialogContent,
     DialogTitle,
     DialogDescription,
-    DialogPortal,
-    DialogOverlay,
-} from "@radix-ui/react-dialog"
+    DialogFooter,
+    DialogHeader,
+} from "@/components/ui/dialog"
 import {
     Select,
     SelectContent,
@@ -20,9 +20,10 @@ import {
 
 import { Button } from "./ui/button"
 import { Label } from "./ui/label"
-import { Checkbox } from "@radix-ui/react-checkbox"
-import { Plus, ImageIcon, Pencil, Loader2 } from "lucide-react"
+import { Input } from "./ui/input"
+import { Plus, ImageIcon, Loader2, X, Upload } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
+import { Separator } from "@/components/ui/separator"
 
 interface AddSchoolModalProps {
     onSchoolAdded?: () => void;
@@ -35,14 +36,25 @@ export function AddSchoolModal({ onSchoolAdded }: AddSchoolModalProps) {
 
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
-    const [selectedLangs, setSelectedLangs] = useState<string[]>([]);
+    const [selectedLangs, setSelectedLangs] = useState<string[]>(["English", "Telugu"]);
     const [selectedBoard, setSelectedBoard] = useState<string>("");
     const [selectedClassRange, setSelectedClassRange] = useState<string>("");
 
-    const toggleLanguage = (lang: string) => {
-        setSelectedLangs((prev) =>
-            prev.includes(lang) ? prev.filter((l) => l !== lang) : [...prev, lang]
-        )
+    const [newLang, setNewLang] = useState("")
+    const [isLangDialogOpen, setIsLangDialogOpen] = useState(false)
+
+    const addLanguage = () => {
+        const trimmed = newLang.trim()
+        if (!trimmed) return
+        if (!selectedLangs.includes(trimmed)) {
+            setSelectedLangs(prev => [...prev, trimmed])
+        }
+        setNewLang("")
+        setIsLangDialogOpen(false)
+    }
+
+    const removeLanguage = (lang: string) => {
+        setSelectedLangs(prev => prev.filter(l => l !== lang))
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -50,9 +62,7 @@ export function AddSchoolModal({ onSchoolAdded }: AddSchoolModalProps) {
         setLoading(true);
 
         try {
-            if (!selectedClassRange) {
-                throw new Error("Please select a class range");
-            }
+            if (!selectedClassRange) throw new Error("Please select a class range");
 
             const form = e.target as HTMLFormElement;
             const formData = new FormData(form);
@@ -61,10 +71,7 @@ export function AddSchoolModal({ onSchoolAdded }: AddSchoolModalProps) {
             formData.append("languages", JSON.stringify(selectedLangs));
             formData.append("board", selectedBoard);
 
-            if (imageFile) {
-                formData.append("image", imageFile);
-            }
-
+            if (imageFile) formData.append("image", imageFile);
 
             const res = await fetch("/api/admin/schools", {
                 method: "POST",
@@ -72,15 +79,11 @@ export function AddSchoolModal({ onSchoolAdded }: AddSchoolModalProps) {
             })
 
             const json = await res.json();
+            if (!res.ok) throw new Error(json.message || "Failed to create school");
 
-            if (!res.ok) {
-                throw new Error(json.message || "Failed to create school");
-            }
-
-            toast({ title: "Success", description: "School added successfully" });;
+            toast({ title: "Success", description: "School added successfully" });
             setOpen(false);
-
-            if (onSchoolAdded) onSchoolAdded();
+            onSchoolAdded?.();
 
         } catch (error: any) {
             toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -92,200 +95,177 @@ export function AddSchoolModal({ onSchoolAdded }: AddSchoolModalProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" className={`gap-2 cursor-pointer`}>
+                <Button className="gap-2 shadow-sm">
                     <Plus className="h-4 w-4" />
                     Add School
                 </Button>
             </DialogTrigger>
 
-            <DialogPortal>
-                <DialogOverlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
+            <DialogContent className="sm:max-w-[700px] p-0 overflow-hidden flex flex-col max-h-[90vh]">
+                <DialogHeader className="p-6 pb-2">
+                    <DialogTitle className="text-2xl">Add New School</DialogTitle>
+                    <DialogDescription>
+                        Fill in the details below to register a new school in the system.
+                    </DialogDescription>
+                </DialogHeader>
 
-                <DialogContent className="fixed left-1/2 top-1/2 z-50 
-                    w-[95vw] max-w-4xl 
-                    -translate-x-1/2 -translate-y-1/2 
-                    rounded-xl border bg-background p-6 shadow-lg focus:outline-none"
-                >
-                    <div className="mb-6">
-                        <DialogTitle className="text-xl font-semibold">
-                            Add School
-                        </DialogTitle>
-                        <DialogDescription className="text-sm text-muted-foreground">
-                            Enter the details of the new school
-                        </DialogDescription>
+                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 pt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Left Column: Basic Info */}
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="name">School Name</Label>
+                                <Input id="name" name="name" placeholder="Green Valley High" required />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="email">School Email</Label>
+                                <Input id="email" name="email" type="email" placeholder="admin@school.com" required />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="password">Access Password</Label>
+                                <Input id="password" name="password" type="password" placeholder="••••••••" required />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="location">Location</Label>
+                                <Input id="location" name="location" placeholder="City, State" required />
+                            </div>
+                        </div>
+
+                        {/* Right Column: Configuration & Logo */}
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Classes</Label>
+                                    <Select onValueChange={setSelectedClassRange} required>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Range" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="upto-8">Upto 8</SelectItem>
+                                            <SelectItem value="upto-10">Upto 10</SelectItem>
+                                            <SelectItem value="upto-12">Upto 12</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Board</Label>
+                                    <Select onValueChange={setSelectedBoard} required>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Board" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="ICSE">ICSE</SelectItem>
+                                            <SelectItem value="CBSE">CBSE</SelectItem>
+                                            <SelectItem value="TSBIE">TSBIE</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>School Logo</Label>
+                                <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 transition-colors hover:bg-muted/50 group relative min-h-[140px]">
+                                    {logoPreview ? (
+                                        <div className="relative w-full h-32">
+                                            <img src={logoPreview} alt="Preview" className="w-full h-full object-contain" />
+                                            <button
+                                                type="button"
+                                                onClick={() => { setLogoPreview(null); setImageFile(null) }}
+                                                className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-sm"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <label htmlFor="logo" className="flex flex-col items-center cursor-pointer w-full">
+                                            <Upload className="h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors mb-2" />
+                                            <span className="text-sm text-muted-foreground">Upload JPG/PNG</span>
+                                            <input
+                                                id="logo"
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={(e) => {
+                                                    const file = e.target.files?.[0]
+                                                    if (file) {
+                                                        setImageFile(file)
+                                                        setLogoPreview(URL.createObjectURL(file))
+                                                    }
+                                                }}
+                                            />
+                                        </label>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <form onSubmit={handleSubmit}>
-                        {/* Main Grid: 3 Columns on desktop */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <Separator className="my-6" />
 
-                            {/* LEFT: Inputs (Spans 2 columns) */}
-                            <div className="grid grid-cols gap-4">
-                                <div className="grid gap-2">
-                                    <label className="text-sm font-medium">School Email</label>
-                                    <input
-                                        name="email"
-                                        type="email"
-                                        placeholder="school@gmail.com"
-                                        className="px-3 py-2 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none"
-                                        required
-                                    />
+                    {/* Languages Section - Full Width */}
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <Label className="text-base">Medium of Instruction</Label>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsLangDialogOpen(true)}
+                                className="h-8 text-xs"
+                            >
+                                <Plus className="w-3 h-3 mr-1" /> Add Language
+                            </Button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {selectedLangs.map(lang => (
+                                <div key={lang} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium border">
+                                    {lang}
+                                    <button type="button" onClick={() => removeLanguage(lang)} className="hover:text-destructive transition-colors">
+                                        <X className="w-3.5 h-3.5" />
+                                    </button>
                                 </div>
+                            ))}
+                        </div>
+                    </div>
 
-                                <div className="grid gap-2">
-                                    <label className="text-sm font-medium">Password</label>
-                                    <input
-                                        name="password"
-                                        type="password"
-                                        placeholder="********"
-                                        className="px-3 py-2 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <label className="text-sm font-medium">School Name</label>
-                                    <input
-                                        name="name"
-                                        type="text"
-                                        placeholder="Green Valley High"
-                                        className="px-3 py-2 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="flex flex-col md:flex-row gap-4">
-                                    {/* Classes - Added flex-1 to keep sizing consistent */}
-                                    <div className="flex-1 space-y-2">
-                                        <Label className="text-sm font-medium">Classes</Label>
-                                        <Select onValueChange={setSelectedClassRange}>
-                                            <SelectTrigger className="rounded-xl h-10">
-                                                <SelectValue placeholder="Select class" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="upto-8">Upto 8</SelectItem>
-                                                <SelectItem value="upto-10">Upto 10</SelectItem>
-                                                <SelectItem value="upto-12">Upto 12</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    {/* Languages */}
-                                    <div className="flex-[2] space-y-3">
-                                        <Label className="text-sm font-medium">Languages</Label>
-                                        <div className="flex flex-wrap gap-1">
-                                            {["English", "Hindi", "Telugu"].map((lang) => {
-                                                const isChecked = selectedLangs.includes(lang)
-                                                return (
-                                                    <label
-                                                        key={lang}
-                                                        htmlFor={lang}
-                                                        className={`flex items-center gap-2 rounded-xl border px-4 py-2 cursor-pointer transition-all
-                                                        ${isChecked
-                                                                ? "border-primary  bg-primary/5 ring-1 ring-primary"
-                                                                : "border-input hover:bg-muted"
-                                                            }`}
-                                                    >
-                                                        <Checkbox
-                                                            id={lang}
-                                                            checked={isChecked}
-                                                            onCheckedChange={() => toggleLanguage(lang)}
-                                                        />
-                                                        <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                                            {lang}
-                                                        </span>
-                                                    </label>
-                                                )
-                                            })}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col md:flex-row gap-4 mt-3">
-                                    <div className="flex-1 space-y-2">
-                                        <Label className="text-sm font-medium">Board</Label>
-                                        <Select onValueChange={setSelectedBoard}>
-                                            <SelectTrigger className="rounded-xl h-10">
-                                                <SelectValue placeholder="Select Board" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="ICSE">ICSE</SelectItem>
-                                                <SelectItem value="CBSE">CBSE</SelectItem>
-                                                <SelectItem value="TSBIE">TSBIE</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-
-                                    <div className="grid gap-2">
-                                        <label className="text-sm font-medium">Location</label>
-                                        <input
-                                            name="location"
-                                            type="text"
-                                            placeholder="Mumbai, Maharashtra"
-                                            className="px-3 py-2 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            {/* RIGHT: Logo Upload (Spans 1 column) */}
-                            <div className="flex flex-col gap-2">
-                                <span className="text-sm font-medium">School Logo</span>
-                                <label
-                                    htmlFor="logo"
-                                    className="flex flex-col items-center justify-center 
-                                    border-2 border-dashed rounded-xl p-4 cursor-pointer 
-                                    hover:bg-muted/50 transition min-h-[180px] h-full"
-                                >
-                                    {logoPreview ? (
-                                        <img
-                                            src={logoPreview}
-                                            alt="Logo preview"
-                                            className="h-32 w-full object-contain"
-                                        />
-                                    ) : (
-                                        <div className="flex flex-col items-center text-muted-foreground">
-                                            <ImageIcon className="h-10 w-10 mb-2 opacity-50" />
-                                            <span className="text-xs text-center">Click to upload logo</span>
-                                        </div>
-                                    )}
-                                </label>
-                                <input
-                                    id="logo"
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0]
-                                        if (file) {
-                                            setImageFile(file)
-                                            setLogoPreview(URL.createObjectURL(file))
-                                        }
-                                    }}
+                    {/* Inner Dialog for Adding Language */}
+                    <Dialog open={isLangDialogOpen} onOpenChange={setIsLangDialogOpen}>
+                        <DialogContent className="sm:max-w-[400px]">
+                            <DialogHeader>
+                                <DialogTitle>Add Language</DialogTitle>
+                            </DialogHeader>
+                            <div className="py-4">
+                                <Input
+                                    placeholder="e.g. Hindi, Spanish"
+                                    value={newLang}
+                                    onChange={(e) => setNewLang(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addLanguage())}
                                 />
                             </div>
-                        </div>
+                            <DialogFooter>
+                                <Button type="button" variant="ghost" onClick={() => setIsLangDialogOpen(false)}>Cancel</Button>
+                                <Button type="button" onClick={addLanguage}>Add Language</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </form>
 
-                        {/* Footer: Outside the field grid for full width alignment */}
-                        <div className="flex justify-end gap-3 mt-8 pt-4 border-t">
-                            <Button
-                                variant="ghost"
-                                className="cursor-pointer"
-                                type="button"
-                                onClick={() => setOpen(false)}
-                                disabled={loading}
-                            >
-                                Cancel
-                            </Button>
-                            <Button type="submit" className="px-8 cursor-pointer" disabled={loading}>
-                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Save School
-                            </Button>
-                        </div>
-                    </form>
-                </DialogContent>
-            </DialogPortal>
-        </Dialog >
+                <DialogFooter className="p-6 pt-2 bg-muted/20 border-t">
+                    <Button variant="ghost" type="button" onClick={() => setOpen(false)} disabled={loading}>
+                        Cancel
+                    </Button>
+                    <Button type="submit" onClick={(e) => {
+                        // Manual trigger for form since button is outside form tags in some layouts
+                        const form = document.querySelector('form')
+                        form?.requestSubmit()
+                    }} className="min-w-[120px]" disabled={loading}>
+                        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Create School"}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     )
 }

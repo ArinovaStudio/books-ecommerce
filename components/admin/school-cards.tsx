@@ -26,7 +26,7 @@ type School = {
 
 type Props = {
     activeTab: string
-    onSelectSchool: (school: { id: string; name: string }) => void
+    onSelectSchool: (id: string) => void
     refreshTrigger?: number
 }
 
@@ -111,7 +111,7 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                     {schools.map((school) => (
                         <Card
                             key={school.id}
-                            className="relative hover:shadow-md transition-shadow"
+                            className="relative cursor-pointer hover:shadow-md transition-shadow"
                         >
                             <CardHeader className="pb-2">
                                 <div className="flex items-start justify-between">
@@ -119,7 +119,7 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                                     <div
                                         className="flex gap-3 cursor-pointer"
                                         onClick={() =>
-                                            onSelectSchool({ id: school.id, name: school.name })
+                                            onSelectSchool(school.id)
                                         }
                                     >
                                         {school.image ? (
@@ -210,7 +210,7 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                                 <div
                                     className="flex items-center gap-2 text-sm text-muted-foreground mt-2 cursor-pointer"
                                     onClick={() =>
-                                        onSelectSchool({ id: school.id, name: school.name })
+                                        onSelectSchool(school.id)
                                     }
                                 >
                                     <MapPin className="h-4 w-4" />
@@ -260,20 +260,23 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
 
                     ))}
                 </div>
-            )}
+            )
+            }
 
             {/* Edit School Modal */}
-            {editingSchool && (
-                <EditSchoolModal
-                    school={editingSchool}
-                    open={open}
-                    onOpenChange={(val) => {
-                        setOpen(val)
-                        if (!val) setEditingSchool(null)
-                    }}
-                    onUpdate={() => setLocalRefresh(prev => prev + 1)}
-                />
-            )}
-        </div>
+            {
+                editingSchool && (
+                    <EditSchoolModal
+                        school={editingSchool}
+                        open={open}
+                        onOpenChange={(val) => {
+                            setOpen(val)
+                            if (!val) setEditingSchool(null)
+                        }}
+                        onUpdate={() => setLocalRefresh(prev => prev + 1)}
+                    />
+                )
+            }
+        </div >
     )
 }

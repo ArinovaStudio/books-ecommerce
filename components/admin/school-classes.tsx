@@ -21,7 +21,7 @@ type ClassType = {
 type Props = {
     schoolId: string
     onBack?: () => void
-    onSelectClass?: (data: { id: string; name: string }) => void
+    onSelectClass?: (id: string) => void
 }
 
 export function SchoolClasses({
@@ -85,7 +85,7 @@ export function SchoolClasses({
                             key={cls.id}
                             onClick={
                                 onSelectClass
-                                    ? () => onSelectClass({ id: cls.id, name: cls.name })
+                                    ? () => onSelectClass(cls.id)
                                     : undefined
                             }
                             className={`transition ${onSelectClass

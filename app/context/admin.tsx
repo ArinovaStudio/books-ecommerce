@@ -34,7 +34,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function fetchAdminRole() {
       try {
-        const res = await fetch("/api/test-subadmin-login", {
+        const res = await fetch("/api/test-admin-login", {
           credentials: "include",
         })
 

@@ -33,7 +33,7 @@ type SectionType = {
 type Props = {
     school: string
     classes: string
-    onSelectSection?: (section: SectionType) => void
+    onSelectSection?: (section: string) => void
     onBack?: () => void
 }
 
