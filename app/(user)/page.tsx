@@ -11,6 +11,7 @@ import Companies from "@/components/landing/companies"
 import Courses from "@/components/landing/courses"
 import Learning from "@/components/landing/learning-path"
 import Cta from "@/components/landing/cta"
+import Testimonial from "@/components/landing/testimonial"
 import Event from "@/components/landing/event"
 
 export default function Home() {
@@ -26,15 +27,19 @@ export default function Home() {
       <Hero />
       <Companies/>
       <AboutUs/>
+      <PartnerSchools />
       <Courses/>
       <Learning/>
       <Cta/>
-      <Event/>
+      <Testimonial/>
       
-      {/* <PartnerSchools />
+      {/* 
       <HowItWorks />
       <Features />
-      <HeroCTA />  */}
+      
+      <HeroCTA />
+      <Event/>
+      */}
     </main>
   )
 }

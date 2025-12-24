@@ -1,10 +1,11 @@
 import Image from 'next/image'
 import React from 'react'
 import { Button } from '../ui/button'
+import { ArrowRight } from 'lucide-react'
 
 export default function cta() {
     return (
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <section className="pt-16 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-6 mb-16">
                 {/* Yellow CTA */}
                 <div className="relative bg-yellow-400 p-14 flex justify-between rounded-none rounded-tr-3xl rounded-bl-3xl overflow-visible w-full">
@@ -16,13 +17,15 @@ export default function cta() {
                         <p className="text-gray-800 text-sm mb-6">
                             Empowering kids with self-confidence to face the world
                         </p>
-                        <Button className="bg-gray-900 hover:bg-gray-800 text-white w-fit rounded-none rounded-tr-2xl rounded-bl-2xl px-6">
-                            Book Now →
+                        <Button className="group bg-gray-900 hover:bg-gray-900/90 text-white w-fit rounded-none rounded-tr-2xl rounded-bl-2xl px-6 py-7 flex items-center gap-2 transition-transform duration-300 ease-out hover:scale-105 cursor-pointer">
+                            Browse Schools
+                            <ArrowRight className="w-4 h-4 transition-transform duration-300 ease-out group-hover:translate-x-1.5" strokeWidth={2} />
                         </Button>
+
                     </div>
 
                     {/* RIGHT POPPING IMAGE */}
-                    <div className="absolute right-0 -top-16 w-[300px] h-[340px]">
+                    <div className="absolute right-0 -top-16 w-[300px] h-[375px]">
                         <Image src="/boy-books.png" alt="boy" fill className="object-contain" />
                     </div>
                 </div>
@@ -37,56 +40,17 @@ export default function cta() {
                             Turning aspirations into achievable goals for students
                         </p>
                     </div>
-                    <Button className="bg-white hover:bg-gray-100 text-orange-500 w-fit rounded-none rounded-tr-2xl rounded-bl-2xl px-6">
-                        Learn More →
-                    </Button>
+                    <div>Any issues?
+                        <Button className="group bg-white hover:bg-white text-orange-500 w-fit rounded-none rounded-tr-2xl rounded-bl-2xl px-6 py-3 flex items-center gap-2 transition-transform duration-300 ease-out hover:scale-105 cursor-pointer"> Contact us
+                            <ArrowRight
+                                className="w-4 h-4 transition-transform duration-300 ease-out group-hover:translate-x-1.5"
+                                strokeWidth={2}
+                            />
+                        </Button></div>
+
                 </div>
             </div>
 
-
-            {/* Testimonial Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-7xl mx-auto mt-40">
-
-                <div>
-                    <p className="text-sm text-gray-600 mb-4">Admission on going</p>
-                    <h3 className="text-3xl font-bold text-gray-900 mb-6">Empower your kids to think be smarter and sharper</h3>
-                    <p className="text-gray-600 mb-8">
-                        Encourage kids to think critically, be creative, and solve problems for a better future.
-                    </p>
-                    <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-none rounded-tr-2xl rounded-bl-2xl px-6">Get Educated →</Button>
-
-                    {/* Stats */}
-                    <div className="grid grid-cols-2 gap-4 mt-8">
-                        <div className="flex items-center gap-3">
-                            <div className="text-2xl">✓</div>
-                            <div>
-                                <p className="font-bold text-gray-900">45M+</p>
-                                <p className="text-sm text-gray-600">Learners have reached across the globe</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="text-2xl">☀️</div>
-                            <div>
-                                <p className="font-bold text-gray-900">164+</p>
-                                <p className="text-sm text-gray-600">Nations participating in the program</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="relative bg-blue-500/80 overflow-visible h-96 flex items-end justify-center rounded-none rounded-tr-4xl rounded-bl-4xl">
-
-                    <Image
-                        src="/happy-student-girl-confident-smiling.png"
-                        alt="Happy Student"
-                        width={400}
-                        height={300}
-                        className="w-full h-130 object-contain drop-shadow-lg"
-                    />
-
-
-                </div>
-
-            </div>
         </section>
     )
 }

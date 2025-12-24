@@ -7,6 +7,7 @@ import Link from "next/link"
 
 import { schools } from "@/data/demodata"
 import SchoolSearch from "../schoolSearch"
+import { Button } from "../ui/button"
 
 
 export default function PartnerSchools() {
@@ -19,16 +20,15 @@ export default function PartnerSchools() {
   const visibleSchools = filteredSchools.slice(0, 5)
 
   return (
-    <section id="schools" className="py-20 md:py-32 bg-gray-50">
+    <section id="schools" className="py-20 md:pb-25">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
 
         {/* Section Header */}
         <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-10 md:mb-16">
           <div className="space-y-2">
-            <h2 className="text-4xl md:text-5xl font-bold text-blue-950">
-              Partner Schools
-            </h2>
-            <p className="text-md md:text-lg text-gray-600 max-w-2xl">
+            <h2 className="text-4xl md:text-5xl font-bold text-black">
+              Partner <span className="text-orange-400">Schools</span></h2>
+            <p className="text-md md:text-md text-gray-600 max-w-2xl">
               We work with top schools across India to bring you the exact books
               and supplies your child needs.
             </p>
@@ -41,16 +41,18 @@ export default function PartnerSchools() {
               onChange={setSearch}
               results={filteredSchools}
               placeholder="Search Schools..."
-              className="w-full sm:w-72"
+              className="w-[60%]"
             />
 
             {/* View all */}
             <Link
               href="/schools"
-              className="text-sm text-blue-900 hover:text-blue-700 inline-flex items-center gap-1"
             >
-              View all schools
-              <ArrowRight size={16} />
+              <Button className="group text-sm bg-orange-400 hover:bg-orange-400/90 cursor-pointer rounded-none rounded-tr-3xl rounded-bl-3xl py-5 px-6 flex justify-center items-center gap-2 transition-transform duration-300 ease-out hover:scale-105">
+                View all schools
+                <ArrowRight size={16} className="transition-transform duration-300 ease-out group-hover:translate-x-1.5" />
+              </Button>
+
             </Link>
           </div>
         </div>
@@ -63,7 +65,7 @@ export default function PartnerSchools() {
               href={`/schools/${school.id}`}
               className="block h-full"
             >
-              <Card className="px-6 py-4 hover:shadow-lg transition-shadow flex flex-col gap-3 h-full">
+              <Card className="px-6 py-4 hover:shadow-lg flex flex-col gap-3 h-full rounded-none rounded-tr-3xl rounded-bl-3xl border-none transition-transform duration-300 hover:-translate-y-2">
                 <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100">
                   <img
                     src={school.image || "/school.jpg"}
@@ -72,7 +74,7 @@ export default function PartnerSchools() {
                   />
                 </div>
 
-                <h3 className="font-bold text-sm text-blue-950">
+                <h3 className="font-bold text-sm text-black">
                   {school.name}
                 </h3>
 

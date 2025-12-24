@@ -99,7 +99,7 @@ export default function Hero() {
     // </section >
 
 
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#0c2f25] via-[#17340d] to-[#0a241c]">
+    <section className="relative overflow-hidden bg-linear-to-br from-[#0c2f25] via-[#17340d] to-[#0a241c]">
       {/* Decorative blobs */}
       <div className="absolute inset-0">
         <div className="absolute top-10 sm:top-24 right-6 sm:right-24 w-40 sm:w-64 h-40 sm:h-64 bg-green-600/20 rounded-full blur-3xl" />
@@ -144,7 +144,7 @@ export default function Hero() {
           <div className="relative flex justify-center lg:justify-end mt-6 lg:mt-0">
             <div className="relative w-56 h-56 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-96 lg:h-96">
               {/* Glow ring */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-lime-400/30 to-green-600/30 blur-2xl" />
+              <div className="absolute inset-0 rounded-full bg-linear-to-tr  from-lime-400/30 to-green-600/30 blur-2xl" />
 
               {/* Image */}
               <div className="relative rounded-full overflow-hidden border-4 border-lime-400/30 md:h-110">

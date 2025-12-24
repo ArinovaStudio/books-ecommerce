@@ -46,7 +46,7 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
   ]
 
   return (
-    <section className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 relative">
+    <section className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100 relative">
       {expandedClassId && (
         <div
           onClick={() => setExpandedClassId(null)}
@@ -54,7 +54,7 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
         />
       )}
 
-      <div className="bg-gradient-to-br from-blue-950 via-blue-900 to-blue-950 py-8 sm:py-10 lg:py-12 px-4 sm:px-6 relative z-50 shadow-lg">
+      <div className="bg-linear-to-br from-green-950 via-green-900 to-green-950 py-8 sm:py-10 lg:py-12 px-4 sm:px-6 relative z-50 shadow-lg">
         <div className="max-w-7xl mx-auto">
           <button
             onClick={() => router.back()}
@@ -65,14 +65,14 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
           </button>
 
           <div className="flex flex-row items-start sm:items-center gap-4 sm:gap-6">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-2xl overflow-hidden shadow-xl ring-4 ring-white/20 flex-shrink-0">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-2xl overflow-hidden shadow-xl ring-4 ring-white/20 shrink-0">
               <img src={school.image || "/school.jpg"} alt={school.name} className="w-full h-full object-cover" />
             </div>
 
             <div className="flex-1">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">{school.name}</h1>
               <p className="flex items-center gap-2 text-blue-100 mt-2 text-sm sm:text-base">
-                <MapPin size={18} className="flex-shrink-0" />
+                <MapPin size={18} className="shrink-0" />
                 <span>{school.location}</span>
               </p>
             </div>
@@ -101,11 +101,10 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
                   <div
                     className={`
                                         border rounded-xl bg-white shadow-sm transition-all duration-300 overflow-hidden
-                                        ${
-                                          isOpen
-                                            ? "ring-2 ring-blue-500 border-blue-500 shadow-xl scale-[1.02]"
-                                            : "hover:shadow-md hover:border-blue-200 hover:-translate-y-0.5"
-                                        }
+                                        ${isOpen
+                        ? "ring-2 ring-blue-500 border-blue-500 shadow-xl scale-[1.02]"
+                        : "hover:shadow-md hover:border-blue-200 hover:-translate-y-0.5"
+                      }
                                     `}
                   >
                     <button
@@ -117,7 +116,7 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
                       </h3>
                       <ChevronDown
                         size={18}
-                        className={`text-gray-400 group-hover:text-blue-600 transition-all duration-300 flex-shrink-0
+                        className={`text-gray-400 group-hover:text-blue-600 transition-all duration-300 shrink-0
                                                     ${isOpen ? "rotate-180" : ""}
                                                 `}
                       />
@@ -128,7 +127,7 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
                                                 ${isOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"}
                                             `}
                     >
-                      <div className="border-t border-gray-100 px-3 sm:px-4 py-3 bg-gradient-to-b from-gray-50 to-white">
+                      <div className="border-t border-gray-100 px-3 sm:px-4 py-3 bg-linear-to-b from-gray-50 to-white">
                         <p className="text-xs font-medium text-gray-500 mb-2 text-center">Select Language</p>
                         <div className="flex flex-col gap-2">
                           {languages.map((lang) => (

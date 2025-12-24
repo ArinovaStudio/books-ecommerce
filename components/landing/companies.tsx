@@ -12,7 +12,7 @@ export default function Companies() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <p className="text-sm text-muted-foreground font-semibold uppercase tracking-wide">
-            Trusted by Companies All Over the World
+            Trusted Schools All Over the World
           </p>
         </div>
 

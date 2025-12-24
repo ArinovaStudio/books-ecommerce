@@ -3,12 +3,10 @@ import Image from "next/image"
 
 export default function Footer() {
   return (
-    <footer className="bg-[#15203b] text-white">
+    <footer className="bg-linear-to-br from-green-950 via-green-900 to-green-950 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
 
-
-
-        {/* ================= BRAND + FEATURES ================= */}
+        {/*  BRAND + FEATURES */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10 py-10 border-b border-white/10">
 
           {/* Logo */}
@@ -47,7 +45,7 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* ================= TOP LINKS ================= */}
+        {/* TOP LINKS */}
         <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-6 sm:gap-8 py-10 sm:pl-7 border-b border-white/10 text-blue-100 text-sm">
 
           <div className="space-y-2">
@@ -93,9 +91,9 @@ export default function Footer() {
 
         </div>
 
-        {/* ================= SECURITY NOTICE ================= */}
+        {/* SECURITY NOTICE */}
         <div className="my-8">
-          <p className="text-xs sm:text-sm text-blue-200 bg-blue-900/40 border border-blue-800 rounded-lg px-4 sm:px-5 py-4 leading-relaxed">
+          <p className="text-xs sm:text-sm text-white bg-lime-400/20 border border-lime-400 rounded-lg px-4 sm:px-5 py-4 leading-relaxed">
             <strong>Security Notice:</strong> Beware of scammers—we never request OTPs, bank
             details, or card information from our customers. All legitimate communications
             occur through official channels listed on this platform. Report any suspicious
@@ -103,7 +101,7 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* ================= BOTTOM LEGAL BAR ================= */}
+        {/*  BOTTOM LEGAL BAR */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-6 border-t border-white/10 text-blue-100 text-xs sm:text-sm text-center md:text-left">
 
           <div className="flex flex-wrap justify-center md:justify-start gap-4">

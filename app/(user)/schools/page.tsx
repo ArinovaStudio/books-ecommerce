@@ -34,7 +34,7 @@ export default function SchoolsPage() {
 
     return (
         <section className="min-h-screen bg-[#f7f4f2]">
-            <div className="bg-[#132345] text-white px-30 py-15">
+            <div className="bg-linear-to-br from-green-950 via-green-900 to-green-950 text-white px-30 py-15">
 
                 {/* Title */}
                 <h1 className="text-4xl md:text-4xl font-bold">

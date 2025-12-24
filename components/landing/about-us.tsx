@@ -1,5 +1,7 @@
 "use client"
 
+import { ArrowRight } from "lucide-react"
+
 export default function AboutUs() {
     return (
         <section className="py-12 sm:py-16 lg:py-24">
@@ -33,7 +35,7 @@ export default function AboutUs() {
                         <img
                             src="/young-professional-student-smiling-outdoors.jpg"
                             alt="Student portrait"
-                            className="w-full max-w-[160px] h-[220px] object-cover rounded-t-full sm:mt-[200px] mt-[200px]"
+                            className="w-full max-w-40 h-[220px] object-cover rounded-t-full sm:mt-[200px] mt-[200px]"
                         />
                     </div>
 
@@ -71,8 +73,9 @@ export default function AboutUs() {
                             </div>
                         </div>
 
-                        <button className="px-6 py-3 bg-orange-400 text-primary-foreground font-semibold hover:bg-orange-400/90 transition rounded-none rounded-tr-2xl rounded-bl-2xl ">
+                        <button className="group px-6 py-3 bg-orange-400 text-primary-foreground font-semibold rounded-none rounded-tr-2xl rounded-bl-2xl flex items-center gap-2 transition-all duration-300 ease-out hover:bg-orange-400/90 hover:scale-105 cursor-pointer">
                             View More Details
+                            <ArrowRight size={16} className="transition-transform duration-300 ease-out group-hover:translate-x-1.5" />
                         </button>
                     </div>
 
