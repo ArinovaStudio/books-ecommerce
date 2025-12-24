@@ -1,190 +1,211 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChevronLeft, Search } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { ChevronLeft, Loader2 } from "lucide-react"
 
-/* ================= DEMO DATA ================= */
-const usersData = [
-  {
-    id: 1,
-    userName: "Rahul Sharma",
-    email: "rahul.sharma@email.com",
-    phone: "+91 98765 43210",
-    schoolName: "Greenwood High School",
-    className: "Class 10-A",
-    bundleName: "Science Bundle",
-    orderNumber: "ORD-1001",
-    orderDate: "2025-01-15",
-    totalAmount: 4500,
-    status: "Pending",
-  },
-  {
-    id: 2,
-    userName: "Priya Patel",
-    email: "priya.patel@email.com",
-    phone: "+91 98765 43211",
-    schoolName: "Greenwood High School",
-    className: "Class 9-B",
-    bundleName: "Math Bundle",
-    orderNumber: "ORD-1005",
-    orderDate: "2025-01-18",
-    totalAmount: 3500,
-    status: "Completed",
-  },
-  {
-    id: 3,
-    userName: "Amit Kumar",
-    email: "amit.kumar@email.com",
-    phone: "+91 98765 43212",
-    schoolName: "Sunrise Academy",
-    className: "Class 12-A",
-    bundleName: "Complete Bundle",
-    orderNumber: "ORD-1002",
-    orderDate: "2025-01-20",
-    totalAmount: 3200,
-    status: "Completed",
-  },
-  {
-    id: 4,
-    userName: "Sneha Gupta",
-    email: "sneha.gupta@email.com",
-    phone: "+91 98765 43213",
-    schoolName: "Maple Leaf School",
-    className: "Class 11-C",
-    bundleName: "English Bundle",
-    orderNumber: "ORD-1003",
-    orderDate: "2025-01-25",
-    totalAmount: 5000,
-    status: "Cancelled",
-  },
-  {
-    id: 5,
-    userName: "Vikram Singh",
-    email: "vikram.singh@email.com",
-    phone: "+91 98765 43214",
-    schoolName: "Riverdale High",
-    className: "Class 8-A",
-    bundleName: "History Bundle",
-    orderNumber: "ORD-1004",
-    orderDate: "2025-02-01",
-    totalAmount: 2800,
-    status: "Pending",
-  },
-  {
-    id: 6,
-    userName: "Anjali Mehta",
-    email: "anjali.mehta@email.com",
-    phone: "+91 98765 43215",
-    schoolName: "Sunrise Academy",
-    className: "Class 10-B",
-    bundleName: "Science Bundle",
-    orderNumber: "ORD-1006",
-    orderDate: "2025-02-05",
-    totalAmount: 4200,
-    status: "Pending",
-  },
-]
+/* ================= TYPES ================= */
+type School = {
+  id: string
+  name: string
+}
+
+type Order = {
+  id: string
+  userName: string
+  email: string
+  phone: string
+  className: string
+  bundleName: string
+  orderNumber: string
+  orderDate: string
+  totalAmount: number
+  status: "Pending" | "Completed" | "Cancelled"
+}
+
+type Props = {
+  role: "ADMIN" | "SUB_ADMIN"
+  subAdminSchoolId?: string
+}
 
 /* ================= COMPONENT ================= */
-export function OrdersTable() {
-  const [selectedSchool, setSelectedSchool] = useState<string | null>(null)
+export function OrdersTable({ role, subAdminSchoolId }: Props) {
+  const [schools, setSchools] = useState<School[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
+  const [selectedSchool, setSelectedSchool] = useState<School | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [search, setSearch] = useState("")
 
-  const uniqueSchools = Array.from(new Set(usersData.map((user) => user.schoolName)))
+  /* ================= FETCH SCHOOLS ================= */
+  const fetchSchools = async () => {
+    if (role === "SUB_ADMIN") return
+    try {
+      setLoading(true)
+      const res = await fetch("/api/schools")
+      const data = await res.json()
+      if (data.success) setSchools(data.schools)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  const filteredUsers = selectedSchool ? usersData.filter((user) => user.schoolName === selectedSchool) : []
+  /* ================= FETCH ORDERS ================= */
+  const fetchOrders = async (school: School) => {
+    try {
+      setLoading(true)
+      setSelectedSchool(school)
+      setSearch("")
+
+      const res = await fetch(`/api/admin/orders?schoolId=${school.id}`)
+      const data = await res.json()
+      if (data.success) setOrders(data.orders)
+      else setOrders([])
+    } catch (err) {
+      console.error(err)
+      setOrders([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  /* ================= FILTERED ORDERS ================= */
+  const filteredOrders = orders.filter((order) => {
+    const q = search.toLowerCase()
+    return (
+      order?.userName?.toLowerCase().includes(q) ||
+      order?.email?.toLowerCase().includes(q) ||
+      order?.orderNumber?.toLowerCase().includes(q) ||
+      order?.status?.toLowerCase().includes(q)
+    )
+  })
+
+  useEffect(() => {
+    if (role === "SUB_ADMIN" && subAdminSchoolId) {
+      setSelectedSchool({ id: subAdminSchoolId, name: "Your School" })
+      fetchOrders({ id: subAdminSchoolId, name: "Your School" })
+    } else {
+      fetchSchools()
+    }
+  }, [role, subAdminSchoolId])
 
   return (
     <div className="space-y-4">
-      {/* Search */}
+      {/* ================= HEADER ================= */}
       <div className="flex items-center gap-2">
-        {selectedSchool && (
-          <Button variant="outline" size="icon" onClick={() => setSelectedSchool(null)}>
+        {selectedSchool && role === "ADMIN" && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => {
+              setSelectedSchool(null)
+              setOrders([])
+              setSearch("")
+            }}
+          >
             <ChevronLeft className="h-4 w-4" />
           </Button>
         )}
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search orders..." className="pl-9" />
-        </div>
       </div>
 
-      {!selectedSchool && (
+      {/* ================= SCHOOLS ================= */}
+      {!selectedSchool && role === "ADMIN" && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {uniqueSchools.map((schoolName) => {
-            const schoolUsers = usersData.filter((user) => user.schoolName === schoolName)
-            const totalOrders = schoolUsers.length
-            const totalValue = schoolUsers.reduce((sum, user) => sum + user.totalAmount, 0)
-
-            return (
-              <Card
-                key={schoolName}
-                className="cursor-pointer transition-colors hover:bg-accent"
-                onClick={() => setSelectedSchool(schoolName)}
-              >
-                <CardHeader>
-                  <CardTitle className="text-lg">{schoolName}</CardTitle>
-                  <CardDescription>
-                    {totalOrders} {totalOrders === 1 ? "order" : "orders"}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            )
-          })}
+          {schools.map((school) => (
+            <Card
+              key={school.id}
+              className="cursor-pointer transition-colors hover:bg-accent"
+              onClick={() => fetchOrders(school)}
+            >
+              <CardHeader>
+                <CardTitle className="text-xl flex justify-center items-center">{school.name}</CardTitle>
+              </CardHeader>
+            </Card>
+          ))}
         </div>
       )}
 
+      {/* {selectedSchool.name} */}
+
+      {/* ================= ORDERS ================= */}
       {selectedSchool && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">{selectedSchool}</h2>
-          <div className="grid gap-4">
-            {filteredUsers.map((user) => (
-              <Card key={user.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-base">{user.userName}</CardTitle>
-                      <CardDescription className="mt-1">
-                        <div className="space-y-1">
-                          <div>{user.email}</div>
-                          <div>{user.phone}</div>
-                          <div className="text-xs">
-                            {user.className} • {user.bundleName}
-                          </div>
-                        </div>
-                      </CardDescription>
+          <h2 className="text-xl font-semibold">{role === "ADMIN" ? selectedSchool.name : ""}</h2>
+
+          {/* 🔍 Search Orders */}
+          <Input
+            placeholder="Search by name, email, order number or status..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="max-w-md"
+          />
+
+          {/* ⏳ Loading */}
+          {loading && (
+            <div className="flex items-center justify-center mt-10">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          )}
+
+          {/* 📭 Empty */}
+          {!loading && filteredOrders.length === 0 && (
+            <p className="text-center text-muted-foreground">
+              No orders found
+            </p>
+          )}
+
+          {/* 📦 Orders List */}
+          {!loading && filteredOrders.length > 0 && (
+            <div className="space-y-4">
+              {filteredOrders.map((order) => (
+                <Card key={order.id}>
+                  <CardHeader>
+                    <div className="flex justify-between">
+                      <div>
+                        <CardTitle className="text-base">{order.userName}</CardTitle>
+                        <CardDescription>
+                          {order.email} • {order.phone}
+                        </CardDescription>
+                      </div>
+                      <Badge
+                        variant={
+                          order.status === "Completed"
+                            ? "default"
+                            : order.status === "Pending"
+                              ? "secondary"
+                              : "destructive"
+                        }
+                      >
+                        {order.status}
+                      </Badge>
                     </div>
-                    <Badge
-                      variant={
-                        user.status === "Completed"
-                          ? "default"
-                          : user.status === "Pending"
-                            ? "secondary"
-                            : "destructive"
-                      }
-                    >
-                      {user.status}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
+                  </CardHeader>
+
+                  <CardContent className="flex justify-between">
                     <div>
-                      <div className="text-sm text-muted-foreground">Order: {user.orderNumber}</div>
-                      <div className="text-sm text-muted-foreground">Date: {user.orderDate}</div>
+                      <p className="text-sm">Order: {order.orderNumber}</p>
+                      <p className="text-sm">Date: {order.orderDate}</p>
                     </div>
+
                     <div className="text-right">
-                      <div className="text-2xl font-bold">₹{user.totalAmount.toLocaleString()}</div>
-                      <p className="text-xs text-muted-foreground mt-1">Total Amount</p>
+                      <p className="text-xl font-bold">₹{order.totalAmount.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground">Total Amount</p>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

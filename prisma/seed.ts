@@ -39,6 +39,8 @@ async function main() {
     },
   });
 
+  
+
   const parent = await prisma.user.create({
     data: {
       email: "parent@test.com",

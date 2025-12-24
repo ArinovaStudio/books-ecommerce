@@ -1,8 +1,9 @@
-"use state";
-import { useState } from "react"
+"use client"
+
+import { useEffect, useState } from "react"
 import { Button } from "../ui/button"
 import { Card, CardHeader, CardTitle } from "../ui/card"
-import { ArrowLeft, Plus, Trash2 } from "lucide-react"
+import { ArrowLeft, Plus, Trash2, Loader2 } from "lucide-react"
 import { Input } from "../ui/input"
 import {
     Dialog,
@@ -13,133 +14,227 @@ import {
     DialogFooter,
 } from "../ui/dialog"
 
+import { useToast } from "../ui/use-toast"
+
+const sortSections = (a: string, b: string) => {
+    const order = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
+    const aIndex = order.indexOf(a.toUpperCase())
+    const bIndex = order.indexOf(b.toUpperCase())
+    return aIndex - bIndex
+}
+
+
+/* ================= TYPES ================= */
+
 type SectionType = {
-    id: string
     name: string
 }
 
 type Props = {
-    section?: {
-        id: string
-        name: string
-    }
-    school: string,
-    classes: string,
-    onSelectSection?: (section: SectionType) => void
+    school: string
+    classes: string
+    onSelectSection?: (section: string) => void
     onBack?: () => void
 }
 
-export default function SchoolSection({ onSelectSection, onBack, school, classes }: Props) {
-    const [sections, setSections] = useState<SectionType[]>([
-        {
-            id: "A",
-            name: "A"
-        },
-        {
-            id: "B",
-            name: "B"
-        },
-        {
-            id: "C",
-            name: "C"
-        },
-        {
-            id: "D",
-            name: "D"
-        }
-    ])
+/* ================= COMPONENT ================= */
+
+export default function SchoolSection({
+    onSelectSection,
+    onBack,
+    school,
+    classes,
+}: Props) {
+    const { toast } = useToast();
+    const [sections, setSections] = useState<string[]>([])
+    const [loading, setLoading] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const [newSection, setNewSection] = useState<string>("")
+    const [newSection, setNewSection] = useState("")
 
+    /* ================= FETCH SECTIONS ================= */
 
+    const fetchSection = async () => {
+        if (!school || !classes) return
 
-    const handleAddSection = () => {
-        const section = newSection.trim().toUpperCase()
-        if (!section) return
+        setLoading(true)
+        try {
+            const res = await fetch(
+                `/api/admin/classes/${classes}/sections`
+            )
+            const data = await res.json()
 
-        const exists = sections.some(sec => sec.id === section)
-        if (exists) {
-            setNewSection("")
-            setIsDialogOpen(false)
-            return
+            if (data.success) {
+                setSections(data.sections.sort(sortSections))
+                toast({
+                    title: "Success",
+                    description: "Section added successfully",
+                    variant: "default"
+                })
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to add section",
+                variant: "destructive"
+            })
+            setSections([])
+        } finally {
+            setLoading(false)
         }
-
-        setSections([
-            ...sections,
-            { id: section, name: section }
-        ])
-
-        setNewSection("")
-        setIsDialogOpen(false)
     }
 
-    const deleteSection = (e: React.MouseEvent, sectionToDelete: string) => {
+    useEffect(() => {
+        fetchSection()
+    }, [school, classes])
+
+    /* ================= ADD SECTION ================= */
+
+    const handleAddSection = async () => {
+        if (!newSection.trim()) return
+
+        setLoading(true)
+        try {
+            const res = await fetch(
+                `/api/admin/classes/${classes}/sections`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ section: newSection.toUpperCase() }),
+                }
+            )
+
+            const data = await res.json()
+
+            if (data.success) {
+                fetchSection()
+            }
+        } catch (error) {
+            console.error("Add section error:", error)
+        } finally {
+            setLoading(false)
+            setIsDialogOpen(false)
+            setNewSection("")
+        }
+    }
+
+    /* ================= DELETE SECTION ================= */
+
+    const deleteSection = async (
+        e: React.MouseEvent,
+        sectionToDelete: string
+    ) => {
         e.stopPropagation()
-        setSections(sections.filter((sec) => sec.id !== sectionToDelete))
+
+        try {
+            const res = await fetch(
+                `/api/admin/classes/${classes}/sections`,
+                {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ section: sectionToDelete }),
+                }
+            )
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error(data.message || "Delete failed")
+            }
+
+            if (data.success) {
+                toast({
+                    title: "Success",
+                    description: "Section deleted successfully",
+                    variant: "default"
+                })
+                fetchSection()
+            }
+        } catch (error) {
+            console.error("Delete section error:", error)
+        }
     }
+
+    /* ================= UI ================= */
 
     return (
-        <div >
-            <div className="flex justify-between items-center mb-4">
-                <Button variant="ghost" onClick={onBack} className="gap-2 cursor-pointer">
-                    <ArrowLeft className="h-4 w-4" />
-                    Back to classes
-                </Button>
+        <div className="space-y-4">
+            {/* Header */}
+            <div className="flex justify-between items-center">
+                {onBack && (
+                    <Button variant="ghost" onClick={onBack} className="gap-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to classes
+                    </Button>
+                )}
 
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button variant="outline" className="gap-2 cursor-pointer">
+                        <Button variant="outline" className="gap-2">
                             <Plus className="h-4 w-4" />
                             Add Section
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
+
+                    <DialogContent>
                         <DialogHeader>
                             <DialogTitle>Add New Section</DialogTitle>
                         </DialogHeader>
-                        <div className="py-4">
-                            <Input
-                                placeholder="e.g. A, D, E ..."
-                                value={newSection}
-                                onChange={(e) => setNewSection(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleAddSection()}
-                            />
-                        </div>
+
+                        <Input
+                            placeholder="e.g. A, B, C"
+                            value={newSection}
+                            onChange={(e) => setNewSection(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleAddSection()}
+                        />
+
                         <DialogFooter>
-                            <Button variant="outline" className="cursor-pointer" onClick={() => setIsDialogOpen(false)}>
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsDialogOpen(false)}
+                            >
                                 Cancel
                             </Button>
-                            <Button className="cursor-pointer" onClick={handleAddSection}>Add Section</Button>
+                            <Button onClick={handleAddSection}>Add</Button>
                         </DialogFooter>
                     </DialogContent>
-
                 </Dialog>
             </div>
 
-            <div className="grid mt-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {sections.map((sec) => (
-                    <Card
-                        key={sec.id}
-                        onClick={onSelectSection ? () => onSelectSection({ name: sec.name, id: sec.id }) : undefined}
-                        className={`group relative transition ${onSelectSection
-                            ? "cursor-pointer hover:shadow-md"
-                            : "cursor-default"
-                            }`}
-                    >
-                        <button
-                            onClick={(e) => deleteSection(e, sec.id)}
-                            className="absolute cursor-pointer top-2 right-2 p-1.5 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+            {/* Sections Grid */}
+            {loading ? (
+                <div className="flex justify-center p-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : sections.length === 0 ? (
+                <p className="text-center text-muted-foreground">
+                    No sections found
+                </p>
+            ) : (
+                <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                    {sections.map((sec) => (
+                        <Card
+                            key={sec}
+                            onClick={
+                                onSelectSection
+                                    ? () => onSelectSection({ name: sec })
+                                    : undefined
+                            }
+                            className="group relative cursor-pointer hover:shadow-md"
                         >
-                            <Trash2 className="h-4 w-4" />
-                        </button>
-                        <CardHeader>
-                            <CardTitle className="text-center text-base">
-                                {sec.name}
-                            </CardTitle>
-                        </CardHeader>
-                    </Card>
-                ))}
-            </div>
-        </div >
+                            <button
+                                onClick={(e) => deleteSection(e, sec)}
+                                className="absolute top-2 right-2 cursor-pointer p-1.5 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </button>
+
+                            <CardHeader>
+                                <CardTitle className="text-center">{sec}</CardTitle>
+                            </CardHeader>
+                        </Card>
+                    ))}
+                </div>
+            )}
+        </div>
     )
 }

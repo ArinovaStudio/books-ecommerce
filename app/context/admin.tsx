@@ -9,10 +9,7 @@ type User = {
   id: string
   name: string
   role: Role
-  school: {
-    id: string
-    name: string
-  } | null
+  schoolId: string
 }
 
 interface AdminContextType {
@@ -45,6 +42,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
         const data = await res.json()
         setUser(data.user)
+        console.log("User", data.user)
         setRole(data.user.role)
 
         if (data.user.role === "SUB_ADMIN") {

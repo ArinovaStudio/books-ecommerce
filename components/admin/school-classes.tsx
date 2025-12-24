@@ -9,8 +9,8 @@ const sortClasses = (a: { name: string }, b: { name: string }) => {
         "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
         "Class 6", "Class 7", "Class 8", "Class 9", "Class 10",
         "Class 11", "Class 12"
-    ];
-    return order.indexOf(a.name) - order.indexOf(b.name);
+    ]
+    return order.indexOf(a.name) - order.indexOf(b.name)
 }
 
 type ClassType = {
@@ -19,47 +19,47 @@ type ClassType = {
 }
 
 type Props = {
-    school?: {
-        id: string
-        name: string
-    } | null
+    schoolId: string
     onBack?: () => void
-    onSelectClass?: (className: { id: string; name: string }) => void
+    onSelectClass?: (id: string) => void
 }
 
 export function SchoolClasses({
-    school,
+    schoolId,
     onBack,
     onSelectClass,
 }: Props) {
-
     const [classes, setClasses] = useState<ClassType[]>([])
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-        if (!school?.id) return;
+        if (!schoolId) {
+            setClasses([])
+            setLoading(false)
+            return
+        }
 
         const fetchClasses = async () => {
             setLoading(true)
             try {
-                const res = await fetch(`/api/admin/schools/${school.id}/classes`)
+                const res = await fetch(`/api/admin/schools/${schoolId}/classes`)
                 const data = await res.json()
 
                 if (data.success) {
-                    const sorted = data.classes.sort(sortClasses)
-                    setClasses(sorted)
+                    setClasses(data.classes.sort(sortClasses))
                 } else {
                     setClasses([])
                 }
             } catch (error) {
                 console.error("Failed to fetch classes", error)
+                setClasses([])
             } finally {
                 setLoading(false)
             }
         }
 
         fetchClasses()
-    }, [school?.id])
+    }, [schoolId])
 
     return (
         <div className="space-y-4">
@@ -80,7 +80,7 @@ export function SchoolClasses({
                 </div>
             ) : (
                 <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                    {classes.map((cls, index) => (
+                    {classes.map((cls,index) => (
                         <Card
                             key={index}
                             onClick={()=>onSelectClass ? onSelectClass(cls):undefined}
