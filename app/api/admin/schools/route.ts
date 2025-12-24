@@ -33,10 +33,11 @@ export const POST = Wrapper(async (req: NextRequest) => {
         const password = formData.get("password") as string;
         const address = formData.get("location") as string; 
         const classRange = formData.get("classRange") as string;
-        const languagesRaw = formData.get("languages") as string; 
+        const languagesRaw = formData.get("languages") as string;
+        const board = formData.get("board") as string;
         const imageFile = formData.get("image") as File | null;
 
-        if (!name || !email || !password || !address || !classRange) {
+        if (!name || !email || !password || !address || !classRange || !board) {
             return NextResponse.json({ success: false, message: "All fields are required" }, { status: 400 });
         }
 
@@ -63,7 +64,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
         const result = await prisma.$transaction(async (tx) => {
             
             const school = await tx.school.create({ 
-                data: { name, email, image: imageUrl, address, classRange, 
+                data: { name, email, image: imageUrl, address, classRange, board,
                     languages: languagesRaw ? JSON.parse(languagesRaw) : [], 
                     numberOfClasses: classesToCreate.length,
                     status: "ACTIVE"
