@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -73,7 +72,7 @@ const SignInPage = () => {
                     description: 'Signed in successfully',
                     variant: 'default'
                 })
-                router.push('/dashboard')
+                router.push('/')
             } else {
                 toast({
                     title: 'Error',
@@ -180,12 +179,12 @@ const SignInPage = () => {
                             'Login Now'
                         )}
                     </Button>
-                    <div className="text-center">
+                    {/* <div className="text-center">
                         <span className="text-sm text-gray-600">Create an account!   </span>
                         <Link href="/signup" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
                             Sign Up
                         </Link>
-                    </div>
+                    </div> */}
                 </form>
             </div>
         </div>
