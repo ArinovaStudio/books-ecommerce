@@ -10,18 +10,27 @@ export const GET = Wrapper(async (req: NextRequest, { params }: { params: Promis
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
 
-        if (auth.user.role !== "ADMIN") {
+        if (auth.user.role !== "ADMIN" || auth.user.role !== "SUB_ADMIN") {
             return NextResponse.json({ success: false, message: "Only Admin can view users" }, { status: 403 });
         }
 
         const { schoolId, classId } = await params;
+        const { searchParams } = new URL(req.url);
+        const section = searchParams.get('section');
+
+        // Sub admin check
+        if (auth.user.role === "SUB_ADMIN") {
+            if (!auth.user.schoolId || auth.user.schoolId !== schoolId) {
+                return NextResponse.json({ success: false, message: "You are not authorized to manage this school's users" }, { status: 403 });
+            }
+        }
 
         const users = await prisma.user.findMany({
             where: {
                 children: {
                     some: {
                         classId: classId,
-                        schoolId: schoolId 
+                        schoolId: schoolId
                     }
                 }
             },
@@ -42,7 +51,7 @@ export const GET = Wrapper(async (req: NextRequest, { params }: { params: Promis
             name: u.name,
             email: u.email,
             phone: u.phone || "N/A",
-            role: u.role, 
+            role: u.role,
             status: u.status,
             joinDate: new Date(u.createdAt).toLocaleDateString()
         }));

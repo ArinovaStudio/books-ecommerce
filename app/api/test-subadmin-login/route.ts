@@ -8,13 +8,12 @@ const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY";
 
 export async function GET() {
     try {
-        const email = "rahulsingh.dev.36@gmail.com";
+        const email = "rahul5416@gmail.com";
         const password = "123456";
 
-        // 1️⃣ Find existing school
         const school = await prisma.school.findFirst({
             where: {
-                email: email, // assuming school email matches
+                email: email,
             },
         });
 
@@ -25,12 +24,10 @@ export async function GET() {
             );
         }
 
-        // 2️⃣ Find subadmin user
         let subadmin = await prisma.user.findUnique({
             where: { email },
         });
 
-        // 3️⃣ Create subadmin if not exists
         if (!subadmin) {
             const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -50,7 +47,6 @@ export async function GET() {
             });
         }
 
-        // 4️⃣ Generate JWT
         const token = jwt.sign(
             {
                 id: subadmin.id,
@@ -62,7 +58,6 @@ export async function GET() {
             { expiresIn: "1d" }
         );
 
-        // 5️⃣ Set cookie
         const cookieStore = await cookies();
         cookieStore.set("token", token, {
             httpOnly: true,

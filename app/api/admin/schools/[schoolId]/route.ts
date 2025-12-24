@@ -38,6 +38,7 @@ export const PUT = Wrapper(async(req: NextRequest, { params }: { params: Promise
     const address = formData.get("location") as string; 
     const classRange = formData.get("classes") as string; 
     const languagesRaw = formData.get("languages") as string;
+    const board = formData.get("board") as string;
     const imageFile = formData.get("image") as File | null;
 
     let imageUrl = existingSchool.image;
@@ -98,7 +99,8 @@ export const PUT = Wrapper(async(req: NextRequest, { params }: { params: Promise
                 classRange: classRange || existingSchool.classRange,
                 languages: languagesRaw ? JSON.parse(languagesRaw) : existingSchool.languages,
                 image: imageUrl,
-                numberOfClasses: newNumberOfClasses
+                numberOfClasses: newNumberOfClasses,
+                board: board || existingSchool.board
             },
         });
 

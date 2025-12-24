@@ -17,32 +17,32 @@ export async function GET() {
 
     if (!admin) {
       const hashedPassword = await bcrypt.hash(adminPassword, 12);
-      
+
       admin = await prisma.user.create({
         data: {
           name: "Super Admin",
           email: adminEmail,
           password: hashedPassword,
-          role: "ADMIN",      
-          status: "ACTIVE",   
-          phone: "9999999999", 
+          role: "ADMIN",
+          status: "ACTIVE",
+          phone: "9999999999",
           address: "Test Lab"
         }
       });
     }
 
-    const token = jwt.sign( { id: admin.id, email: admin.email, role: admin.role }, SECRET_KEY, { expiresIn: "1d" });
+    const token = jwt.sign({ id: admin.id, email: admin.email, role: admin.role }, SECRET_KEY, { expiresIn: "1d" });
 
     const cookieStore = await cookies();
     cookieStore.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24 
+      maxAge: 60 * 60 * 24
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: "Logged in as Admin successfully",
       user: { email: admin.email, role: admin.role }
     });

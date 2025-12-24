@@ -14,9 +14,10 @@ import { Bundels } from "@/components/Bundels"
 import { OrdersTable } from "@/components/admin/user-table"
 import SchoolSection from "@/components/admin/school-section"
 import ProductTables from "@/components/product-tables"
+import { PromoteUserDialog } from "@/components/PromoteUser"
 
 export default function AdminDashboard() {
-  const { activeTab } = useAdmin()
+  const { activeTab, role } = useAdmin()
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [selectedSchool, setSelectedSchool] = useState<{ id: string; name: string } | null>(null)
@@ -43,8 +44,13 @@ export default function AdminDashboard() {
         {activeTab === "users" && (
           <Card>
             <CardHeader>
-              <CardTitle>Registered Users</CardTitle>
-              <CardDescription>View and manage all registered users</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Registered Users</CardTitle>
+                  <CardDescription>View and manage all registered users</CardDescription>
+                </div>
+                {role === "ADMIN" && <PromoteUserDialog />}
+              </div>
             </CardHeader>
             <CardContent>
               {!selectedSchool && !selectedClass && (
@@ -106,7 +112,7 @@ export default function AdminDashboard() {
           </Card>
         )}
 
-        {/* Bundles Tab */}
+        {/* Bundles Tab
         {activeTab === "bundels" && (
           <Card>
             <CardHeader>
@@ -139,7 +145,7 @@ export default function AdminDashboard() {
               )}
             </CardContent>
           </Card>
-        )}
+        )} */}
 
         {/* Order Tabs */}
         {activeTab === "orders" && (

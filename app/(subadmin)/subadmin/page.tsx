@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { AnalyticsCharts } from "@/components/admin/analytics-chart"
-import { SchoolCards } from "@/components/admin/school-cards"
 import { SchoolClasses } from "@/components/admin/school-classes"
 import { SchoolClassUsers } from "@/components/admin/school-users"
 import { AdminHeader } from "@/components/admin/header"
@@ -23,7 +21,6 @@ export default function AdminDashboard() {
     const [selectedSection, setSelectedSection] = useState<{ id: string; name: string } | null>(null)
     const [selectedLang, setSelectedLang] = useState<string | null>(null)
 
-    // Reset selections when switching tabs
     useEffect(() => {
         setSelectedClass(null)
         setSelectedLang(null)
@@ -45,15 +42,15 @@ export default function AdminDashboard() {
                         <CardContent>
                             {!selectedClass && (
                                 <SchoolClasses
-                                    school={user.school}
+                                    schoolId={user.schoolId}
                                     onSelectClass={setSelectedClass}
                                 />
                             )}
 
-                            {/* {selectedClass && !selectedSection && (
+                            {selectedClass && !selectedSection && (
                                 <SchoolSection
-                                    school={user.school}
-                                    classes={selectedClass.name}
+                                    school={user.schoolId}
+                                    classes={selectedClass.id}
                                     onSelectSection={setSelectedSection}
                                     onBack={() => setSelectedClass(null)}
                                 />
@@ -62,13 +59,12 @@ export default function AdminDashboard() {
                             {selectedClass && selectedSection && (
                                 <SchoolClassUsers
                                     activeTab={activeTab}
-                                    schoolId={user.school.id.toString()}
+                                    schoolId={user.schoolId}
                                     classId={selectedClass.id}
                                     sectionId={selectedSection.id}
-                                    className={selectedClass.name}
                                     onBack={() => setSelectedSection(null)}
                                 />
-                            )} */}
+                            )}
                         </CardContent>
                     </Card>
                 )}
@@ -140,7 +136,7 @@ export default function AdminDashboard() {
                             <CardDescription>View and manage all Orders</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <OrdersTable />
+                            <OrdersTable role={user.role} subAdminSchoolId={user.schoolId} />
                         </CardContent>
                     </Card>
                 )}
