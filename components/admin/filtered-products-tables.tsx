@@ -211,7 +211,7 @@ export default function FilteredProductTable({
   );
 
   return (
-    <Card className="w-full border-none shadow-none bg-transparent">
+    <Card className="w-full py-0 pb-3 border-none shadow-none bg-transparent">
       <CardHeader className="px-0">
         <Button variant="ghost" onClick={()=>setSelectedClass(null)} className="gap-2 justify-self-start">
             <ArrowLeft className="h-4 w-4" />
