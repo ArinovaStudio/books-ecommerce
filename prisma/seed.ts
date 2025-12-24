@@ -29,6 +29,8 @@ async function main() {
     },
   });
 
+  
+
   const parent = await prisma.user.create({
     data: {
       name: "Parent User",
