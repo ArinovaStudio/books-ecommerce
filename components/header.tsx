@@ -87,10 +87,12 @@ export default function Header() {
               size={20}
               className="text-white hover:text-orange-600 cursor-pointer transition"
             />
-            <User
-              size={20}
-              className="text-white hover:text-orange-600 cursor-pointer transition"
-            />
+            <Link href="/signup">
+              <User
+                size={20}
+                className="text-white hover:text-orange-600 cursor-pointer transition"
+              />
+            </Link>
 
             {/* <Button
               className="bg-orange-500 hover:bg-orange-600 text-white px-6 rounded-lg cursor-pointer"
