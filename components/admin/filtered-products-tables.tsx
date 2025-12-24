@@ -57,7 +57,6 @@ export default function FilteredProductTable({
         }),
       });
       const data = await res.json();
-
       if (data.success) {
         setProducts(data.data);
       } else {

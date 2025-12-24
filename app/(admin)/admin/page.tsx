@@ -105,7 +105,7 @@ export default function AdminDashboard() {
               {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab={activeTab} refreshTrigger={refreshTrigger} />}
               {selectedSchool && !selectedClass && (
                 <SchoolClasses
-                  school={selectedSchool}
+                  schoolId={selectedSchool}
                   onSelectClass={setSelectedClass}
                   onBack={() => setSelectedSchool(null)}
                 />
