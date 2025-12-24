@@ -83,11 +83,8 @@ export function SchoolClasses({
                     {classes.map((cls, index) => (
                         <Card
                             key={index}
-                            onClick={onSelectClass ? () => onSelectClass({ id: cls.id, name: cls.name }) : undefined}
-                            className={`transition ${onSelectClass
-                                ? "cursor-pointer hover:shadow-md"
-                                : "cursor-default"
-                                }`}
+                            onClick={()=>onSelectClass ? onSelectClass(cls):undefined}
+                            className={`transition cursor-pointer hover:shadow-md hover:text-white hover:bg-[var(--primary)]`}
                         >
                             <CardHeader>
                                 <CardTitle className="text-center text-base">

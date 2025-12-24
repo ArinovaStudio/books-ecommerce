@@ -14,6 +14,7 @@ import { Bundels } from "@/components/Bundels"
 import { OrdersTable } from "@/components/admin/user-table"
 import SchoolSection from "@/components/admin/school-section"
 import ProductTables from "@/components/product-tables"
+import FilteredProductTable from "@/components/admin/filtered-products-tables"
 
 export default function AdminDashboard() {
   const { activeTab } = useAdmin()
@@ -99,15 +100,21 @@ export default function AdminDashboard() {
               {selectedSchool && !selectedClass && (
                 <SchoolClasses
                   school={selectedSchool}
+                  onSelectClass={setSelectedClass}
                   onBack={() => setSelectedSchool(null)}
                 />
               )}
+              {
+                selectedSchool && selectedClass && (
+                  <FilteredProductTable setSelectedClass={setSelectedClass} selectedSchool={selectedSchool}  selectedClass={selectedClass}/>
+                )
+              }
             </CardContent>
           </Card>
         )}
 
         {/* Bundles Tab */}
-        {activeTab === "bundels" && (
+        {/* {activeTab === "bundels" && (
           <Card>
             <CardHeader>
               <CardTitle>Bundles</CardTitle>
@@ -139,7 +146,7 @@ export default function AdminDashboard() {
               )}
             </CardContent>
           </Card>
-        )}
+        )} */}
 
         {/* Order Tabs */}
         {activeTab === "orders" && (
@@ -155,7 +162,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Product Tab */}
-        {activeTab === "products" && (
+        {/* {activeTab === "products" && (
           <Card>
             <CardHeader>
               <CardTitle>Products</CardTitle>
@@ -165,7 +172,7 @@ export default function AdminDashboard() {
               <ProductTables />
             </CardContent>
           </Card>
-        )}
+        )} */}
       </main>
     </>
   )

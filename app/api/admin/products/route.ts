@@ -24,7 +24,8 @@ export const POST = Wrapper(async (req: NextRequest) => {
         const category = formData.get("category") as string;
         const stock = formData.get("stock") as string;
         const imageFile = formData.get("image") as File | null;
-
+        const classId = formData.get("classId") as string;
+        const schoolId = formData.get("schoolId") as string;
         if (!name || !description || !price || !category || !stock) {
             return NextResponse.json({ success: false, message: "All fields are required" }, { status: 400 });
         }
@@ -46,7 +47,8 @@ export const POST = Wrapper(async (req: NextRequest) => {
                 brand,
                 category: category as "TEXTBOOK" | "NOTEBOOK" | "STATIONARY" | "OTHER",
                 stock: parseInt(stock),
-                image: imageUrl
+                image: imageUrl,
+                classId: classId
             }
         });
 

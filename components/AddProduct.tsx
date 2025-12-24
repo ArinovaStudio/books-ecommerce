@@ -35,6 +35,8 @@ type Product = {
 }
 
 type Props = {
+    selectedSchool?: any
+    selectedClass?: any
     product?: Product          // 👈 optional
     onSuccess: () => void
     trigger?: React.ReactNode  // 👈 custom trigger (Edit button)
@@ -42,6 +44,8 @@ type Props = {
 
 
 export default function AddEditProductDialog({
+    selectedSchool,
+    selectedClass,
     product,
     onSuccess,
     trigger,
@@ -56,7 +60,6 @@ export default function AddEditProductDialog({
     const [productClass, setProductClass] = useState("")
     const [image, setImage] = useState<File | null>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
-
     /* ✅ Prefill for edit */
     useEffect(() => {
         if (product) {
@@ -64,7 +67,7 @@ export default function AddEditProductDialog({
             setProductClass(product.class || "")
             setImagePreview(product.image)
         }
-    }, [product])
+    }, [product,selectedClass,selectedSchool])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -72,15 +75,11 @@ export default function AddEditProductDialog({
 
         try {
             if (!category) throw new Error("Please select category")
-            if (category === "TEXTBOOK" && !productClass) {
-                throw new Error("Please select class")
-            }
-
             const form = e.target as HTMLFormElement
             const formData = new FormData(form)
-
             formData.append("category", category)
-            if (productClass) formData.append("class", productClass)
+            formData.append("classId",selectedClass);
+            formData.append("schoolId",selectedSchool);
             if (image) formData.append("image", image)
 
             const res = await fetch(
@@ -113,9 +112,9 @@ export default function AddEditProductDialog({
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
+            <DialogTrigger asChild={true}>
                 {trigger || (
-                    <Button className="gap-2">
+                    <Button>
                         <Plus className="h-4 w-4" />
                         Add Product
                     </Button>
@@ -144,11 +143,11 @@ export default function AddEditProductDialog({
                         />
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
                             <Label>Category</Label>
                             <Select value={category} onValueChange={setCategory}>
-                                <SelectTrigger>
+                                <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -161,7 +160,7 @@ export default function AddEditProductDialog({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label>Quantity</Label>
+                            <Label>Minimum Quantity</Label>
                             <Input
                                 name="stock"
                                 type="number"
@@ -170,7 +169,7 @@ export default function AddEditProductDialog({
                             />
                         </div>
 
-                        {category === "TEXTBOOK" && (
+                        {/* {category === "TEXTBOOK" && (
                             <div className="grid gap-2">
                                 <Label>Class</Label>
                                 <Select value={productClass} onValueChange={setProductClass}>
@@ -186,7 +185,7 @@ export default function AddEditProductDialog({
                                     </SelectContent>
                                 </Select>
                             </div>
-                        )}
+                        )} */}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
