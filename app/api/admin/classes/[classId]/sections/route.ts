@@ -4,6 +4,69 @@ import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
+export const GET = Wrapper(
+  async (
+    req: NextRequest,
+    { params }: { params: Promise<{ classId: string }> }
+  ) => {
+    try {
+      const auth = await verifyAdmin(req);
+
+      if (!auth.success) {
+        return NextResponse.json(
+          { success: false, message: "Unauthorized" },
+          { status: 403 }
+        );
+      }
+
+      const { classId } = await params;
+
+      const existingClass = await prisma.class.findUnique({
+        where: { id: classId },
+        select: {
+          sections: true,
+          schoolId: true,
+        },
+      });
+
+      if (!existingClass) {
+        return NextResponse.json(
+          { success: false, message: "Class not found" },
+          { status: 404 }
+        );
+      }
+
+      // 🔐 Sub-admin restriction
+      if (auth.user.role === "SUB_ADMIN") {
+        if (
+          !auth.user.schoolId ||
+          auth.user.schoolId !== existingClass.schoolId
+        ) {
+          return NextResponse.json(
+            {
+              success: false,
+              message:
+                "You are not authorized to view this school's classes",
+            },
+            { status: 403 }
+          );
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        sections: existingClass.sections ?? [],
+      });
+    } catch (error) {
+      console.error("Get sections error:", error);
+      return NextResponse.json(
+        { success: false, message: "Internal server error" },
+        { status: 500 }
+      );
+    }
+  }
+);
+
 const addSectionSchema = z.object({
   section: z.string().min(1, "Section name is required"),
 });
@@ -11,7 +74,7 @@ const addSectionSchema = z.object({
 // Add a section in section array of class
 export const POST = Wrapper(async (req: NextRequest, { params }: { params: Promise<{ classId: string }> }) => {
   const auth = await verifyAdmin(req);
-  if (!auth.success){ 
+  if (!auth.success) {
     return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
   }
 
@@ -26,15 +89,15 @@ export const POST = Wrapper(async (req: NextRequest, { params }: { params: Promi
   const { section } = validation.data;
 
   const existingClass = await prisma.class.findUnique({ where: { id: classId }, select: { sections: true, schoolId: true } });
-  if (!existingClass){
+  if (!existingClass) {
     return NextResponse.json({ success: false, message: "Class not found" }, { status: 404 });
   }
 
   // Sub admin check
   if (auth.user.role === "SUB_ADMIN") {
-      if (!auth.user.schoolId || auth.user.schoolId !== existingClass.schoolId) {
-          return NextResponse.json({ success: false, message: "You are not authorized to manage this school's classes" }, { status: 403 });
-      }
+    if (!auth.user.schoolId || auth.user.schoolId !== existingClass.schoolId) {
+      return NextResponse.json({ success: false, message: "You are not authorized to manage this school's classes" }, { status: 403 });
+    }
   }
 
   if (existingClass.sections.includes(section)) {
@@ -60,7 +123,7 @@ const updateSectionSchema = z.object({
 // Update a section name in section array of class
 export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promise<{ classId: string }> }) => {
   const auth = await verifyAdmin(req);
-  if (!auth.success){ 
+  if (!auth.success) {
     return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
   }
 
@@ -75,15 +138,15 @@ export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promis
   const { oldSection, newSection } = validation.data;
 
   const existingClass = await prisma.class.findUnique({ where: { id: classId }, select: { sections: true, schoolId: true } });
-  if (!existingClass){
+  if (!existingClass) {
     return NextResponse.json({ success: false, message: "Class not found" }, { status: 404 });
   }
 
   // Sub admin check
   if (auth.user.role === "SUB_ADMIN") {
-      if (!auth.user.schoolId || auth.user.schoolId !== existingClass.schoolId) {
-          return NextResponse.json({ success: false, message: "You are not authorized to manage this school's classes" }, { status: 403 });
-      }
+    if (!auth.user.schoolId || auth.user.schoolId !== existingClass.schoolId) {
+      return NextResponse.json({ success: false, message: "You are not authorized to manage this school's classes" }, { status: 403 });
+    }
   }
 
   if (!existingClass.sections.includes(oldSection)) {
@@ -108,12 +171,12 @@ const deleteSectionSchema = z.object({
 // Delete a section in section array of class
 export const DELETE = Wrapper(async (req: NextRequest, { params }: { params: Promise<{ classId: string }> }) => {
   const auth = await verifyAdmin(req);
-  if (!auth.success){ 
+  if (!auth.success) {
     return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
   }
 
   const { classId } = await params;
-  const body = await req.json(); 
+  const body = await req.json();
   const validation = deleteSectionSchema.safeParse(body);
 
   if (!validation.success) {
@@ -124,15 +187,15 @@ export const DELETE = Wrapper(async (req: NextRequest, { params }: { params: Pro
 
 
   const existingClass = await prisma.class.findUnique({ where: { id: classId }, select: { sections: true, schoolId: true } });
-  if (!existingClass){
+  if (!existingClass) {
     return NextResponse.json({ success: false, message: "Class not found" }, { status: 404 });
   }
 
   // Sub admin check
   if (auth.user.role === "SUB_ADMIN") {
-      if (!auth.user.schoolId || auth.user.schoolId !== existingClass.schoolId) {
-          return NextResponse.json({ success: false, message: "You are not authorized to manage this school's classes" }, { status: 403 });
-      }
+    if (!auth.user.schoolId || auth.user.schoolId !== existingClass.schoolId) {
+      return NextResponse.json({ success: false, message: "You are not authorized to manage this school's classes" }, { status: 403 });
+    }
   }
 
   if (!existingClass.sections.includes(section)) {

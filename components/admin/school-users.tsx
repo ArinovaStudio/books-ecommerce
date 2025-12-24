@@ -23,7 +23,7 @@ type Props = {
     activeTab: string
     classId: string
     sectionId: string
-    className: string
+    className?: string
     onBack: () => void
 }
 
@@ -70,7 +70,7 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
                     <ArrowLeft className="h-4 w-4" />
                     <p className="hidden md:block">Back to Section</p>
                 </Button>
-                <AddUserDialog 
+                <AddUserDialog
                     schoolId={schoolId}
                     classId={classId}
                     sectionId={sectionId}

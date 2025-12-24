@@ -10,7 +10,7 @@ export const GET = Wrapper(async (req: NextRequest, { params }: { params: Promis
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
 
-        if (auth.user.role !== "ADMIN") {
+        if (auth.user.role !== "ADMIN" || auth.user.role !== "SUB_ADMIN") {
             return NextResponse.json({ success: false, message: "Only Admin can view users" }, { status: 403 });
         }
 
@@ -21,7 +21,7 @@ export const GET = Wrapper(async (req: NextRequest, { params }: { params: Promis
                 children: {
                     some: {
                         classId: classId,
-                        schoolId: schoolId 
+                        schoolId: schoolId
                     }
                 }
             },
@@ -42,7 +42,7 @@ export const GET = Wrapper(async (req: NextRequest, { params }: { params: Promis
             name: u.name,
             email: u.email,
             phone: u.phone || "N/A",
-            role: u.role, 
+            role: u.role,
             status: u.status,
             joinDate: new Date(u.createdAt).toLocaleDateString()
         }));
