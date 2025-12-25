@@ -14,6 +14,7 @@ import { Bundels } from "@/components/Bundels"
 import { OrdersTable } from "@/components/admin/user-table"
 import SchoolSection from "@/components/admin/school-section"
 import ProductTables from "@/components/product-tables"
+import FilteredProductTable from "@/components/admin/filtered-products-tables"
 import { PromoteUserDialog } from "@/components/PromoteUser"
 
 export default function AdminDashboard() {
@@ -105,9 +106,15 @@ export default function AdminDashboard() {
               {selectedSchool && !selectedClass && (
                 <SchoolClasses
                   schoolId={selectedSchool}
+                  onSelectClass={setSelectedClass}
                   onBack={() => setSelectedSchool(null)}
                 />
               )}
+              {
+                selectedSchool && selectedClass && (
+                  <FilteredProductTable setSelectedClass={setSelectedClass} selectedSchool={selectedSchool}  selectedClass={selectedClass}/>
+                )
+              }
             </CardContent>
           </Card>
         )}
@@ -161,7 +168,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Product Tab */}
-        {activeTab === "products" && (
+        {/* {activeTab === "products" && (
           <Card>
             <CardHeader>
               <CardTitle>Products</CardTitle>
@@ -171,7 +178,7 @@ export default function AdminDashboard() {
               <ProductTables />
             </CardContent>
           </Card>
-        )}
+        )} */}
       </main>
     </>
   )

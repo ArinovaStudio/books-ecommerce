@@ -1,31 +1,41 @@
-import { PrismaClient } from "@prisma/client";
+import {
+  PrismaClient,
+  UserRole,
+  UserStatus,
+  SchoolStatus,
+  ProductCategory,
+  KitType,
+  PaymentStatus,
+} from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding started...");
+  console.log("🌱 Seeding database...");
 
-  /* -------------------- SCHOOL -------------------- */
-  const school = await prisma.school.create({
-    data: {
-      name: "Green Valley School",
-      email: "info@greenvalley.edu",
-      address: "Kolkata, WB",
-      languages: ["English", "Hindi"],
-      classRange: "1-12",
-      image: "https://dummyimage.com/school.png",
-      board: "CBSE",
-    },
-  });
+  await prisma.orderItem.deleteMany();
+  await prisma.payment.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.kitItem.deleteMany();
+  await prisma.kit.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.student.deleteMany();
+  await prisma.class.deleteMany();
+  await prisma.school.deleteMany();
+  await prisma.otp.deleteMany();
+  await prisma.apiTraffic.deleteMany();
+  await prisma.user.deleteMany();
 
-  /* -------------------- USERS -------------------- */
+  const hashedAdminPassword = await bcrypt.hash("admin123", 12);
+
   const admin = await prisma.user.create({
     data: {
-      name: "Admin User",
-      email: "admin@mail.com",
-      password: "hashed_password",
-      role: "ADMIN",
-      schoolId: school.id,
+      email: "admin@school.com",
+      name: "Super Admin",
+      password: hashedAdminPassword,
+      role: UserRole.ADMIN,
+      status: UserStatus.ACTIVE,
     },
   });
 
@@ -33,146 +43,160 @@ async function main() {
 
   const parent = await prisma.user.create({
     data: {
-      name: "Parent User",
-      email: "parent@mail.com",
-      password: "hashed_password",
-      role: "USER",
+      email: "parent@test.com",
+      phone: "9999999999",
+      name: "Rahul Sharma",
+      password: "parent123",
+      role: UserRole.USER,
     },
   });
 
-  /* -------------------- OTP -------------------- */
-  await prisma.otp.create({
+  // ---------- School ----------
+  const school = await prisma.school.create({
     data: {
-      email: "parent@mail.com",
-      otp: "123456",
-      expiredAt: new Date(Date.now() + 5 * 60 * 1000),
+      name: "Green Valley Public School",
+      email: "info@greenvalley.edu",
+      address: "Sector 21, New Delhi",
+      languages: ["English", "Hindi"],
+      classRange: "1-10",
+      image: "https://dummyimage.com/600x400/000/fff&text=School",
+      board: "CBSE",
+      status: SchoolStatus.ACTIVE,
+      subAdmins: {
+        connect: { id: admin.id },
+      },
     },
   });
 
-  /* -------------------- CLASS -------------------- */
-  const class10 = await prisma.class.create({
+  // ---------- Class ----------
+  const class5 = await prisma.class.create({
     data: {
-      schoolId: school.id,
-      name: "Class 10",
+      name: "Class 5",
       sections: ["A", "B"],
-      academicYear: "2024-25",
-    },
-  });
-
-  /* -------------------- STUDENT -------------------- */
-  const student = await prisma.student.create({
-    data: {
-      name: "Aritra",
-      rollNo: "10A01",
-      section: "A",
-      parentEmail: "parent@mail.com",
-      parentId: parent.id,
+      academicYear: "2025-2026",
       schoolId: school.id,
-      classId: class10.id,
-      isActive: true,
     },
   });
 
-  /* -------------------- PRODUCTS -------------------- */
-  const book = await prisma.product.create({
+  // ---------- Products ----------
+  const mathBook = await prisma.product.create({
     data: {
-      name: "Math Textbook",
-      description: "Class 10 Math",
+      name: "Mathematics Textbook",
+      description: "Class 5 Maths Book",
       price: 250,
-      category: "TEXTBOOK",
+      category: ProductCategory.TEXTBOOK,
       stock: 100,
       brand: "NCERT",
+      classId: class5.id,
     },
   });
 
   const notebook = await prisma.product.create({
     data: {
       name: "Notebook",
-      description: "200 pages",
+      description: "200 pages notebook",
       price: 60,
-      category: "NOTEBOOK",
-      stock: 500,
+      category: ProductCategory.NOTEBOOK,
+      stock: 300,
+      brand: "Classmate",
+      classId: class5.id,
     },
   });
 
-  /* -------------------- KIT -------------------- */
+  const pen = await prisma.product.create({
+    data: {
+      name: "Blue Pen",
+      description: "Smooth ball pen",
+      price: 10,
+      category: ProductCategory.STATIONARY,
+      stock: 500,
+      brand: "Reynolds",
+      classId: class5.id,
+    },
+  });
+
+  // ---------- Kit ----------
   const kit = await prisma.kit.create({
     data: {
-      type: "BASIC",
-      classId: class10.id,
+      type: KitType.BASIC,
+      classId: class5.id,
       language: "English",
-      totalPrice: 310,
+      totalPrice: 320,
+      items: {
+        create: [
+          { productId: mathBook.id, quantity: 1 },
+          { productId: notebook.id, quantity: 1 },
+          { productId: pen.id, quantity: 1 },
+        ],
+      },
+    },
+    include: { items: true },
+  });
+
+  // ---------- Student ----------
+  const student = await prisma.student.create({
+    data: {
+      name: "Aarav Sharma",
+      rollNo: "15",
+      section: "A",
+      parentEmail: parent.email,
+      isActive: true,
+      schoolId: school.id,
+      classId: class5.id,
+      parentId: parent.id,
+      dob: new Date("2014-05-10"),
+      gender: "Male",
+      address: "Sector 21, New Delhi",
     },
   });
 
-  /* -------------------- KIT ITEMS -------------------- */
-  await prisma.kitItem.createMany({
-    data: [
-      {
-        kitId: kit.id,
-        productId: book.id,
-        quantity: 1,
-      },
-      {
-        kitId: kit.id,
-        productId: notebook.id,
-        quantity: 1,
-      },
-    ],
-  });
-
-  /* -------------------- ORDER -------------------- */
+  // ---------- Order ----------
   const order = await prisma.order.create({
     data: {
       userId: parent.id,
       studentId: student.id,
       school: school.name,
-      class: class10.name,
+      class: class5.name,
       section: student.section,
-      kitType: "BASIC",
-      academicYear: "2024-25",
+      kitType: KitType.BASIC,
+      academicYear: "2025-2026",
       status: "PLACED",
-      totalAmount: 310,
+      totalAmount: kit.totalPrice,
+      items: {
+        create: [
+          { productId: mathBook.id, quantity: 1, price: mathBook.price },
+          { productId: notebook.id, quantity: 1, price: notebook.price },
+          { productId: pen.id, quantity: 1, price: pen.price },
+        ],
+      },
+      payment: {
+        create: {
+          amount: kit.totalPrice,
+          status: PaymentStatus.SUCCESS,
+          method: "UPI",
+        },
+      },
     },
   });
 
-  /* -------------------- ORDER ITEMS -------------------- */
-  await prisma.orderItem.createMany({
-    data: [
-      {
-        orderId: order.id,
-        productId: book.id,
-        quantity: 1,
-        price: 250,
-      },
-      {
-        orderId: order.id,
-        productId: notebook.id,
-        quantity: 1,
-        price: 60,
-      },
-    ],
-  });
-
-  /* -------------------- PAYMENT -------------------- */
-  await prisma.payment.create({
+  // ---------- OTP ----------
+  await prisma.otp.create({
     data: {
-      orderId: order.id,
-      amount: 310,
-      status: "SUCCESS",
-      method: "UPI",
+      email: parent.email,
+      otp: "123456",
+      expiredAt: new Date(Date.now() + 10 * 60 * 1000),
     },
   });
 
-  /* -------------------- API TRAFFIC -------------------- */
+  // ---------- API Traffic ----------
   await prisma.apiTraffic.create({
     data: {
       hour: new Date(new Date().setMinutes(0, 0, 0)),
-      count: 5,
+      count: 25,
     },
   });
 
-  console.log("✅ Seeding completed successfully");
+  console.log("✅ Seeding finished successfully!");
 }
 
 main()

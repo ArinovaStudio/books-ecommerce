@@ -13,7 +13,13 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select"
 import { UserPlus, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
@@ -28,17 +34,26 @@ interface Props {
     onStudentAdded?: () => void
 }
 
-export default function AddUserDialog({ schoolId, classId, sectionId, onStudentAdded }: Props) {
+export default function AddUserDialog({
+    schoolId,
+    classId,
+    sectionId,
+    onStudentAdded
+}: Props) {
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState<FormErrors>({})
+    const [parentExists, setParentExists] = useState<boolean | null>(null)
+
     const { toast } = useToast()
+
     const [formData, setFormData] = useState({
         name: "",
         rollNo: "",
         classId: classId || "",
         section: sectionId || "",
         parentEmail: "",
+        password: "",
         dob: "",
         gender: "",
         bloodGroup: "",
@@ -55,68 +70,77 @@ export default function AddUserDialog({ schoolId, classId, sectionId, onStudentA
 
     const handleSelectChange = (name: string, value: string) => {
         setFormData(prev => ({ ...prev, [name]: value }))
-        if (errors[name]) {
-            setErrors(prev => ({ ...prev, [name]: "" }))
+    }
+
+    const checkParentEmail = async () => {
+        if (!formData.parentEmail) return
+
+        try {
+            const res = await fetch(
+                `/api/admin/check-parent?email=${encodeURIComponent(formData.parentEmail)}`
+            )
+            const data = await res.json()
+            setParentExists(data.exists)
+        } catch {
+            setParentExists(null)
         }
     }
 
     const validateForm = () => {
         const newErrors: FormErrors = {}
-        
+
         if (!formData.name.trim()) newErrors.name = "Name is required"
         if (!formData.rollNo.trim()) newErrors.rollNo = "Roll Number is required"
         if (!formData.classId.trim()) newErrors.classId = "Class is required"
         if (!formData.section.trim()) newErrors.section = "Section is required"
-        if (!formData.parentEmail.trim()) newErrors.parentEmail = "Parent Email is required"
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.parentEmail)) newErrors.parentEmail = "Invalid email format"
-        
+
+        if (!formData.parentEmail.trim()) {
+            newErrors.parentEmail = "Parent Email is required"
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.parentEmail)) {
+            newErrors.parentEmail = "Invalid email format"
+        }
+
+        // 🔐 Password required ONLY if parent does NOT exist
+        if (parentExists === false && !formData.password.trim()) {
+            newErrors.password = "Password is required"
+        }
+
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        
         if (!validateForm()) return
-        
+
         setLoading(true)
         try {
-            const response = await fetch('/api/admin/students', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            const res = await fetch("/api/admin/students", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData)
             })
-            
-            const data = await response.json()
-            
+
+            const data = await res.json()
+
             if (data.success) {
                 toast({
                     title: "Success",
-                    description: "Student created successfully",
-                    variant: "default"
+                    description: "Student created successfully"
                 })
-                setFormData({ name: "", rollNo: "", classId: classId || "", section: sectionId || "", parentEmail: "", dob: "", gender: "", bloodGroup: "", address: "" })
                 setOpen(false)
                 onStudentAdded?.()
             } else {
-                if (data.errors) {
-                    const fieldErrors: FormErrors = {}
-                    data.errors.forEach((error: any) => {
-                        fieldErrors[error.field] = error.message
-                    })
-                    setErrors(fieldErrors)
-                } else {
-                    toast({
-                        title: "Error",
-                        description: data.message || "Failed to create student",
-                        variant: "destructive"
-                    })
-                }
+                toast({
+                    title: "Error",
+                    description: data.message || "Failed to create student",
+                    variant: "destructive"
+                })
             }
-        } catch (error) {
+        } catch {
             toast({
                 title: "Error",
-                description: "Something went wrong. Please try again.",
+                description: "Something went wrong",
                 variant: "destructive"
             })
         } finally {
@@ -127,7 +151,7 @@ export default function AddUserDialog({ schoolId, classId, sectionId, onStudentA
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="gap-2 cursor-pointer">
+                <Button className="gap-2">
                     <UserPlus className="h-4 w-4" />
                     Add New Student
                 </Button>
@@ -142,71 +166,73 @@ export default function AddUserDialog({ schoolId, classId, sectionId, onStudentA
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 py-2">
+                    {/* Name & Roll No */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Student Name *</Label>
-                            <Input
-                                id="name" name="name" 
-                                value={formData.name} onChange={handleChange}
-                                className={errors.name ? "border-red-500" : ""}
-                            />
-                            {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                        <div>
+                            <Label>Student Name *</Label>
+                            <Input name="name" value={formData.name} onChange={handleChange} />
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="rollNo">Roll Number *</Label>
-                            <Input
-                                id="rollNo" name="rollNo"
-                                value={formData.rollNo} onChange={handleChange}
-                                className={errors.rollNo ? "border-red-500" : ""}
-                            />
-                            {errors.rollNo && <p className="text-sm text-red-500">{errors.rollNo}</p>}
+                        <div>
+                            <Label>Roll Number *</Label>
+                            <Input name="rollNo" value={formData.rollNo} onChange={handleChange} />
                         </div>
                     </div>
 
+                    {/* Class & Section */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="classId">Class ID *</Label>
-                            <Input
-                                id="classId" name="classId"
-                                value={formData.classId} onChange={handleChange}
-                                className={errors.classId ? "border-red-500" : ""}
-                                disabled={!!classId}
-                            />
-                            {errors.classId && <p className="text-sm text-red-500">{errors.classId}</p>}
+                        <div>
+                            <Label>Class *</Label>
+                            <Input name="classId" value={formData.classId} disabled />
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="section">Section *</Label>
-                            <Input
-                                id="section" name="section"
-                                value={formData.section} onChange={handleChange}
-                                className={errors.section ? "border-red-500" : ""}
-                                disabled={!!sectionId}
-                            />
-                            {errors.section && <p className="text-sm text-red-500">{errors.section}</p>}
+                        <div>
+                            <Label>Section *</Label>
+                            <Input name="section" value={formData.section} disabled />
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="parentEmail">Parent Email *</Label>
+                    {/* Parent Email */}
+                    <div>
+                        <Label>Parent Email *</Label>
                         <Input
-                            id="parentEmail" name="parentEmail" type="email"
-                            value={formData.parentEmail} onChange={handleChange}
-                            className={errors.parentEmail ? "border-red-500" : ""}
+                            name="parentEmail"
+                            type="email"
+                            value={formData.parentEmail}
+                            onChange={handleChange}
+                            onBlur={checkParentEmail}
                         />
-                        {errors.parentEmail && <p className="text-sm text-red-500">{errors.parentEmail}</p>}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="dob">Date of Birth</Label>
+                    {/* Password – conditional */}
+                    {parentExists === false && (
+                        <div>
+                            <Label>Password *</Label>
                             <Input
-                                id="dob" name="dob" type="date"
-                                value={formData.dob} onChange={handleChange}
+                                name="password"
+                                type="password"
+                                value={formData.password}
+                                onChange={handleChange}
                             />
                         </div>
-                        <div className="space-y-2">
+                    )}
+
+                    {/* DOB, Gender, Blood Group */}
+                    <div className="grid grid-cols-3 gap-4">
+                        <div>
+                            <Label>Date of Birth</Label>
+                            <Input
+                                name="dob"
+                                type="date"
+                                value={formData.dob}
+                                onChange={handleChange}
+                            />
+                        </div>
+
+                        <div>
                             <Label>Gender</Label>
-                            <Select value={formData.gender} onValueChange={(v) => handleSelectChange("gender", v)}>
+                            <Select
+                                value={formData.gender}
+                                onValueChange={v => handleSelectChange("gender", v)}
+                            >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
@@ -217,29 +243,33 @@ export default function AddUserDialog({ schoolId, classId, sectionId, onStudentA
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="bloodGroup">Blood Group</Label>
+
+                        <div>
+                            <Label>Blood Group</Label>
                             <Input
-                                id="bloodGroup" name="bloodGroup"
-                                value={formData.bloodGroup} onChange={handleChange}
-                                placeholder="A+, B-, O+, etc."
+                                name="bloodGroup"
+                                value={formData.bloodGroup}
+                                onChange={handleChange}
+                                placeholder="A+, O-, etc"
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="address">Address</Label>
+                    {/* Address */}
+                    <div>
+                        <Label>Address</Label>
                         <Input
-                            id="address" name="address"
-                            value={formData.address} onChange={handleChange}
+                            name="address"
+                            value={formData.address}
+                            onChange={handleChange}
                         />
                     </div>
 
                     <DialogFooter className="pt-4">
-                        <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={loading}>
+                        <Button variant="ghost" type="button" onClick={() => setOpen(false)}>
                             Cancel
                         </Button>
-                        <Button variant="default" type="submit" disabled={loading}>
+                        <Button type="submit" disabled={loading}>
                             {loading ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

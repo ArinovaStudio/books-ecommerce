@@ -23,9 +23,9 @@ const navItems: {
     { id: "analytics", label: "Analytics", icon: BarChart3, roles: ["ADMIN"] },
     { id: "users", label: "Users", icon: Users, roles: ["ADMIN", "SUB_ADMIN"] },
     { id: "schools", label: "Schools", icon: GraduationCap, roles: ["ADMIN"] },
-    { id: "bundels", label: "Bundels", icon: Book, roles: ["ADMIN", "SUB_ADMIN"] },
+    // { id: "bundels", label: "Bundels", icon: Book, roles: ["ADMIN", "SUB_ADMIN"] },
     { id: "orders", label: "Orders", icon: ClipboardList, roles: ["ADMIN", "SUB_ADMIN"] },
-    { id: "products", label: "Products", icon: SquareChartGantt, roles: ["ADMIN", "SUB_ADMIN"] },
+    // { id: "products", label: "Products", icon: SquareChartGantt, roles: ["ADMIN", "SUB_ADMIN"] },
   ]
 
 export function AdminSidebar() {
@@ -57,7 +57,7 @@ export function AdminSidebar() {
       >
         <div className="flex h-full flex-col">
           {/* Header */}
-          <div className="flex items-center gap-3 border-b px-6 py-4">
+          <div className="flex items-center gap-3 border-b px-6 py-[18px]">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400/20">
               <BarChart3 className="h-6 w-6 text-amber-500" />
             </div>
