@@ -15,7 +15,7 @@ export async function GET() {
       where: { email: adminEmail },
     });
 
-    // ✅ Create admin if not exists
+    // Create admin if not exists
     if (!admin) {
       const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
@@ -29,25 +29,7 @@ export async function GET() {
       });
     }
 
-    // ✅ Ensure role is ADMIN
-    if (admin.role !== "ADMIN") {
-      admin = await prisma.user.update({
-        where: { id: admin.id },
-        data: { role: "ADMIN" },
-      });
-    }
-
-    // ✅ Validate password
-    const isMatch = await bcrypt.compare(adminPassword, admin.password);
-
-    if (!isMatch) {
-      return NextResponse.json(
-        { success: false, message: "Invalid admin credentials" },
-        { status: 401 }
-      );
-    }
-
-    // ✅ Generate JWT
+    // Generate JWT
     const token = jwt.sign(
       { id: admin.id, email: admin.email, role: admin.role },
       SECRET_KEY,
