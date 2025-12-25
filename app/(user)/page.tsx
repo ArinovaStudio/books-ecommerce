@@ -25,12 +25,12 @@ export default function Home() {
   return (
     <main>
       <Hero />
-      <Companies/>
-      <AboutUs/>
+      {/* <AboutUs/> */}
       <PartnerSchools />
       <Courses/>
       <Learning/>
-      <Cta/>
+      {/* <Cta/> */}
+      <Companies/>
       <Testimonial/>
       
       {/* 
