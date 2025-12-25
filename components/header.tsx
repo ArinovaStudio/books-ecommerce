@@ -1,15 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X, Phone, ShoppingCart, User, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+type User = {
+  id: string
+  name: string
+  email: string
+  role: string
+}
+
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me', {
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          setUser(data.user);
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const handleScroll = (id: string) => {
     const section = document.getElementById(id);
@@ -71,9 +101,8 @@ export default function Header() {
           {/* DESKTOP NAV */}
           <nav className="hidden lg:flex gap-5">
             <NavLink target="home" label="Home" />
-            <NavLink target="about" label="About Us" />
-            <NavLink target="schools" label="Browse Schools" />
-            <NavLink target="contact" label="Contact" />
+            <Link href="/about" className="text-white font-medium text-sm" scroll={false}>About us</Link>
+            <Link href="/schools" className="text-white font-medium text-sm" scroll={false}>Browse Schools</Link>
           </nav>
 
           {/* DESKTOP CTA */}
@@ -87,19 +116,23 @@ export default function Header() {
               size={20}
               className="text-white hover:text-orange-600 cursor-pointer transition"
             />
-            <Link href="/signup">
-              <User
-                size={20}
-                className="text-white hover:text-orange-600 cursor-pointer transition"
-              />
-            </Link>
+            {user ? (
+              <Link href="/profile">
+                <User
+                  size={20}
+                  className="text-white hover:text-orange-600 cursor-pointer transition"
+                />
+              </Link>
+            ) : null}
 
-            {/* <Button
-              className="bg-orange-500 hover:bg-orange-600 text-white px-6 rounded-lg cursor-pointer"
-              onClick={() => router.push("/schools")}
-            >
-              Shop Now
-            </Button> */}
+            {!user && (
+              <Button
+                className="bg-orange-500 hover:bg-orange-600 text-white px-6 rounded-lg cursor-pointer"
+                onClick={() => router.push("/signin")}
+              >
+                Login
+              </Button>
+            )}
           </div>
 
           {/* TABLET ICONS */}
@@ -108,10 +141,12 @@ export default function Header() {
               size={22}
               className="text-white hover:text-orange-600 cursor-pointer transition"
             />
-            <User
-              size={22}
-              className="text-white hover:text-orange-600 cursor-pointer transition"
-            />
+            {user ? (
+              <User
+                size={22}
+                className="text-white hover:text-orange-600 cursor-pointer transition"
+              />
+            ) : null}
 
             {/* <Button
               className="px-4 py-1.5 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-lg cursor-pointer"
