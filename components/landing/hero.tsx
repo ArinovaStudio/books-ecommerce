@@ -112,30 +112,29 @@ export default function Hero() {
           {/* LEFT CONTENT */}
           <div className="space-y-8 sm:space-y-11 py-4 text-center lg:text-left">
             <div>
-              <p className="text-xs sm:text-sm font-semibold text-lime-400 tracking-wide uppercase">
+              {/* <p className="text-xs sm:text-sm font-semibold text-lime-400 tracking-wide uppercase">
                 • LMS EDUCATION
-              </p>
+              </p> */}
               <h1 className="mt-4 text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-bold text-white leading-tight">
-                Developing Thoughts <br className="hidden sm:block" /> for the Future
+                School Books & Stationery,  Delivered to Your Door
               </h1>
             </div>
 
             <p className="max-w-md mx-auto lg:mx-0 text-sm sm:text-base text-gray-300 leading-relaxed">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit proin leo sem,
-              luctus turpis in, faucibus ridiculus diam.
+              Get the complete book set and stationery kit for your child's school. Select your school, pick the class, and we'll handle the rest.
             </p>
 
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
               <button className="px-7 py-3 rounded-full bg-lime-400 text-[#0c2f25] font-semibold hover:bg-lime-300 transition">
-                Let’s Talk Us
+                Browse Schools
               </button>
 
               <button className="px-7 py-3 rounded-full bg-white/10 text-white font-semibold flex items-center justify-center gap-3 hover:bg-white/20 transition">
                 <div className="w-8 h-8 rounded-full bg-lime-400 flex items-center justify-center">
                   <Play className="text-black fill-black" size={12} />
                 </div>
-                How It Works
+                Learn More
               </button>
             </div>
           </div>
@@ -147,9 +146,9 @@ export default function Hero() {
               <div className="absolute inset-0 rounded-full bg-linear-to-tr  from-lime-400/30 to-green-600/30 blur-2xl" />
 
               {/* Image */}
-              <div className="relative rounded-full overflow-hidden border-4 border-lime-400/30 md:h-110">
+              <div className="relative rounded-full overflow-hidden border-4 border-lime-400/30 md:h-100">
                 <img
-                  src="/graduate-student-in-cap-and-gown-smiling.jpg"
+                  src="/24985 boy.jpg"
                   alt="Graduate"
                   className="w-full h-full object-cover"
                 />
@@ -159,7 +158,7 @@ export default function Hero() {
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-center items-center gap-4 sm:gap-6 mt-12 sm:mt-20">
+        {/* <div className="flex justify-center items-center gap-4 sm:gap-6 mt-12 sm:mt-20">
           {["01", "02", "03", "04"].map((num, idx) => (
             <div key={num} className="flex items-center gap-2">
               <span
@@ -173,7 +172,7 @@ export default function Hero() {
               )}
             </div>
           ))}
-        </div>
+        </div> */}
       </div>
     </section>
 
