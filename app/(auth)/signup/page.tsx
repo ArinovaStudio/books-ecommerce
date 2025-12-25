@@ -127,7 +127,6 @@ const SignUpPage = ({
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-3xl rounded-3xl p-8 md:p-10">
-
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -137,9 +136,7 @@ const SignUpPage = ({
             Register student details to get started
           </p>
         </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
-
           {/* Basic Info */}
           <div>
             <h2 className="text-sm font-semibold text-gray-500 mb-2">
@@ -298,8 +295,6 @@ const SignUpPage = ({
               />
             </div>
           </div>
-
-
           {/* Submit */}
           <Button
             type="submit"
@@ -319,7 +314,6 @@ const SignUpPage = ({
               Login
             </Link>
           </p>
-
         </form>
       </div>
     </div>
