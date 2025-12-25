@@ -80,10 +80,10 @@ export function SchoolClasses({
                 </div>
             ) : (
                 <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                    {classes.map((cls,index) => (
+                    {classes.map((cls, index) => (
                         <Card
                             key={index}
-                            onClick={()=>onSelectClass ? onSelectClass(cls):undefined}
+                            onClick={() => onSelectClass ? onSelectClass(cls.id) : undefined}
                             className={`transition cursor-pointer hover:shadow-md hover:text-white hover:bg-[var(--primary)]`}
                         >
                             <CardHeader>

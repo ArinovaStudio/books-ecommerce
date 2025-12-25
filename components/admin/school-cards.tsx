@@ -8,6 +8,9 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, MapPin, Users, GraduationCap, Pencil, Trash, Loader2 } from "lucide-react"
 import { EditSchoolModal } from "../EditSchool"
+import { AddSchoolModal } from "../addSchoolModal"
+import { PromoteUserDialog } from "../PromoteUser"
+import { useToast } from "@/hooks/use-toast"
 
 type School = {
     id: string
@@ -31,8 +34,10 @@ type Props = {
 }
 
 export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: Props) {
+    const { toast } = useToast();
     const [schools, setSchools] = useState<School[]>([])
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
+    const [deleteLoading, setDeleteLoading] = useState(false)
     const [search, setSearch] = useState("")
     const [editingSchool, setEditingSchool] = useState<any>(null)
     const [open, setOpen] = useState(false)
@@ -69,17 +74,34 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
     }, [search, refreshTrigger, localRefresh])
 
     const handleDelete = async (schoolId: string) => {
+        setDeleteLoading(true);
         try {
             const res = await fetch(`/api/admin/schools/${schoolId}`, { method: "DELETE" });
             const json = await res.json();
 
             if (json.success) {
                 setSchools(prev => prev.filter(s => s.id !== schoolId));
+                toast({
+                    title: "Success",
+                    description: "School deleted successfully",
+                    variant: "default"
+                })
             } else {
-                alert(json.message);
+                toast({
+                    title: "Error",
+                    description: json.message,
+                    variant: "destructive"
+                })
             }
         } catch (error) {
             console.error("Delete failed", error);
+            toast({
+                title: "Error",
+                description: "Failed to delete school",
+                variant: "destructive"
+            })
+        } finally {
+            setDeleteLoading(false);
         }
     }
 
@@ -95,6 +117,7 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
+                {activeTab === "schools" ? <AddSchoolModal onSchoolAdded={() => setLocalRefresh(prev => prev + 1)} /> : <PromoteUserDialog />}
             </div>
 
             {/* Loading State */}
@@ -196,7 +219,7 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                                                                     className="cursor-pointer"
                                                                     onClick={() => handleDelete(school.id)}
                                                                 >
-                                                                    Delete
+                                                                    {deleteLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : "Delete"}
                                                                 </Button>
                                                             </DialogFooter>
                                                         </DialogContent>

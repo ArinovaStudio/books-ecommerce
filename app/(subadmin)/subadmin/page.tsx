@@ -17,8 +17,8 @@ export default function AdminDashboard() {
     const { activeTab, user } = useAdmin()
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-    const [selectedClass, setSelectedClass] = useState<{ id: string; name: string } | null>(null)
-    const [selectedSection, setSelectedSection] = useState<{ id: string; name: string } | null>(null)
+    const [selectedClass, setSelectedClass] = useState<string | null>(null)
+    const [selectedSection, setSelectedSection] = useState<string | null>(null)
     const [selectedLang, setSelectedLang] = useState<string | null>(null)
 
     useEffect(() => {
@@ -35,10 +35,6 @@ export default function AdminDashboard() {
                 {/* Users Tab */}
                 {activeTab === "users" && (
                     <Card>
-                        <CardHeader>
-                            <CardTitle>Registered Users</CardTitle>
-                            <CardDescription>View and manage all registered users</CardDescription>
-                        </CardHeader>
                         <CardContent>
                             {!selectedClass && (
                                 <SchoolClasses
@@ -50,7 +46,7 @@ export default function AdminDashboard() {
                             {selectedClass && !selectedSection && (
                                 <SchoolSection
                                     school={user.schoolId}
-                                    classes={selectedClass.id}
+                                    classes={selectedClass}
                                     onSelectSection={setSelectedSection}
                                     onBack={() => setSelectedClass(null)}
                                 />
@@ -60,8 +56,8 @@ export default function AdminDashboard() {
                                 <SchoolClassUsers
                                     activeTab={activeTab}
                                     schoolId={user.schoolId}
-                                    classId={selectedClass.id}
-                                    sectionId={selectedSection.id}
+                                    classId={selectedClass}
+                                    sectionId={selectedSection}
                                     onBack={() => setSelectedSection(null)}
                                 />
                             )}
@@ -69,87 +65,11 @@ export default function AdminDashboard() {
                     </Card>
                 )}
 
-                {/* Schools Tab */}
-                {/* {activeTab === "schools" && (
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div className="flex flex-col gap-2">
-                                    <CardTitle>Schools</CardTitle>
-                                    <CardDescription>View and manage all schools</CardDescription>
-                                </div>
-                                <AddSchoolModal onSchoolAdded={() => setRefreshTrigger(prev => prev + 1)} />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab={activeTab} refreshTrigger={refreshTrigger} />}
-                            {selectedSchool && !selectedClass && (
-                                <SchoolClasses
-                                    school={selectedSchool}
-                                    onBack={() => setSelectedSchool(null)}
-                                />
-                            )}
-                        </CardContent>
-                    </Card>
-                )} */}
-
-                {/* Bundles Tab */}
-                {/* {activeTab === "bundels" && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Bundles</CardTitle>
-                            <CardDescription>View and manage all Bundles</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab={activeTab} />}
-                            {selectedSchool && !selectedClass && (
-                                <SchoolClasses
-                                    school={selectedSchool}
-                                    onBack={() => setSelectedSchool(null)}
-                                    onSelectClass={setSelectedClass}
-                                />
-                            )}
-                            {selectedSchool && selectedClass && !selectedLang && (
-                                <LanguageSelector
-                                    schoolId={selectedSchool.id}
-                                    classId={selectedClass.id}
-                                    onSelectingLang={setSelectedLang}
-                                    onBack={() => setSelectedClass(null)}
-                                />
-                            )}
-
-                            {selectedSchool && selectedClass && selectedLang && (
-                                <Bundels
-                                    onBack={() => setSelectedLang(null)}
-                                    classId={selectedClass.id}
-                                    language={selectedLang} />
-                            )}
-                        </CardContent>
-                    </Card>
-                )} */}
-
                 {/* Order Tabs */}
                 {activeTab === "orders" && (
                     <Card>
-                        <CardHeader>
-                            <CardTitle>Orders</CardTitle>
-                            <CardDescription>View and manage all Orders</CardDescription>
-                        </CardHeader>
                         <CardContent>
                             <OrdersTable role={user.role} subAdminSchoolId={user.schoolId} />
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Product Tab */}
-                {activeTab === "products" && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Products</CardTitle>
-                            <CardDescription>View and manage all Products</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <ProductTables />
                         </CardContent>
                     </Card>
                 )}

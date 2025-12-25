@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Search, Mail, User, ArrowLeft, Plus, Loader2, Pencil, Trash, ShieldOff } from "lucide-react"
+import { MoreHorizontal, Search, Mail, User, ArrowLeft, Loader2, Pencil, Trash, ShieldOff } from "lucide-react"
 import AddUserDialog from "../AddUser"
+import { useToast } from "@/hooks/use-toast"
 
 type UserType = {
     id: string
@@ -21,7 +22,7 @@ type UserType = {
 type Props = {
     schoolId: string
     activeTab: string
-    classId: {id:string,name:string}
+    classId: string
     sectionId: string
     className?: string
     onBack: () => void
@@ -31,39 +32,79 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
     const [users, setUsers] = useState<UserType[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
+    const { toast } = useToast()
 
     useEffect(() => {
         const fetchUsers = async () => {
             setLoading(true)
             try {
-                const res = await fetch(`/api/admin/schools/${schoolId}/classes/${classId.id}`)
+                const res = await fetch(`/api/admin/students?classId=${classId}&section=${sectionId}`)
                 const data = await res.json()
 
                 if (data.success) {
-                    console.log("users", data.users)
-                    setUsers(data.users)
+                    setUsers(data.students.map((student: any) => ({
+                        id: student.id,
+                        name: student.name,
+                        email: student.parent?.email || student.parentEmail,
+                        phone: student.parent?.phone || "",
+                        role: "User",
+                        status: student.isActive ? "Active" : "Inactive",
+                        joinDate: new Date(student.createdAt).toLocaleDateString()
+                    })))
                 } else {
                     setUsers([])
                 }
             } catch (error) {
                 console.error("Failed to fetch users", error)
+                toast({ title: "Error", description: "Failed to fetch students", variant: "destructive" })
             } finally {
                 setLoading(false)
             }
         }
 
-        /*if (schoolId && classId) {
-            fetchUsers()
-        }*/
-
-        fetchUsers()
-    }, [])
-
+        if (classId && sectionId) fetchUsers()
+    }, [classId, sectionId])
 
     const filteredUsers = users.filter(user =>
         user.name.toLowerCase().includes(search.toLowerCase()) ||
         user.email.toLowerCase().includes(search.toLowerCase())
     )
+
+    // DELETE STUDENT
+    const handleDelete = async (userId: string) => {
+        if (!confirm("Are you sure you want to delete this student?")) return
+        try {
+            const res = await fetch(`/api/admin/students/${userId}`, { method: "DELETE" })
+            const data = await res.json()
+            if (data.success) {
+                setUsers(prev => prev.filter(u => u.id !== userId))
+                toast({ title: "Deleted", description: "Student deleted successfully" })
+            } else {
+                toast({ title: "Error", description: data.message || "Failed to delete student", variant: "destructive" })
+            }
+        } catch (error) {
+            console.error(error)
+            toast({ title: "Error", description: "Failed to delete student", variant: "destructive" })
+        }
+    }
+
+    // DEACTIVATE STUDENT
+    const handleDeactivate = async (userId: string) => {
+        if (!confirm("Are you sure you want to deactivate this student?")) return
+        try {
+            const res = await fetch(`/api/admin/students/${userId}/toggle`, { method: "PATCH" })
+            const data = await res.json()
+            if (data.success) {
+                setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: "Inactive" } : u))
+                toast({ title: "Deactivated", description: "Student deactivated successfully" })
+            } else {
+                toast({ title: "Error", description: data.message || "Failed to deactivate student", variant: "destructive" })
+            }
+        } catch (error) {
+            console.error(error)
+            toast({ title: "Error", description: "Failed to deactivate student", variant: "destructive" })
+        }
+    }
 
     return (
         <div className="space-y-4">
@@ -75,7 +116,7 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
                 <AddUserDialog
                     schoolId={schoolId}
                     classId={classId}
-                    sectionId={sectionId.name}
+                    sectionId={sectionId}
                     onStudentAdded={() => window.location.reload()}
                 />
             </div>
@@ -95,9 +136,8 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
                     No users linked to students in {className}.
                 </div>
             ) : (
-
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {users.map((user) => (
+                    {filteredUsers.map((user) => (
                         <Card key={user.id} className="relative hover:shadow-md transition">
                             <CardHeader className="pb-2">
                                 <div className="flex items-start justify-between">
@@ -115,33 +155,26 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
                                             </DropdownMenuTrigger>
 
                                             <DropdownMenuContent align="end" className="w-36">
-                                                <DropdownMenuItem
-                                                    className="gap-2 cursor-pointer"
-                                                // onClick={(e) => {
-                                                //     e.stopPropagation()
-                                                //     // setEditingSchool(school)
-                                                //     // setOpen(true)
-                                                // }}
-                                                >
+                                                <DropdownMenuItem className="gap-2 cursor-pointer">
                                                     <Pencil className="h-4 w-4" /> Edit
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuItem
                                                     className="gap-2 text-destructive cursor-pointer"
-                                                // onClick={(e) => {
-                                                //     e.stopPropagation()
-                                                //     handleDelete(school.id)
-                                                // }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        handleDelete(user.id)
+                                                    }}
                                                 >
                                                     <Trash className="h-4 w-4 text-red-400" /> Delete
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuItem
                                                     className="gap-2 text-destructive cursor-pointer"
-                                                // onClick={(e) => {
-                                                //     e.stopPropagation()
-                                                //     handleDelete(school.id)
-                                                // }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        handleDeactivate(user.id)
+                                                    }}
                                                 >
                                                     <ShieldOff className="h-4 w-4 text-red-400" /> Deactivate
                                                 </DropdownMenuItem>
@@ -180,7 +213,6 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
                     ))}
                 </div>
             )}
-
         </div>
     )
 }

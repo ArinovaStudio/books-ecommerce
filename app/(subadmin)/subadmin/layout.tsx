@@ -9,7 +9,7 @@ function SubAdminLayoutContent({ children }: { children: React.ReactNode }) {
     if (loading) return <div>Loading...</div>
 
     if (role !== "SUB_ADMIN") {
-        return <div className="p-4 text-red-500">Access Denied: Only SubAdmins can view this page.</div>
+        return;
     }
 
     return (

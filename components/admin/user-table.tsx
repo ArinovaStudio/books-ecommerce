@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { ChevronLeft, Loader2 } from "lucide-react"
+import { ChevronLeft, Loader2, Search } from "lucide-react"
 
 /* ================= TYPES ================= */
 type School = {
@@ -33,7 +33,7 @@ type Order = {
 }
 
 type Props = {
-  role: "ADMIN" | "SUB_ADMIN"
+  role?: "ADMIN" | "SUB_ADMIN"
   subAdminSchoolId?: string
 }
 
@@ -42,21 +42,22 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
   const [schools, setSchools] = useState<School[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null)
+  const [schoolLoading, setSchoolLoading] = useState(false)
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState("")
 
   /* ================= FETCH SCHOOLS ================= */
   const fetchSchools = async () => {
     if (role === "SUB_ADMIN") return
+    setSchoolLoading(true)
     try {
-      setLoading(true)
       const res = await fetch("/api/schools")
       const data = await res.json()
       if (data.success) setSchools(data.schools)
     } catch (err) {
       console.error(err)
     } finally {
-      setLoading(false)
+      setSchoolLoading(false)
     }
   }
 
@@ -135,6 +136,8 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
         </div>
       )}
 
+      {schoolLoading && <div className="flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
+
       {/* {selectedSchool.name} */}
 
       {/* ================= ORDERS ================= */}
@@ -143,12 +146,15 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
           <h2 className="text-xl font-semibold">{role === "ADMIN" ? selectedSchool.name : ""}</h2>
 
           {/* 🔍 Search Orders */}
-          <Input
-            placeholder="Search by name, email, order number or status..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="max-w-md"
-          />
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, email, order number or status..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="max-w-md pl-10"
+            />
+          </div>
 
           {/* ⏳ Loading */}
           {loading && (

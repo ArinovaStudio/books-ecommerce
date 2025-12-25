@@ -8,9 +8,9 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
   if (loading) return <div>Loading...</div>
 
-  // if (role !== "ADMIN") {
-  //   return <div className="p-4 text-red-500">Access Denied: Only Admins can view this page.</div>
-  // }
+  if (role !== "ADMIN") {
+    return;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

@@ -97,7 +97,7 @@ export function PromoteUserDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline">Promote User</Button>
+                <Button variant="outline" className="cursor-pointer">Promote User</Button>
             </DialogTrigger>
 
             <DialogContent>

@@ -30,9 +30,9 @@ type Product = {
   image: string;
 };
 interface Props {
-  setSelectedClass: (object: any)=>void;
-  selectedSchool: { id: string; name: string };
-  selectedClass: { id: string; name: string };
+  setSelectedClass: (object: any) => void;
+  selectedSchool: string;
+  selectedClass: string;
 }
 const GRID_STYLE =
   "grid grid-cols-1 md:grid-cols-[80px_1fr_120px_100px_100px_100px] gap-3 md:gap-4 items-center";
@@ -52,8 +52,8 @@ export default function FilteredProductTable({
       const res = await fetch("/api/admin/products/filter", {
         method: "POST",
         body: JSON.stringify({
-          schoolId: selectedSchool.id,
-          classId: selectedClass.id,
+          schoolId: selectedSchool,
+          classId: selectedClass,
         }),
       });
       const data = await res.json();
@@ -192,8 +192,8 @@ export default function FilteredProductTable({
             </Dialog>
           </Button>
           <AddEditProductDialog
-            selectedSchool={selectedSchool.id}
-            selectedClass={selectedClass.id}
+            selectedSchool={selectedSchool}
+            selectedClass={selectedClass}
             product={product}
             onSuccess={fetchProducts}
             trigger={
@@ -213,17 +213,17 @@ export default function FilteredProductTable({
   return (
     <Card className="w-full py-0 pb-3 border-none shadow-none bg-transparent">
       <CardHeader className="px-0">
-        <Button variant="ghost" onClick={()=>setSelectedClass(null)} className="gap-2 justify-self-start">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Classes
+        <Button variant="ghost" onClick={() => setSelectedClass(null)} className="gap-2 justify-self-start">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Classes
         </Button>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <CardTitle className="text-xl md:text-2xl font-bold tracking-tight">
             Included Items
           </CardTitle>
           <AddEditProductDialog
-            selectedSchool={selectedSchool.id}
-            selectedClass={selectedClass.id}
+            selectedSchool={selectedSchool}
+            selectedClass={selectedClass}
             onSuccess={fetchProducts}
           />
         </div>
@@ -296,10 +296,10 @@ export default function FilteredProductTable({
 
                     {products.filter((p) => p.category.toUpperCase() === catKey)
                       .length === 0 && (
-                      <div className="py-16 text-center text-sm text-muted-foreground">
-                        No {catKey.toLowerCase()} items found.
-                      </div>
-                    )}
+                        <div className="py-16 text-center text-sm text-muted-foreground">
+                          No {catKey.toLowerCase()} items found.
+                        </div>
+                      )}
                   </div>
                 </div>
               </TabsContent>
