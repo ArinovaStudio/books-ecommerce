@@ -9,7 +9,7 @@ const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY";
 export async function GET() {
   try {
     const adminEmail = "admin@test.com";
-    const adminPassword = "admin123";
+    const adminPassword = "admin1234";
 
     let admin = await prisma.user.findUnique({
       where: { email: adminEmail }
