@@ -51,17 +51,19 @@ export default function SchoolSection({
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [newSection, setNewSection] = useState("")
 
+    console.log("classes = \n",classes)
+
     /* ================= FETCH SECTIONS ================= */
 
     const fetchSection = async () => {
-        if (!school || !classes) return
-
+        // if (!school || !classes) return
         setLoading(true)
         try {
             const res = await fetch(
                 `/api/admin/classes/${classes}/sections`
             )
             const data = await res.json()
+            console.log("data = ",data.section)
 
             if (data.success) {
                 setSections(data.sections.sort(sortSections))

@@ -71,8 +71,8 @@ export default function Header() {
           {/* DESKTOP NAV */}
           <nav className="hidden lg:flex gap-5">
             <NavLink target="home" label="Home" />
-            <NavLink target="schools" label="Browse Schools" />
             <NavLink target="about" label="About Us" />
+            <NavLink target="schools" label="Browse Schools" />
             <NavLink target="contact" label="Contact" />
           </nav>
 

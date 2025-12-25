@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
     Dialog,
     DialogContent,
@@ -29,7 +29,9 @@ interface FormErrors {
 
 interface Props {
     schoolId?: string
-    classId?: string
+    classId?: {
+        id: string, name: string
+    },
     sectionId?: string
     onStudentAdded?: () => void
 }
@@ -50,7 +52,7 @@ export default function AddUserDialog({
     const [formData, setFormData] = useState({
         name: "",
         rollNo: "",
-        classId: classId || "",
+        classId: classId?.id || "",
         section: sectionId || "",
         parentEmail: "",
         password: "",
@@ -59,6 +61,29 @@ export default function AddUserDialog({
         bloodGroup: "",
         address: ""
     })
+
+    console.log("class id - ",classId)
+
+    const [generatedPassword, setGeneratedPassword] = useState<string>("")
+
+    const generatePassword = () => {
+        const pwd = Math.random().toString(36).slice(-8)
+
+        setFormData((prev) => ({
+            ...prev,
+            password: pwd
+        }))
+    }
+
+
+    const copyPassword = async () => {
+        await navigator.clipboard.writeText(formData.password)
+        toast({
+            title: "Copied",
+            description: "Password copied to clipboard"
+        })
+    }
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -148,6 +173,7 @@ export default function AddUserDialog({
         }
     }
 
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
@@ -182,7 +208,7 @@ export default function AddUserDialog({
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label>Class *</Label>
-                            <Input name="classId" value={formData.classId} disabled />
+                            <Input name="classId" value={classId?.name} disabled />
                         </div>
                         <div>
                             <Label>Section *</Label>
@@ -206,14 +232,32 @@ export default function AddUserDialog({
                     {parentExists === false && (
                         <div>
                             <Label>Password *</Label>
-                            <Input
-                                name="password"
-                                type="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                            />
+
+                            <div className="flex gap-2">
+                                <Input
+                                    name="password"
+                                    type="text"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                />
+
+                                <Button
+                                    type="button"
+                                    onClick={() => {
+                                        if (!formData.password) {
+                                            generatePassword()
+                                        } else {
+                                            copyPassword()
+                                        }
+                                    }}
+                                >
+                                    {formData.password === "" ? "Generate" : "Copy"}
+                                </Button>
+
+                            </div>
                         </div>
                     )}
+
 
                     {/* DOB, Gender, Blood Group */}
                     <div className="grid grid-cols-3 gap-4">

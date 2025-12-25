@@ -99,7 +99,7 @@ export default function Hero() {
     // </section >
 
 
-    <section className="relative overflow-hidden bg-linear-to-br from-[#0c2f25] via-[#17340d] to-[#0a241c]">
+    <section id='home' className="relative overflow-hidden bg-linear-to-br from-[#0c2f25] via-[#17340d] to-[#0a241c]">
       {/* Decorative blobs */}
       <div className="absolute inset-0">
         <div className="absolute top-10 sm:top-24 right-6 sm:right-24 w-40 sm:w-64 h-40 sm:h-64 bg-green-600/20 rounded-full blur-3xl" />

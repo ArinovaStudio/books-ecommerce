@@ -33,6 +33,10 @@ export default function AdminDashboard() {
     setSelectedLang(null)
   }, [activeTab])
 
+  useEffect(() => {
+    console.log("selected school = ", selectedSchool, "\nselected class =", selectedClass, "\nselected section = ", selectedSection)
+  }, [selectedClass, selectedSchool, selectedSection])
+
   return (
     <>
       <AdminHeader />
@@ -68,12 +72,14 @@ export default function AdminDashboard() {
 
               {selectedSchool && selectedClass && !selectedSection && (
                 <SchoolSection
-                  school={selectedSchool}
-                  classes={selectedClass}
+                  school={selectedSchool.id}
+                  classes={selectedClass.id}
                   onSelectSection={setSelectedSection}
                   onBack={() => setSelectedClass(null)}
                 />
               )}
+
+
 
               {selectedSchool && selectedClass && selectedSection && (
                 <SchoolClassUsers
@@ -112,7 +118,7 @@ export default function AdminDashboard() {
               )}
               {
                 selectedSchool && selectedClass && (
-                  <FilteredProductTable setSelectedClass={setSelectedClass} selectedSchool={selectedSchool}  selectedClass={selectedClass}/>
+                  <FilteredProductTable setSelectedClass={setSelectedClass} selectedSchool={selectedSchool} selectedClass={selectedClass} />
                 )
               }
             </CardContent>

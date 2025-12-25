@@ -5,7 +5,7 @@ import { ArrowLeft, Loader2 } from "lucide-react"
 
 const sortClasses = (a: { name: string }, b: { name: string }) => {
     const order = [
-        "Nursery", "LKG", "UKG",
+        "Nursery", "PP1", "PP2",
         "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
         "Class 6", "Class 7", "Class 8", "Class 9", "Class 10",
         "Class 11", "Class 12"
@@ -44,7 +44,7 @@ export function SchoolClasses({
             try {
                 const res = await fetch(`/api/admin/schools/${schoolId}/classes`)
                 const data = await res.json()
-
+                // console.log("data  = ",data.classes)
                 if (data.success) {
                     setClasses(data.classes.sort(sortClasses))
                 } else {

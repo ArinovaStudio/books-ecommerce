@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react'
 
 export default function cta() {
     return (
-        <section className="pt-16 px-4 sm:px-6 lg:px-8">
+        <section id='contact' className="pt-16 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-6 mb-16">
                 {/* Yellow CTA */}
                 <div className="relative bg-yellow-400 p-14 flex justify-between rounded-none rounded-tr-3xl rounded-bl-3xl overflow-visible w-full">

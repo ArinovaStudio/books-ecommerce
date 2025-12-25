@@ -21,7 +21,7 @@ type UserType = {
 type Props = {
     schoolId: string
     activeTab: string
-    classId: string
+    classId: {id:string,name:string}
     sectionId: string
     className?: string
     onBack: () => void
@@ -36,7 +36,7 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
         const fetchUsers = async () => {
             setLoading(true)
             try {
-                const res = await fetch(`/api/admin/schools/${schoolId}/classes/${classId}`)
+                const res = await fetch(`/api/admin/schools/${schoolId}/classes/${classId.id}`)
                 const data = await res.json()
 
                 if (data.success) {
@@ -52,10 +52,12 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
             }
         }
 
-        if (schoolId && classId) {
+        /*if (schoolId && classId) {
             fetchUsers()
-        }
-    }, [schoolId, classId])
+        }*/
+
+        fetchUsers()
+    }, [])
 
 
     const filteredUsers = users.filter(user =>
@@ -73,7 +75,7 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
                 <AddUserDialog
                     schoolId={schoolId}
                     classId={classId}
-                    sectionId={sectionId}
+                    sectionId={sectionId.name}
                     onStudentAdded={() => window.location.reload()}
                 />
             </div>
