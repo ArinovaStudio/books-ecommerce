@@ -32,7 +32,6 @@ export default function SchoolsPage() {
             (school: School) => school.status === "ACTIVE"
           );
           setSchools(filtered_schools);
-          console.log(filtered_schools);
             setCities([...new Set(filtered_schools.map((s: School) => s.address))])
         }
       } catch (error) {

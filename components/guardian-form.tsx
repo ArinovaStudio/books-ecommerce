@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,6 +24,23 @@ export function GuardianForm({ planName, planPrice, onBack }: GuardianFormProps)
     guardianEmail: "",
     address: "",
   })
+
+    useEffect(()=>{
+      const fetchDetails = async ()=>{
+        const user = await fetch("/api/user/details");
+        const resData = await user.json();
+        if(resData.success){
+          const {user:userData} = resData; 
+          setFormData({
+            guardianName: userData.name,
+            guardianEmail: userData.email,
+            guardianPhone: userData.phone,
+            address: userData.address
+          });      
+        }
+      }
+      fetchDetails();
+    },[]);
   const [otpSent, setOtpSent] = useState(false)
   const [otp, setOtp] = useState("")
   const [isVerified, setIsVerified] = useState(false)
@@ -154,6 +171,7 @@ export function GuardianForm({ planName, planPrice, onBack }: GuardianFormProps)
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                   <Input
+                    disabled
                     id="guardianName"
                     type="text"
                     placeholder="Enter guardian's full name"
@@ -185,6 +203,7 @@ export function GuardianForm({ planName, planPrice, onBack }: GuardianFormProps)
                       "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base",
                       errors.guardianPhone && "border-destructive focus-visible:ring-destructive",
                     )}
+                    disabled
                     maxLength={10}
                   />
                 </div>
@@ -280,6 +299,7 @@ export function GuardianForm({ planName, planPrice, onBack }: GuardianFormProps)
                   <MapPin className="absolute left-3 top-3 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                   <Textarea
                     id="address"
+                    disabled
                     placeholder="Enter complete address"
                     value={formData.address}
                     onChange={(e) => handleInputChange("address", e.target.value)}
