@@ -36,7 +36,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function fetchAdminRole() {
       try {
-        const res = await fetch("/api/admin/me")
+        const res = await fetch("/api/auth/me")
 
         if (!res.ok) {
           // throw new Error("Not authenticated")
