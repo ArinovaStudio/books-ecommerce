@@ -85,7 +85,6 @@ export const POST = Wrapper(async (req: NextRequest) => {
         }
 
         const user = auth.user;
-        console.log("\nuser = ", user)
         // if (user.role !== "SUB_ADMIN" || !user.schoolId) {
         //     return NextResponse.json({ success: false, message: "Only Sub Admins can add students" }, { status: 403 });
         // }

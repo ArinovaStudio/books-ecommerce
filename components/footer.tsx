@@ -1,5 +1,6 @@
 import { Mail, Phone, MapPin, Facebook, Instagram, Twitter, Linkedin, BookOpen, MessageSquare, Download } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 
 export default function Footer() {
   return (
@@ -56,17 +57,25 @@ export default function Footer() {
           </div>
 
           <div className="space-y-2">
-            <p>Privacy Policy</p>
-            <p>Terms of Service</p>
-            <p>Refund Policy</p>
-            <p>Shipping Policy</p>
+            <Link href={'/policy'} className="text-blue-100 text-sm cursor-pointer ">
+              <p className="pb-2">Privacy Policy</p>
+
+            </Link>
+            <Link href={'/policy'} className="text-blue-100 text-sm cursor-pointer">
+              <p className="pb-2">Terms of Service</p>
+
+            </Link>
+            <Link href={'/policy'} className="text-blue-100 text-sm cursor-pointer">
+              <p className="pb-2">Refund Policy</p>
+
+            </Link>
+            <Link href={'/policy'} className="text-blue-100 text-sm cursor-pointer">
+              <p className="pb-2">Shipping Policy</p>
+
+            </Link>
           </div>
 
-          <div className="space-y-2">
-            <p>FAQ’s</p>
-            <p>Contact Us</p>
-            <p>Help</p>
-          </div>
+
 
           <div className="space-y-2 col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2">
@@ -88,7 +97,12 @@ export default function Footer() {
               <p>Twitter</p>
             </div>
           </div>
-
+          <div className="space-y-2">
+            <p className="text-white font-medium">Contact Us</p>
+            <p>123 Education Lane, Sector 5, New Delhi - 110001</p>
+            <p>+91 98765 43210</p>
+            <p>support@globenest.in</p>
+          </div>
         </div>
 
         {/* SECURITY NOTICE */}

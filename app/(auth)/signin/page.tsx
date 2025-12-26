@@ -65,15 +65,23 @@ const SignInPage = () => {
             })
 
             const data = await response.json()
+            console.log("\ndata = ", data)
 
             if (data.success) {
                 toast({
-                    title: 'Success',
-                    description: 'Signed in successfully',
-                    variant: 'default'
+                    title: "Success",
+                    description: "Signed in successfully",
                 })
-                router.push('/')
-            } else {
+
+                const roleRoutes: Record<string, string> = {
+                    ADMIN: "/admin",
+                    SUB_ADMIN: "/subadmin",
+                    USER: "/",
+                }
+
+                router.push(roleRoutes[data.user.role] ?? "/")
+            }
+            else {
                 toast({
                     title: 'Error',
                     description: data.message || 'Invalid credentials',
@@ -95,7 +103,7 @@ const SignInPage = () => {
         <div className="h-full flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
+                    <h1 className="text-3xl text-center font-bold text-gray-800 mb-2">Welcome Back</h1>
                     <p className="text-gray-600 text-sm">
                         To keep connected with us please login with your personal information by email address and password
                     </p>
@@ -179,12 +187,17 @@ const SignInPage = () => {
                             'Login Now'
                         )}
                     </Button>
-                    {/* <div className="text-center">
-                        <span className="text-sm text-gray-600">Create an account!   </span>
-                        <Link href="/signup" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                            Sign Up
+                    <div className="text-center">
+                        <span className="text-sm text-gray-600">Don&apos;t have an account? </span>
+                        <Link
+                            href="/signup"
+                            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                            Create account
                         </Link>
-                    </div> */}
+                    </div>
+
+
                 </form>
             </div>
         </div>

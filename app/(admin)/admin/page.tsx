@@ -50,11 +50,11 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <div>
+                {/* <div>
                   <CardTitle>Registered Users</CardTitle>
                   <CardDescription>View and manage all registered users</CardDescription>
-                </div>
-                {role === "ADMIN" && <PromoteUserDialog />}
+                </div> */}
+                {/* {role === "ADMIN" && !selectedSchool && !selectedClass && !selectedSection && <PromoteUserDialog />} */}
               </div>
             </CardHeader>
             <CardContent>
@@ -72,8 +72,8 @@ export default function AdminDashboard() {
 
               {selectedSchool && selectedClass && !selectedSection && (
                 <SchoolSection
-                  school={selectedSchool.id}
-                  classes={selectedClass.id}
+                  school={selectedSchool}
+                  classes={selectedClass}
                   onSelectSection={setSelectedSection}
                   onBack={() => setSelectedClass(null)}
                 />
@@ -100,15 +100,14 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-2">
+                {/* <div className="flex flex-col gap-2">
                   <CardTitle>Schools</CardTitle>
                   <CardDescription>View and manage all schools</CardDescription>
-                </div>
-                <AddSchoolModal onSchoolAdded={() => setRefreshTrigger(prev => prev + 1)} />
+                </div> */}
               </div>
             </CardHeader>
             <CardContent>
-              {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab={activeTab} refreshTrigger={refreshTrigger} />}
+              {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab={activeTab} />}
               {selectedSchool && !selectedClass && (
                 <SchoolClasses
                   schoolId={selectedSchool}
@@ -164,8 +163,6 @@ export default function AdminDashboard() {
         {activeTab === "orders" && (
           <Card>
             <CardHeader>
-              <CardTitle>Orders</CardTitle>
-              <CardDescription>View and manage all Orders</CardDescription>
             </CardHeader>
             <CardContent>
               <OrdersTable role="ADMIN" />

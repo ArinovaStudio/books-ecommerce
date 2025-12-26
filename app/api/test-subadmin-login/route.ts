@@ -8,8 +8,8 @@ const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY";
 
 export async function GET() {
     try {
-        const email = "subadmin@greenvalley.edu";
-        const password = "subadmin123";
+        const email = "rahul9090@gmail.com";
+        const password = "123456";
 
         const school = await prisma.school.findFirst({
             where: {

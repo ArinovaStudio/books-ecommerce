@@ -10,21 +10,17 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={"min-h-screen flex flex-col"}>
+    <>
+      {/* GLOBAL HEADER */}
+      <Header />
 
-        {/* GLOBAL HEADER */}
-        <Header />
+      {/* PAGE CONTENT */}
+      <main className="grow bg-[#fffaf3] ">
+        {children}
+      </main>
 
-        {/* PAGE CONTENT */}
-        <main className="grow bg-[#fffaf3] ">
-          {children}
-        </main>
-
-        {/* GLOBAL FOOTER */}
-        <Footer />
-
-      </body>
-    </html>
+      {/* GLOBAL FOOTER */}
+      <Footer />
+    </>
   )
 }

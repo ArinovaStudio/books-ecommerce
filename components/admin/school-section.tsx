@@ -51,7 +51,6 @@ export default function SchoolSection({
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [newSection, setNewSection] = useState("")
 
-    console.log("classes = \n",classes)
 
     /* ================= FETCH SECTIONS ================= */
 
@@ -63,7 +62,7 @@ export default function SchoolSection({
                 `/api/admin/classes/${classes}/sections`
             )
             const data = await res.json()
-            console.log("data = ",data.section)
+            console.log("data = ", data.section)
 
             if (data.success) {
                 setSections(data.sections.sort(sortSections))
@@ -218,7 +217,7 @@ export default function SchoolSection({
                             key={sec}
                             onClick={
                                 onSelectSection
-                                    ? () => onSelectSection({ name: sec })
+                                    ? () => onSelectSection(sec)
                                     : undefined
                             }
                             className="group relative cursor-pointer hover:shadow-md"

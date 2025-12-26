@@ -20,12 +20,12 @@ export const POST = Wrapper(async (req: NextRequest) => {
     const validation = loginValidation.safeParse(body);
 
     if (!validation.success) {
-      return NextResponse.json({ success: false, message: "validation error" }, { status: 400 } );
+      return NextResponse.json({ success: false, message: "validation error" }, { status: 400 });
     }
 
     const { email, password } = validation.data;
 
-    const user = await prisma.user.findUnique({ where: { email }});
+    const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
       return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
@@ -42,17 +42,19 @@ export const POST = Wrapper(async (req: NextRequest) => {
     }
 
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, SECRET_KEY, { expiresIn: "7d" });
-        
+
     const cookieStore = await cookies();
 
     cookieStore.set("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24 * 7,
-        path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
     });
 
-    return NextResponse.json({ success: true, message: "User login successfully", user: { id: user.id, name: user.name, email: user.email }}, { status: 200 });
+    // console.log("\nuser = ", user)
+
+    return NextResponse.json({ success: true, message: "User login successfully", user: { id: user.id, name: user.name, email: user.email, role: user.role } }, { status: 200 });
 
   } catch (error) {
     console.error("Login Error:", error);

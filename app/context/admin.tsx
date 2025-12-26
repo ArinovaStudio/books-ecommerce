@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { AdminTab } from "@/app/types/admin"
 
 type Role = "ADMIN" | "SUB_ADMIN"
@@ -26,43 +27,48 @@ const AdminContext = createContext<AdminContextType | null>(null)
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [activeTab, setActiveTab] = useState<AdminTab>("analytics")
-  const [user, setUser] = useState<User>()
+  const [user, setUser] = useState<User | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [role, setRole] = useState<Role | null>(null)
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
     async function fetchAdminRole() {
       try {
-        const res = await fetch("/api/test-admin-login", {
-          credentials: "include",
-        })
+        const res = await fetch("/api/auth/me")
 
-        if (!res.ok) throw new Error("Not authenticated")
-
-        const data = await res.json()
-        setUser(data.user)
-        console.log("User", data.user)
-        setRole(data.user.role)
-
-        if (data.user.role === "SUB_ADMIN") {
-          setActiveTab("users")
-        } else {
-          setActiveTab("analytics")
+        if (!res.ok) {
+          // throw new Error("Not authenticated")
+          router.push("/")
+          return
         }
 
+        const data = await res.json()
+
+        if (data.user.role !== "ADMIN" && data.user.role !== "SUB_ADMIN") {
+          throw new Error("Unauthorized")
+        }
+
+        setUser(data.user)
+        setRole(data.user.role)
+
+        setActiveTab(data.user.role === "SUB_ADMIN" ? "users" : "analytics")
       } catch (error) {
         console.error("Auth check failed", error)
+        setUser(null)
         setRole(null)
+        router.push("/")
       } finally {
         setLoading(false)
       }
     }
 
     fetchAdminRole()
-  }, [])
+  }, [router])
 
-  if (loading || !role) return null
+  // Show nothing while checking
+  if (loading) return null
 
   return (
     <AdminContext.Provider
@@ -71,8 +77,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         setActiveTab,
         sidebarOpen,
         setSidebarOpen,
-        role,
-        user,
+        role: role!,
+        user: user!,
         loading,
       }}
     >
@@ -80,7 +86,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     </AdminContext.Provider>
   )
 }
-
 
 export function useAdmin() {
   const context = useContext(AdminContext)
