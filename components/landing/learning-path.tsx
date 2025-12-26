@@ -95,7 +95,7 @@ export default function KidsFutureSection() {
             </p>
 
             <h2 className="text-5xl font-bold mb-7 text-gray-800">
-                Why Parents <span className="text-orange-500">Trust </span>Us
+                Why Parents <span className="text-[#4169B4]">Trust </span>Us
             </h2>
 
             <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-20 ">

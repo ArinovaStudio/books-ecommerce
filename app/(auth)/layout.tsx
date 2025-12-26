@@ -9,17 +9,6 @@ export default function AuthLayout({
     return (
         <div className="h-screen overflow-hidden bg-white">
             <div className="flex h-full m-5">
-                <div className="">
-                    <div className="rounded-lg flex items-center justify-center ">
-                        {/* <BookOpen className="text-white" /> */}
-                        <Image src="/logo .png" alt="GlobeNest Logo"
-                            width={80}
-                            height={80}
-                            className="object-contain "
-                        />
-                    </div>
-                </div>
-                {/* Left Side - Image/Branding */}
                 <div className="hidden no-scrollbar lg:flex lg:w-1/2 bg-brand-950 flex-col items-center justify-center p-12">
                     <div className="flex items-center justify-center">
                         <Image

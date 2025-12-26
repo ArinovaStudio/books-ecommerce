@@ -29,7 +29,7 @@ export default function PartnerSchools() {
       try {
         const response = await fetch('/api/schools')
         const data = await response.json()
-        
+
         if (data.success) {
           setSchools(data.schools.filter((school: School) => school.status === 'ACTIVE'))
         } else {
@@ -62,7 +62,7 @@ export default function PartnerSchools() {
         <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-10 md:mb-16">
           <div className="space-y-2">
             <h2 className="text-4xl md:text-5xl font-bold text-black">
-              Partner <span className="text-orange-400">Schools</span></h2>
+              Partner <span className="text-[#4169B4]">Schools</span></h2>
             <p className="text-md md:text-md text-gray-600 max-w-2xl">
               We work with top schools across India to bring you the exact books
               and supplies your child needs.
@@ -83,7 +83,7 @@ export default function PartnerSchools() {
             <Link
               href="/schools"
             >
-              <Button className="group text-sm bg-orange-400 hover:bg-orange-400/90 cursor-pointer rounded-none rounded-tr-3xl rounded-bl-3xl py-5 px-6 flex justify-center items-center gap-2 transition-transform duration-300 ease-out hover:scale-105">
+              <Button className="group text-sm bg-[#4169B4] hover:bg-[#466B4] cursor-pointer rounded-none rounded-tr-3xl rounded-bl-3xl py-5 px-6 flex justify-center items-center gap-2 transition-transform duration-300 ease-out hover:scale-105">
                 View all schools
                 <ArrowRight size={16} className="transition-transform duration-300 ease-out group-hover:translate-x-1.5" />
               </Button>
@@ -95,7 +95,7 @@ export default function PartnerSchools() {
         {/* Loading State */}
         {loading && (
           <div className="flex justify-center items-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-orange-400" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#46B4]/90" />
           </div>
         )}
 
@@ -103,8 +103,8 @@ export default function PartnerSchools() {
         {error && (
           <div className="text-center py-20">
             <p className="text-red-500 mb-4">{error}</p>
-            <Button 
-              onClick={() => window.location.reload()} 
+            <Button
+              onClick={() => window.location.reload()}
               variant="outline"
               className="cursor-pointer"
             >
@@ -163,8 +163,8 @@ export default function PartnerSchools() {
               {search ? 'No schools found matching your search' : 'No schools available'}
             </p>
             {search && (
-              <Button 
-                onClick={() => setSearch('')} 
+              <Button
+                onClick={() => setSearch('')}
                 variant="outline"
                 className="cursor-pointer"
               >
