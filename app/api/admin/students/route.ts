@@ -73,6 +73,7 @@ const createStudentValidation = z.object({
     gender: z.string().optional(),
     bloodGroup: z.string().optional(),
     address: z.string().optional(),
+    password: z.string().optional(),
 });
 
 // Add new student
@@ -97,10 +98,9 @@ export const POST = Wrapper(async (req: NextRequest) => {
             return NextResponse.json({ success: false, message: "Validation error", errors }, { status: 400 });
         }
 
-        const { name, rollNo, classId, section, parentEmail, dob, gender, bloodGroup, address } = validation.data;
-        const schoolId = user.schoolId;
+        const { name, rollNo, classId, section, parentEmail, dob, gender, bloodGroup, address, password } = validation.data;
 
-        const classExists = await prisma.class.findFirst({ where: { id: classId, schoolId } });
+        const classExists = await prisma.class.findFirst({ where: { id: classId } });
         if (!classExists) {
             return NextResponse.json({ success: false, message: "Invalid Class ID for this school" }, { status: 400 });
         }
@@ -108,6 +108,8 @@ export const POST = Wrapper(async (req: NextRequest) => {
         if (!classExists.sections.includes(section)) {
             return NextResponse.json({ success: false, message: `Section '${section}' does not exist in Class '${classExists.name}'` }, { status: 400 });
         }
+
+        const schoolId = classExists.schoolId;
 
         const existingStudent = await prisma.student.findFirst({ where: { schoolId, classId, section, rollNo } });
 
@@ -121,9 +123,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
         if (existingParent) {
             parentId = existingParent.id;
         } else {
-
-            const randomPassword = Math.random().toString(36).slice(-8) + "1!";
-            const hashedPassword = await bcrypt.hash(randomPassword, 12);
+            const hashedPassword = await bcrypt.hash(password, 12);
 
             const newParent = await prisma.user.create({
                 data: {
