@@ -15,22 +15,13 @@ export const GET = Wrapper(async (req: NextRequest) => {
 
         const user = auth.user;
 
-        // if (user.role !== "SUB_ADMIN" || !user.schoolId) {
-        //     return NextResponse.json({ success: false, message: "Only School Admins can view students" }, { status: 403 });
-        // }
-
         const { searchParams } = new URL(req.url);
         const classId = searchParams.get("classId");
         const section = searchParams.get("section");
         const name = searchParams.get("name");
         const rollNo = searchParams.get("rollNo");
-        const schoolId = user.schoolId;
 
-        if (!schoolId) {
-            return NextResponse.json({ success: false, message: "School ID not found" }, { status: 404 });
-        }
-
-        const whereClause: any = { schoolId };
+        const whereClause: any = {  };
 
         if (classId) {
             whereClause.classId = classId;
@@ -85,9 +76,6 @@ export const POST = Wrapper(async (req: NextRequest) => {
         }
 
         const user = auth.user;
-        // if (user.role !== "SUB_ADMIN" || !user.schoolId) {
-        //     return NextResponse.json({ success: false, message: "Only Sub Admins can add students" }, { status: 403 });
-        // }
 
         const body = await req.json();
         const validation = createStudentValidation.safeParse(body);
@@ -122,6 +110,10 @@ export const POST = Wrapper(async (req: NextRequest) => {
         if (existingParent) {
             parentId = existingParent.id;
         } else {
+            if (!password) {
+                return NextResponse.json({ success: false, message: "Password is required for unregistered parent" }, { status: 400 });
+            }
+
             const hashedPassword = await bcrypt.hash(password, 12);
 
             const newParent = await prisma.user.create({

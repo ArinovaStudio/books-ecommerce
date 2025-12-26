@@ -6,11 +6,10 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
     DialogDescription,
     DialogFooter
 } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button" 
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -20,14 +19,10 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select"
-import { UserPlus, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
-interface FormErrors {
-    [key: string]: string
-}
-
-export interface StudentType {
+interface StudentType {
     id?: string
     name: string
     rollNo: string
@@ -41,36 +36,37 @@ export interface StudentType {
     address?: string
 }
 
-interface Props {
-    schoolId?: string
-    classId?: string
-    sectionId?: string
-    student?: StudentType // optional: if provided, we are editing
-    onStudentAdded?: () => void
-    onStudentUpdated?: () => void
+interface FormErrors {
+    [key: string]: string
 }
 
-export default function AddUserDialog({
-    schoolId,
-    classId,
-    sectionId,
+interface EditProps {
+    student: StudentType
+    open: boolean
+    onOpenChange: (open: boolean) => void
+    onStudentUpdated: () => void
+}
+
+export default function EditUserDialog({
     student,
-    onStudentAdded,
+    open,
+    onOpenChange,
     onStudentUpdated
-}: Props) {
-    const [open, setOpen] = useState(false)
+}: EditProps) {
     const [loading, setLoading] = useState(false)
     const [checkPasswordLoading, setCheckPasswordLoading] = useState(false)
     const [errors, setErrors] = useState<FormErrors>({})
+    
     const [parentExists, setParentExists] = useState<boolean | null>(null)
+    const [originalEmail, setOriginalEmail] = useState("")
 
     const { toast } = useToast()
 
     const [formData, setFormData] = useState<StudentType>({
         name: "",
         rollNo: "",
-        classId: classId || "",
-        section: sectionId || "",
+        classId: "",
+        section: "",
         parentEmail: "",
         password: "",
         dob: "",
@@ -79,29 +75,26 @@ export default function AddUserDialog({
         address: ""
     })
 
-    // Prefill form when editing
     useEffect(() => {
-        if (student) {
+        if (student && open) {
             setFormData({
+                id: student.id,
                 name: student.name || "",
                 rollNo: student.rollNo || "",
-                classId: student.classId || classId || "",
-                section: student.section || sectionId || "",
+                classId: student.classId || "",
+                section: student.section || "",
                 parentEmail: student.parentEmail || "",
-                password: student.password || "",
-                dob: student.dob || "",
+                password: "", 
+                dob: student.dob ? new Date(student.dob).toISOString().split('T')[0] : "",
                 gender: student.gender || "",
                 bloodGroup: student.bloodGroup || "",
                 address: student.address || ""
             })
-        } else {
-            setFormData(prev => ({
-                ...prev,
-                classId: classId || "",
-                section: sectionId || ""
-            }))
+            setOriginalEmail(student.parentEmail || "")
+            setParentExists(null) 
+            setErrors({})
         }
-    }, [student, classId, sectionId])
+    }, [student, open])
 
     const generatePassword = () => {
         const pwd = Math.random().toString(36).slice(-8)
@@ -117,6 +110,14 @@ export default function AddUserDialog({
         const { name, value } = e.target
         setFormData(prev => ({ ...prev, [name]: value }))
         if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }))
+
+        if (name === "parentEmail") {
+            if (value === originalEmail) {
+                setParentExists(null) 
+            } else {
+                setParentExists(null) 
+            }
+        }
     }
 
     const handleSelectChange = (name: string, value: string) => {
@@ -124,7 +125,11 @@ export default function AddUserDialog({
     }
 
     const checkParentEmail = async () => {
-        if (!formData.parentEmail) return
+        if (!formData.parentEmail || formData.parentEmail === originalEmail) {
+            setParentExists(null)
+            return
+        }
+
         setCheckPasswordLoading(true)
         try {
             const res = await fetch(`/api/admin/check-parent?email=${encodeURIComponent(formData.parentEmail)}`)
@@ -141,16 +146,16 @@ export default function AddUserDialog({
         const newErrors: FormErrors = {}
         if (!formData.name.trim()) newErrors.name = "Name is required"
         if (!formData.rollNo.trim()) newErrors.rollNo = "Roll Number is required"
-        if (!formData.classId.trim()) newErrors.classId = "Class is required"
-        if (!formData.section.trim()) newErrors.section = "Section is required"
         if (!formData.parentEmail.trim()) {
             newErrors.parentEmail = "Parent Email is required"
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.parentEmail)) {
             newErrors.parentEmail = "Invalid email format"
         }
-        if (parentExists === false && !formData.password?.trim()) {
-            newErrors.password = "Password is required"
+
+        if (formData.parentEmail !== originalEmail && parentExists === false && !formData.password?.trim()) {
+            newErrors.password = "Password is required for new parent"
         }
+
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
@@ -161,22 +166,17 @@ export default function AddUserDialog({
 
         setLoading(true)
         try {
-            const method = student ? "PATCH" : "POST"
-            const url = student
-                ? `/api/admin/students/${student.id}`
-                : `/api/admin/students?classId=${classId}&section=${sectionId}`
-
-            const res = await fetch(url, {
-                method,
+            const res = await fetch(`/api/admin/students/${student.id}`, {
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData)
             })
             const data = await res.json()
 
             if (data.success) {
-                toast({ title: "Success", description: student ? "Student updated successfully" : "Student created successfully" })
-                setOpen(false)
-                student ? onStudentUpdated?.() : onStudentAdded?.()
+                toast({ title: "Success", description: "Student updated successfully" })
+                onOpenChange(false)
+                onStudentUpdated()
             } else {
                 toast({ title: "Error", description: data.message || "Something went wrong", variant: "destructive" })
             }
@@ -188,35 +188,27 @@ export default function AddUserDialog({
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button className="gap-2">
-                    {student ? "Edit Student" : <><UserPlus className="h-4 w-4" /> Add New Student</>}
-                </Button>
-            </DialogTrigger>
-
-            <DialogContent className="sm:max-w-[600px]">
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>{student ? "Edit Student" : "Add Student"}</DialogTitle>
-                    <DialogDescription>
-                        {student ? "Update student details." : "Enter details to add a new student to the school."}
-                    </DialogDescription>
+                    <DialogTitle>Edit Student</DialogTitle>
+                    <DialogDescription>Update student details.</DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 py-2">
-                    {/* Name & Roll No */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label>Student Name *</Label>
                             <Input name="name" value={formData.name} onChange={handleChange} />
+                            {errors.name && <span className="text-xs text-red-500">{errors.name}</span>}
                         </div>
                         <div>
                             <Label>Roll Number *</Label>
                             <Input name="rollNo" value={formData.rollNo} onChange={handleChange} />
+                            {errors.rollNo && <span className="text-xs text-red-500">{errors.rollNo}</span>}
                         </div>
                     </div>
 
-                    {/* Class & Section */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label>Class *</Label>
@@ -228,20 +220,29 @@ export default function AddUserDialog({
                         </div>
                     </div>
 
-                    {/* Parent Email */}
                     <div>
                         <Label>Parent Email *</Label>
-                        <Input
-                            name="parentEmail"
-                            type="email"
-                            value={formData.parentEmail}
-                            onChange={handleChange}
-                            onBlur={checkParentEmail}
-                        />
+                        <div className="relative">
+                            <Input
+                                name="parentEmail"
+                                type="email"
+                                value={formData.parentEmail}
+                                onChange={handleChange}
+                                onBlur={checkParentEmail}
+                            />
+                            {checkPasswordLoading && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                </div>
+                            )}
+                        </div>
+                        {errors.parentEmail && <span className="text-xs text-red-500">{errors.parentEmail}</span>}
+                        {formData.parentEmail !== originalEmail && parentExists === false && (
+                            <span className="text-xs text-blue-600 ml-1">New parent email. Password required.</span>
+                        )}
                     </div>
 
-                    {/* Password – conditional */}
-                    {parentExists === false && !student && (
+                    {formData.parentEmail !== originalEmail && parentExists === false && (
                         <div>
                             <Label>Password *</Label>
                             <div className="flex gap-2">
@@ -251,20 +252,14 @@ export default function AddUserDialog({
                                     value={formData.password}
                                     onChange={handleChange}
                                 />
-                                <Button
-                                    type="button"
-                                    onClick={() => {
-                                        if (!formData.password) generatePassword()
-                                        else copyPassword()
-                                    }}
-                                >
+                                <Button type="button" onClick={() => !formData.password ? generatePassword() : copyPassword()}>
                                     {formData.password ? "Copy" : "Generate"}
                                 </Button>
                             </div>
+                            {errors.password && <span className="text-xs text-red-500">{errors.password}</span>}
                         </div>
                     )}
 
-                    {/* DOB, Gender, Blood Group */}
                     <div className="grid grid-cols-3 gap-4">
                         <div>
                             <Label>Date of Birth</Label>
@@ -287,17 +282,15 @@ export default function AddUserDialog({
                         </div>
                     </div>
 
-                    {/* Address */}
                     <div>
                         <Label>Address</Label>
                         <Input name="address" value={formData.address} onChange={handleChange} />
                     </div>
 
                     <DialogFooter className="pt-4">
-                        <Button variant="ghost" type="button" onClick={() => setOpen(false)}>Cancel</Button>
+                        <Button variant="ghost" type="button" onClick={() => onOpenChange(false)}>Cancel</Button>
                         <Button type="submit" disabled={loading}>
-                            {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{student ? "Updating..." : "Creating..."}</>
-                                : student ? "Update Student" : "Create Student"}
+                            {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Updating...</> : "Update Student"}
                         </Button>
                     </DialogFooter>
                 </form>

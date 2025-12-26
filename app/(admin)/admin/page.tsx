@@ -35,7 +35,19 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     console.log("selected school = ", selectedSchool, "\nselected class =", selectedClass, "\nselected section = ", selectedSection)
-  }, [selectedClass, selectedSchool, selectedSection])
+  }, [selectedClass, selectedSchool, selectedSection]);
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (response.ok) {
+        console.log("Logout successful");
+        window.location.href = "/logout";
+      }
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
 
   return (
     <>

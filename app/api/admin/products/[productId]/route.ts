@@ -3,6 +3,7 @@ import { deleteImage, getFullImageUrl, saveImage } from "@/lib/upload";
 import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 import { Wrapper } from '@/lib/api-handler';
+import { ProductCategory } from "@prisma/client";
 
 export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promise<{ productId: string }> }) => {
     try {
@@ -10,10 +11,6 @@ export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promis
 
         if (!auth.success) {
             return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
-        }
-
-        if (auth.user.role !== "ADMIN") {
-            return NextResponse.json({ success: false, message: "Only Super Admins can update global products" }, { status: 403 });
         }
 
         const { productId } = await params;
@@ -28,22 +25,29 @@ export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promis
             return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 });
         }
 
+        const isAdmin = auth.user.role === "ADMIN";
+        const isSubAdmin = auth.user.role === "SUB_ADMIN" && auth.user.schoolId === existingProduct.schoolId;
+
+        if (!isAdmin && !isSubAdmin) {
+            return NextResponse.json({ success: false, message: "You are not authorized to delete this product" }, { status: 403 });
+        }
+
         const formData = await req.formData();
         const name = formData.get("name") as string;
         const description = formData.get("description") as string;
         const price = formData.get("price") as string;
         const category = formData.get("category") as string;
         const stock = formData.get("stock") as string;
+        const quantity = formData.get("quantity") as string; 
+        const language = formData.get("language") as string; 
         const imageFile = formData.get("image") as File | null;
 
-        if (!name || !description || !price || !category || !stock) {
-            return NextResponse.json({ success: false, message: "All fields are required" }, { status: 400 });
+        if (!name || !description || !price || !category) {
+            return NextResponse.json({ success: false, message: "Name, Description, Price, Category and Stock are required" }, { status: 400 });
         }
 
-        const newPrice = parseFloat(price);
-
         let imageUrl = existingProduct.image;
-        if (imageFile) {
+        if (imageFile && imageFile.size > 0) {
             const newImageUrl = await saveImage(imageFile);
 
             if (existingProduct.image) {
@@ -54,28 +58,20 @@ export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promis
         }
 
         const updatedProduct = await prisma.product.update({
-            where: { id: productId }, data: {
+            where: { id: productId }, 
+            data: {
                 name,
                 description,
-                price: newPrice,
-                category: category as "TEXTBOOK" | "NOTEBOOK" | "STATIONARY" | "OTHER",
+                price: parseFloat(price),
+                category: category as ProductCategory,
                 stock: parseInt(stock),
+                quantity: quantity ? parseInt(quantity) : existingProduct.quantity,
+                language: language || existingProduct.language,
                 image: imageUrl
             }
         });
 
         updatedProduct.image = getFullImageUrl(updatedProduct.image as string, req);
-
-        //updating the price of the kit items
-        if (existingProduct.price !== newPrice) {
-            const priceDifference = newPrice - existingProduct.price;
-
-            const affectedItems = await prisma.kitItem.findMany({ where: { productId } });
-
-            for (const item of affectedItems) {
-                await prisma.kit.update({ where: { id: item.kitId }, data: { totalPrice: { increment: priceDifference * item.quantity } } });
-            }
-        }
 
         return NextResponse.json({ success: true, message: "Product updated successfully", product: updatedProduct }, { status: 200 });
     } catch (error) {
@@ -92,10 +88,6 @@ export const DELETE = Wrapper(async (req: NextRequest, { params }: { params: Pro
             return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
         }
 
-        if (auth.user.role !== "ADMIN") {
-            return NextResponse.json({ success: false, message: "Only Super Admins can delete global products" }, { status: 403 });
-        }
-
         const { productId } = await params;
 
         if (!productId) {
@@ -108,19 +100,15 @@ export const DELETE = Wrapper(async (req: NextRequest, { params }: { params: Pro
             return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 });
         }
 
-        if (existingProduct.image) {
-            await deleteImage(existingProduct.image);
+        const isAdmin = auth.user.role === "ADMIN";
+        const isSubAdmin = auth.user.role === "SUB_ADMIN" && auth.user.schoolId === existingProduct.schoolId;
+
+        if (!isAdmin && !isSubAdmin) {
+            return NextResponse.json({ success: false, message: "You are not authorized to delete this product" }, { status: 403 });
         }
 
-        const itemsToDelete = await prisma.kitItem.findMany({ where: { productId } });
-
-        for (const item of itemsToDelete) {
-            await prisma.kit.update({
-                where: { id: item.kitId },
-                data: {
-                    totalPrice: { decrement: existingProduct.price * item.quantity }
-                }
-            });
+        if (existingProduct.image) {
+            await deleteImage(existingProduct.image);
         }
 
         await prisma.product.delete({ where: { id: productId } });

@@ -30,7 +30,7 @@ type School = {
 type Props = {
     activeTab: string
     onSelectSchool: (id: string) => void
-    refreshTrigger?: number
+    refreshTrigger?: number 
 }
 
 export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: Props) {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { ProductCategory, KitType } from "@prisma/client";
+import { ProductCategory } from "@prisma/client";
 
 export const maxDuration = 300; 
 export const dynamic = 'force-dynamic';
@@ -20,14 +20,12 @@ function getRandomName(type: 'parent' | 'student') {
 
 export async function GET(req: NextRequest) {
     try {
-        console.log("--- Starting Seeding Process ---");
+        console.log("Starting Seeding Process...");
 
-        // Hash passwords ONCE to save time
         const commonAdminPass = await bcrypt.hash("admin123", 10);
         const commonSchoolPass = await bcrypt.hash("school123", 10);
         const commonUserPass = await bcrypt.hash("user123", 10);
 
-        // Create Super Admin
         const adminEmail = "admin@globe.com";
         await prisma.user.upsert({
             where: { email: adminEmail },
@@ -63,16 +61,16 @@ export async function GET(req: NextRequest) {
         ];
 
         const createdSchools = [];
+        
         for (const [index, s] of schoolsList.entries()) {
             console.log(`Processing School ${index + 1}/${schoolsList.length}: ${s.name}`);
             
-            const cleanName = s.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+            const cleanName = s.name.toLowerCase().replace(/[^a-z0-9]/g, "").substring(0, 15);
             const schoolEmail = `admin.${cleanName}${index}@globe.com`;
 
             let school = await prisma.school.findUnique({ where: { email: schoolEmail } });
 
             if (!school) {
-                // Create School
                 const classesList = getClassNames("upto-10");
                 const currentYear = new Date().getFullYear().toString();
                 const academicYear = `${currentYear}-${parseInt(currentYear) + 1}`;
@@ -91,7 +89,6 @@ export async function GET(req: NextRequest) {
                     }
                 });
 
-                // Create School Sub-Admin
                 await prisma.user.create({
                     data: {
                         name: `${s.name} Admin`,
@@ -104,7 +101,7 @@ export async function GET(req: NextRequest) {
                     }
                 });
 
-                // Create Classes
+            
                 await prisma.class.createMany({
                     data: classesList.map(name => ({
                         name,
@@ -115,48 +112,30 @@ export async function GET(req: NextRequest) {
                 });
 
                 const fetchedClasses = await prisma.class.findMany({ where: { schoolId: school.id } });
-                const firstClassId = fetchedClasses[0].id;
 
-                // Create Products
-                const productData = [
-                    { name: "Mathematics Textbook", description: "NCERT Math Book", price: 250, category: ProductCategory.TEXTBOOK, stock: 500, brand: "NCERT", type: null, classId: firstClassId },
-                    { name: "Science Textbook", description: "NCERT Science Book", price: 300, category: ProductCategory.TEXTBOOK, stock: 500, brand: "NCERT", type: null, classId: firstClassId },
-                    { name: "Single Line Notebook", description: "140 Pages", price: 50, category: ProductCategory.NOTEBOOK, stock: 1000, brand: "Classmate", type: "Ruled", classId: firstClassId },
-                    { name: "Geometry Box", description: "Standard Set", price: 150, category: ProductCategory.STATIONARY, stock: 300, brand: "Camlin", type: null, classId: firstClassId },
-                    { name: "School Bag", description: "Waterproof", price: 800, category: ProductCategory.OTHER, stock: 100, brand: "Skybags", type: null, classId: firstClassId }
-                ];
-
-                const createdProducts = [];
-                for (const p of productData) {
-                    const product = await prisma.product.create({ data: p });
-                    createdProducts.push(product);
-                }
-                const findProd = (namePart: string) => createdProducts.find(p => p.name.includes(namePart))?.id;
-
-                // Create Kits & Students
+    
                 for (const cls of fetchedClasses) {
-                    // Create Kit
-                    if (findProd("Math") && findProd("Notebook")) {
-                        await prisma.kit.create({
-                            data: {
-                                type: KitType.BASIC,
-                                classId: cls.id,
-                                totalPrice: 500,
-                                language: "English",
-                                items: {
-                                    create: [
-                                        { productId: findProd("Math")!, quantity: 1 },
-                                        { productId: findProd("Notebook")!, quantity: 2 }
-                                    ]
-                                }
-                            }
-                        });
-                    }
+                    
+                   
+                    const productData = [
+                        { name: "Mathematics Textbook", description: "NCERT Math Book", price: 250, category: ProductCategory.TEXTBOOK, stock: 500, brand: "NCERT", type: null, quantity: 1 },
+                        { name: "Science Textbook", description: "NCERT Science Book", price: 300, category: ProductCategory.TEXTBOOK, stock: 500, brand: "NCERT", type: null, quantity: 1 },
+                        { name: "Single Line Notebook", description: "140 Pages", price: 50, category: ProductCategory.NOTEBOOK, stock: 1000, brand: "Classmate", type: "Ruled", quantity: 6 }, // Higher Qty example
+                        { name: "Geometry Box", description: "Standard Set", price: 150, category: ProductCategory.STATIONARY, stock: 300, brand: "Camlin", type: null, quantity: 1 },
+                        { name: "School Bag", description: "Waterproof", price: 800, category: ProductCategory.OTHER, stock: 100, brand: "Skybags", type: null, quantity: 1 }
+                    ];
 
-                    // Create 2 Students per class
-                    const studentPromises = Array.from({ length: 2 }).map(async (_, i) => {
-                        const iVal = i + 1;
-                        const parentEmail = `p${iVal}.${cls.id.substring(0,4)}${index}@test.com`; 
+                    await prisma.product.createMany({
+                        data: productData.map(p => ({
+                            ...p,
+                            schoolId: school!.id,
+                            classId: cls.id,
+                            language: "English"
+                        }))
+                    });
+
+                    for (let i = 1; i <= 2; i++) {
+                        const parentEmail = `p${i}.${cls.id.substring(0,4)}${index}@test.com`; 
                         
                         const parent = await prisma.user.create({
                             data: {
@@ -166,11 +145,12 @@ export async function GET(req: NextRequest) {
                                 role: "USER",
                                 status: "ACTIVE",
                                 phone: Math.floor(1000000000 + Math.random() * 9000000000).toString(),
-                                address: "123 Parent St"
+                                address: "123 Parent St",
+                                schoolId: school!.id 
                             }
                         });
 
-                        return prisma.student.create({
+                        await prisma.student.create({
                             data: {
                                 name: getRandomName('student'),
                                 schoolId: school!.id,
@@ -178,15 +158,14 @@ export async function GET(req: NextRequest) {
                                 parentId: parent.id,
                                 rollNo: `R-${Math.floor(Math.random() * 1000)}`,
                                 dob: new Date("2015-01-01"),
-                                gender: iVal % 2 === 0 ? "Male" : "Female",
+                                gender: i % 2 === 0 ? "Male" : "Female",
                                 section: "A",
                                 parentEmail: parent.email,
                                 address: "Same as parent",
                                 isActive: true
                             }
                         });
-                    });
-                    await Promise.all(studentPromises);
+                    }
                 }
             } else {
                 console.log(`Skipping ${s.name} - Already exists`);

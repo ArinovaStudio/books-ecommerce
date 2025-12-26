@@ -15,7 +15,6 @@ export const GET = Wrapper(async (req: NextRequest) => {
             );
         }
 
-        /* ✅ Admin / Sub Admin only */
         if (!["ADMIN", "SUB_ADMIN"].includes(auth.user.role)) {
             return NextResponse.json(
                 { success: false, message: "Forbidden: Admin access only" },
@@ -23,7 +22,6 @@ export const GET = Wrapper(async (req: NextRequest) => {
             );
         }
 
-        /* ✅ Get schoolId from query */
         const { searchParams } = new URL(req.url);
         const schoolId = searchParams.get("schoolId");
 
@@ -34,18 +32,35 @@ export const GET = Wrapper(async (req: NextRequest) => {
             );
         }
 
-        /* ✅ Fetch orders for a school */
+        if (auth.user.role === "SUB_ADMIN" && auth.user.schoolId !== schoolId) {
+            return NextResponse.json(
+                { success: false, message: "Forbidden: You can only view orders for your own school" },
+                { status: 403 }
+            );
+        }
+
         const orders = await prisma.order.findMany({
             where: {
                 student: {
-                    schoolId,
+                    schoolId, 
                 },
             },
             include: {
+                user: {
+                    select: {
+                        name: true,
+                        email: true,
+                        phone: true,
+                    }
+                },
                 student: {
                     select: {
                         name: true,
                         rollNo: true,
+                        section: true,
+                        class: {
+                            select: { name: true }
+                        }
                     },
                 },
                 payment: {
@@ -61,6 +76,8 @@ export const GET = Wrapper(async (req: NextRequest) => {
                             select: {
                                 name: true,
                                 image: true,
+                                price: true,
+                                category: true
                             },
                         },
                     },
@@ -71,7 +88,6 @@ export const GET = Wrapper(async (req: NextRequest) => {
             },
         });
 
-        /* ✅ Normalize product images */
         orders.forEach((order) => {
             order.items?.forEach((item) => {
                 if (item.product?.image) {

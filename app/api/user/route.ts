@@ -2,13 +2,10 @@ import prisma from "@/lib/prisma"
 import { NextRequest, NextResponse } from "next/server"
 import { Wrapper } from "@/lib/api-handler"
 
-/* ---------------- TYPES ---------------- */
-
 type PromoteBody = {
     userId: string
 }
 
-/* ---------------- SEARCH USERS ---------------- */
 export const GET = Wrapper(async (req: NextRequest): Promise<NextResponse> => {
     const { searchParams } = new URL(req.url)
     const q: string | null = searchParams.get("q")
@@ -39,8 +36,7 @@ export const GET = Wrapper(async (req: NextRequest): Promise<NextResponse> => {
     return NextResponse.json(users)
 })
 
-/* ---------------- PROMOTE USER ---------------- */
-/* PATCH /api/users */
+
 export const PATCH = Wrapper(async (req: NextRequest): Promise<NextResponse> => {
     const { userId } = (await req.json()) as PromoteBody
 

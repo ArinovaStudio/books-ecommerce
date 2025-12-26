@@ -1,22 +1,22 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Search, Mail, User, ArrowLeft, Loader2, Pencil, Trash, ShieldOff } from "lucide-react"
-import AddUserDialog from "../AddUser"
+import { MoreHorizontal, Search, Mail, User, ArrowLeft, Loader2, Pencil, Trash, ShieldOff, ShieldCheck } from "lucide-react"
+import AddUserDialog, { StudentType } from "../AddUser"
+import EditUserDialog from "../EditUserDialog" 
 import { useToast } from "@/hooks/use-toast"
 
-type UserType = {
+interface UserType extends StudentType {
     id: string
-    name: string
-    email: string
-    phone: string
+    email:string
     role: string
     status: string
     joinDate: string
+    isActive?: boolean
 }
 
 type Props = {
@@ -32,45 +32,57 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
     const [users, setUsers] = useState<UserType[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
+    
+    const [editingStudent, setEditingStudent] = useState<UserType | null>(null)
+    const [isEditOpen, setIsEditOpen] = useState(false)
+
     const { toast } = useToast()
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            setLoading(true)
-            try {
-                const res = await fetch(`/api/admin/students?classId=${classId}&section=${sectionId}`)
-                const data = await res.json()
+    const fetchUsers = useCallback(async () => {
+        setLoading(true)
+        try {
+            const res = await fetch(`/api/admin/students?classId=${classId}&section=${sectionId}`)
+            const data = await res.json()
 
-                if (data.success) {
-                    setUsers(data.students.map((student: any) => ({
-                        id: student.id,
-                        name: student.name,
-                        email: student.parent?.email || student.parentEmail,
-                        phone: student.parent?.phone || "",
-                        role: "User",
-                        status: student.isActive ? "Active" : "Inactive",
-                        joinDate: new Date(student.createdAt).toLocaleDateString()
-                    })))
-                } else {
-                    setUsers([])
-                }
-            } catch (error) {
-                console.error("Failed to fetch users", error)
-                toast({ title: "Error", description: "Failed to fetch students", variant: "destructive" })
-            } finally {
-                setLoading(false)
+            if (data.success) {
+                setUsers(data.students.map((student: any) => ({
+                    id: student.id,
+                    name: student.name,
+                    rollNo: student.rollNo,
+                    classId: student.classId,
+                    section: student.section,
+                    email: student.parent?.email || student.parentEmail,
+                    parentEmail: student.parent?.email || student.parentEmail,
+                    phone: student.parent?.phone || "",
+                    role: "User",
+                    isActive: student.isActive,
+                    status: student.isActive ? "Active" : "Inactive",
+                    joinDate: new Date(student.createdAt).toLocaleDateString(),
+                    dob: student.dob,
+                    gender: student.gender,
+                    bloodGroup: student.bloodGroup,
+                    address: student.address
+                })))
+            } else {
+                setUsers([])
             }
+        } catch (error) {
+            console.error("Failed to fetch users", error)
+            toast({ title: "Error", description: "Failed to fetch students", variant: "destructive" })
+        } finally {
+            setLoading(false)
         }
+    }, [classId, sectionId, toast])
 
+    useEffect(() => {
         if (classId && sectionId) fetchUsers()
-    }, [classId, sectionId])
+    }, [fetchUsers, classId, sectionId])
 
     const filteredUsers = users.filter(user =>
         user.name.toLowerCase().includes(search.toLowerCase()) ||
         user.email.toLowerCase().includes(search.toLowerCase())
     )
 
-    // DELETE STUDENT
     const handleDelete = async (userId: string) => {
         if (!confirm("Are you sure you want to delete this student?")) return
         try {
@@ -88,22 +100,39 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
         }
     }
 
-    // DEACTIVATE STUDENT
-    const handleDeactivate = async (userId: string) => {
-        if (!confirm("Are you sure you want to deactivate this student?")) return
+    const handleToggleStatus = async (user: UserType) => {
+        const newStatus = !user.isActive 
+        const actionName = newStatus ? "activate" : "deactivate"
+        
+        if (!confirm(`Are you sure you want to ${actionName} this student?`)) return
+
         try {
-            const res = await fetch(`/api/admin/students/${userId}/toggle`, { method: "PATCH" })
+            const res = await fetch(`/api/admin/students/${user.id}/toggle`, { 
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ isActive: newStatus })
+            })
             const data = await res.json()
+            
             if (data.success) {
-                setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: "Inactive" } : u))
-                toast({ title: "Deactivated", description: "Student deactivated successfully" })
+                setUsers(prev => prev.map(u => u.id === user.id ? { 
+                    ...u, 
+                    isActive: newStatus, 
+                    status: newStatus ? "Active" : "Inactive" 
+                } : u))
+                toast({ title: "Success", description: `Student ${actionName}d successfully` })
             } else {
-                toast({ title: "Error", description: data.message || "Failed to deactivate student", variant: "destructive" })
+                toast({ title: "Error", description: data.message || "Failed to update status", variant: "destructive" })
             }
         } catch (error) {
             console.error(error)
-            toast({ title: "Error", description: "Failed to deactivate student", variant: "destructive" })
+            toast({ title: "Error", description: "Failed to update status", variant: "destructive" })
         }
+    }
+
+    const handleEditClick = (user: UserType) => {
+        setEditingStudent(user)
+        setIsEditOpen(true)
     }
 
     return (
@@ -113,15 +142,27 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
                     <ArrowLeft className="h-4 w-4" />
                     <p className="hidden md:block">Back to Section</p>
                 </Button>
+                
                 <AddUserDialog
                     schoolId={schoolId}
                     classId={classId}
                     sectionId={sectionId}
-                    onStudentAdded={() => window.location.reload()}
+                    onStudentAdded={fetchUsers} 
                 />
+
+                {editingStudent && (
+                    <EditUserDialog 
+                        student={editingStudent}
+                        open={isEditOpen}
+                        onOpenChange={(open) => {
+                            setIsEditOpen(open)
+                            if(!open) setEditingStudent(null)
+                        }}
+                        onStudentUpdated={fetchUsers}
+                    />
+                )}
             </div>
 
-            {/* Search */}
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input placeholder="Search users..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -154,11 +195,31 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
                                                 </Button>
                                             </DropdownMenuTrigger>
 
-                                            <DropdownMenuContent align="end" className="w-36">
-                                                <DropdownMenuItem className="gap-2 cursor-pointer">
+                                            <DropdownMenuContent align="end" className="w-40">
+                                                <DropdownMenuItem 
+                                                    className="gap-2 cursor-pointer"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        handleEditClick(user)
+                                                    }}
+                                                >
                                                     <Pencil className="h-4 w-4" /> Edit
                                                 </DropdownMenuItem>
 
+                                                <DropdownMenuItem
+                                                    className={`gap-2 cursor-pointer ${user.isActive ? 'text-destructive' : 'text-green-600'}`}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        handleToggleStatus(user)
+                                                    }}
+                                                >
+                                                    {user.isActive ? (
+                                                        <><ShieldOff className="h-4 w-4" /> Deactivate</>
+                                                    ) : (
+                                                        <><ShieldCheck className="h-4 w-4" /> Activate</>
+                                                    )}
+                                                </DropdownMenuItem>
+                                                
                                                 <DropdownMenuItem
                                                     className="gap-2 text-destructive cursor-pointer"
                                                     onClick={(e) => {
@@ -166,17 +227,7 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
                                                         handleDelete(user.id)
                                                     }}
                                                 >
-                                                    <Trash className="h-4 w-4 text-red-400" /> Delete
-                                                </DropdownMenuItem>
-
-                                                <DropdownMenuItem
-                                                    className="gap-2 text-destructive cursor-pointer"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        handleDeactivate(user.id)
-                                                    }}
-                                                >
-                                                    <ShieldOff className="h-4 w-4 text-red-400" /> Deactivate
+                                                    <Trash className="h-4 w-4" /> Delete
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
@@ -199,7 +250,7 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
 
                                 <div className="flex items-center justify-between text-sm">
                                     <span>Status</span>
-                                    <Badge variant={user.status === "Active" ? "default" : "secondary"}>
+                                    <Badge variant={user.status === "Active" ? "default" : "destructive"}>
                                         {user.status}
                                     </Badge>
                                 </div>

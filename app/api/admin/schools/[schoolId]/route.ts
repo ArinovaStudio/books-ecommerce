@@ -2,6 +2,7 @@ import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { deleteImage, getFullImageUrl, saveImage } from "@/lib/upload";
 import { verifyAdmin } from "@/lib/verify";
+import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
 function getClassNames(range: string): string[] {
@@ -36,9 +37,10 @@ export const PUT = Wrapper(async(req: NextRequest, { params }: { params: Promise
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const address = formData.get("location") as string; 
-    const classRange = formData.get("classes") as string; 
+    const classRange = formData.get("classRange") as string; 
     const languagesRaw = formData.get("languages") as string;
     const board = formData.get("board") as string;
+    const password = formData.get("password") as string;
     const imageFile = formData.get("image") as File | null;
 
     let imageUrl = existingSchool.image;
@@ -49,8 +51,37 @@ export const PUT = Wrapper(async(req: NextRequest, { params }: { params: Promise
     }
 
     const updatedSchool = await prisma.$transaction(async (tx) => {
+
+        if (email || password) {
+            const subAdmin = await tx.user.findFirst({ where: { schoolId: schoolId, role: "SUB_ADMIN" }});
+
+            // Update subadmin in case of change of email
+            if (subAdmin) {
+                const userUpdateData: any = {};
+
+                if (password) {
+                    const hashedPassword = await bcrypt.hash(password, 12);
+                    userUpdateData.password = hashedPassword;
+                }
+
+                if (email && email !== subAdmin.email) {
+                    const existingUser = await tx.user.findUnique({ where: { email } });
+                    if (existingUser && existingUser.id !== subAdmin.id) {
+                        throw new Error(`Email ${email} is already in use by another user.`);
+                    }
+                    userUpdateData.email = email;
+                }
+
+                if (Object.keys(userUpdateData).length > 0) {
+                    await tx.user.update({ where: { id: subAdmin.id }, data: userUpdateData });
+                }
+            }
+        }
+
+
         let newNumberOfClasses = existingSchool.numberOfClasses;
 
+        // update classes
         if (classRange && classRange !== existingSchool.classRange) {
             const expectedClasses = getClassNames(classRange);
             
@@ -90,6 +121,7 @@ export const PUT = Wrapper(async(req: NextRequest, { params }: { params: Promise
             newNumberOfClasses = expectedClasses.length;
         }
 
+        // update school
         const school = await tx.school.update({
             where: { id: schoolId },
             data: {

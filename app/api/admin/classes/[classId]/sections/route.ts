@@ -36,7 +36,7 @@ export const GET = Wrapper(
         );
       }
 
-      // 🔐 Sub-admin restriction
+      // Sub-admin restriction
       if (auth.user.role === "SUB_ADMIN") {
         if (
           !auth.user.schoolId ||

@@ -18,17 +18,14 @@ const updateStudentValidation = z.object({
 });
 
 // update student details
-export const PUT = Wrapper(async( req: NextRequest,  { params }: { params: Promise<{ studentId: string }> }) => {
+export const PUT = Wrapper(async( req: NextRequest, { params }: { params: Promise<{ studentId: string }> }) => {
   try {
     const auth = await verifyAdmin(req);
-        if (!auth.success){
-            return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
-        }
+    if (!auth.success){
+        return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
+    }
 
     const user = auth.user;
-    if (user.role !== "SUB_ADMIN" || !user.schoolId) {
-        return NextResponse.json({ success: false, message: "Only School Admins can update students" }, { status: 403 });
-    }
 
     const { studentId } = await params;
     const body = await req.json();
@@ -45,7 +42,7 @@ export const PUT = Wrapper(async( req: NextRequest,  { params }: { params: Promi
         return NextResponse.json({ success: false, message: "Student not found" }, { status: 404 });
     }
 
-    if (existingStudent.schoolId !== user.schoolId) {
+    if (user.role === "SUB_ADMIN" && existingStudent.schoolId !== user.schoolId) {
         return NextResponse.json({ success: false, message: "You can only manage students in your own school" }, { status: 403 });
     }
 
@@ -58,7 +55,7 @@ export const PUT = Wrapper(async( req: NextRequest,  { params }: { params: Promi
 
         const duplicate = await prisma.student.findFirst({
             where: {
-                schoolId: user.schoolId,
+                schoolId: existingStudent.schoolId, 
                 classId: targetClass,
                 section: targetSection,
                 rollNo: targetRoll,
@@ -102,9 +99,6 @@ export const DELETE = Wrapper(async( req: NextRequest, { params }: { params: Pro
     }
 
     const user = auth.user;
-    if (user.role !== "SUB_ADMIN" || !user.schoolId) {
-        return NextResponse.json({ success: false, message: "Only School Admins can delete students" }, { status: 403 });
-    }
 
     const { studentId } = await params;
 
@@ -113,7 +107,7 @@ export const DELETE = Wrapper(async( req: NextRequest, { params }: { params: Pro
         return NextResponse.json({ success: false, message: "Student not found" }, { status: 404 });
     }
 
-    if (existingStudent.schoolId !== user.schoolId) {
+    if (user.role === "SUB_ADMIN" && existingStudent.schoolId !== user.schoolId) {
         return NextResponse.json({ success: false, message: "You can only delete students in your own school" }, { status: 403 });
     }
 

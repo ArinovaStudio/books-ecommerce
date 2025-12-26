@@ -7,7 +7,6 @@ import { Wrapper } from "@/lib/api-handler";
 
 const createOrderValidation = z.object({
   studentId: z.string().uuid(),
-  kitId: z.string().uuid(),
   paymentMethod: z.string().min(1, "Payment method is required"),
   items: z.array(
     z.object({
@@ -27,27 +26,31 @@ export const POST = Wrapper(async (req: NextRequest) => {
     }
 
     const userId = auth.user.id;
-
     const body = await req.json();
     
     const validation = createOrderValidation.safeParse(body);
 
     if (!validation.success) {
         const errors = validation.error.errors.map((error) => ({ field: error.path[0], message: error.message }));;
-        return NextResponse.json({ success: false, message: "Vlidation error", errors }, { status: 400 });
+        return NextResponse.json({ success: false, message: "Validation error", errors }, { status: 400 });
     }
 
-    const { studentId, kitId, items, paymentMethod } = validation.data;
+    const { studentId, items, paymentMethod } = validation.data;
 
-    const student = await prisma.student.findUnique({ where: { id: studentId } });
+    const student = await prisma.student.findUnique({ 
+        where: { id: studentId },
+        include: { 
+            class: true,
+            school: true
+        }
+    });
+
     if (!student || student.parentId !== userId) {
-        return NextResponse.json({ success: false, message: "Invalid Student ID" }, { status: 403 });
+        return NextResponse.json({ success: false, message: "Invalid Student ID or Unauthorized" }, { status: 403 });
     }
 
-    const kit = await prisma.kit.findUnique({ where: { id: kitId }, include: { class: { include: { school: true } }}});
-
-    if (!kit) {
-      return NextResponse.json({ success: false, message: "Kit not found" }, { status: 404 });
+    if (student.isActive === false) {
+      return NextResponse.json({ success: false, message: "Student is inactive" }, { status: 403 });
     }
 
     const productIds = items.map(i => i.productId);
@@ -60,25 +63,26 @@ export const POST = Wrapper(async (req: NextRequest) => {
 
     for (const item of items) {
       const product = productMap.get(item.productId);
+      
       if (!product) {
         return NextResponse.json({ success: false, message: `Product ID ${item.productId} invalid` }, { status: 400 });
       }
-      
-      totalAmount += product.price * item.quantity;
 
+      totalAmount += product.price * item.quantity;
       validOrderItems.push({ productId: item.productId, quantity: item.quantity, price: product.price });
     }
 
     const orderId = await prisma.$transaction(async (tx) => {
+      
       // Create Order
       const order = await tx.order.create({
           data: {
-              userId, studentId,
-              school: kit.class.school.name, 
-              class: kit.class.name,
+              userId, 
+              studentId, 
+              school: student.school.name, 
+              class: student.class.name,
               section: student.section,
-              academicYear:  kit.class.academicYear,       
-              kitType: kit.type,        
+              academicYear: student.class.academicYear,       
               status: "Ordered",
               totalAmount                
           }
@@ -94,7 +98,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
           }))
       });
 
-      // Payment history added
+      // Create Payment Record
       await tx.payment.create({
           data: {
               orderId: order.id,
@@ -107,7 +111,6 @@ export const POST = Wrapper(async (req: NextRequest) => {
       return order.id;
     })
     
-
     return NextResponse.json({ success: true, message: "Order created successfully", orderId }, { status: 201 });
 
   } catch (error) {
@@ -140,14 +143,14 @@ export const GET = Wrapper(async (req: NextRequest) => {
         orderBy: { createdAt: "desc" } 
     });
 
-    if (!orders) {
+    if (!orders || orders.length === 0) {
       return NextResponse.json({ success: false, message: "No Order history" }, { status: 404 });
     }
 
     orders.forEach((order) => {
       if (order.items) {
         order.items.forEach((item) => {
-          if (item.product.image) {
+          if (item.product?.image) {
             item.product.image = getFullImageUrl(item.product.image, req);
           }
         });

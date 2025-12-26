@@ -19,7 +19,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
       };
     }
 
-    const schools = await prisma.school.findMany({ where: query, orderBy: { createdAt: "desc" } });
+    const schools = await prisma.school.findMany({ where: query, orderBy: { createdAt: "desc" }, include: { _count: { select: { students: true }} }});
 
     if (!schools || schools.length === 0) {
       return NextResponse.json({ success: false, message: "Schools not found" }, { status: 404 });

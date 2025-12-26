@@ -7,6 +7,7 @@ import {
   Book,
   ClipboardList,
   SquareChartGantt,
+  LogOut,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAdmin } from "@/app/context/admin"
@@ -37,6 +38,23 @@ export function AdminSidebar() {
     role,
     loading,
   } = useAdmin()
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        console.log("Logout successful");
+        window.location.href = "/signin";
+      } else {
+        console.error("Failed to logout");
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
 
   if (loading || !role) return null
 
@@ -91,10 +109,19 @@ export function AdminSidebar() {
                 >
                   <Icon className="h-5 w-5" />
                   {item.label}
-                </button>
+                </button> 
               )
             })}
           </nav>
+          <div className="p-4 border-t border-border">
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-red-500 transition-all hover:bg-red-50 hover:text-red-600"
+            >
+              <LogOut className="h-5 w-5 rotate-180" />
+              Logout
+            </button>
+          </div>
         </div>
       </aside>
 
