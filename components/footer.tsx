@@ -61,7 +61,7 @@ export default function Footer() {
               <p className="pb-2">Privacy Policy</p>
 
             </Link>
-            <Link href={'/policy'} className="text-blue-100 text-sm cursor-pointer">
+            <Link href={'/terms'} className="text-blue-100 text-sm cursor-pointer">
               <p className="pb-2">Terms of Service</p>
 
             </Link>
@@ -69,7 +69,7 @@ export default function Footer() {
               <p className="pb-2">Refund Policy</p>
 
             </Link>
-            <Link href={'/policy'} className="text-blue-100 text-sm cursor-pointer">
+            <Link href={'/shipping-policy'} className="text-blue-100 text-sm cursor-pointer">
               <p className="pb-2">Shipping Policy</p>
 
             </Link>
