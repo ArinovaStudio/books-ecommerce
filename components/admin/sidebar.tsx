@@ -7,6 +7,8 @@ import {
   Book,
   ClipboardList,
   SquareChartGantt,
+  LucideDoorOpen,
+  LucideLogOut,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAdmin } from "@/app/context/admin"
@@ -44,8 +46,18 @@ export function AdminSidebar() {
     item.roles.includes(role)
   )
 
-  console.log('subadmin navbar', visibleNavItems)
-
+    const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (response.ok) {
+        console.log("Logout successful");
+        window.location.href = "/logout";
+      }
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
+  
   return (
     <>
       <aside
@@ -55,7 +67,10 @@ export function AdminSidebar() {
           "lg:translate-x-0"
         )}
       >
-        <div className="flex h-full flex-col">
+        <div className="flex h-full flex-col relative">
+          <div onClick={() => handleLogout()} className="absolute w-5/6 h-fit bottom-4 left-5 bg-red-500/10 text-red-400 gap-2 flex justify-center items-center py-3 rounded-lg">
+          <LucideLogOut className="rotate-180" size={18} /> Logout
+          </div>
           {/* Header */}
           <div className="flex items-center gap-3 border-b px-6 py-[18px]">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400/20">

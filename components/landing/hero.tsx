@@ -38,12 +38,12 @@ export default function Hero() {
                 </button>
               </Link>
 
-              <button className="px-7 py-3 bg-red-400 rounded-full bg-white/5 border border-white/10 text-white font-semibold flex items-center justify-center gap-3 hover:bg-white/10 transition">
+              <Link href={"/about"} className="px-7 py-3 rounded-full bg-white/5 border border-white/10 text-white font-semibold flex items-center justify-center gap-3 hover:bg-white/10 transition">
                 <div className="w-8 h-8 rounded-full bg-cyan-400 flex items-center justify-center shadow-lg">
                   <Play className="text-[#141f38] fill-[#141f38]" size={12} />
                 </div>
                 Learn More
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -53,7 +53,7 @@ export default function Hero() {
             <div className="relative w-64 h-72 sm:w-72 sm:h-80 md:w-80 md:h-96 lg:w-80 lg:h-96 aspect-square">
 
               {/* Circular Glow ring */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-cyan-500/20 to-blue-600/20 blur-2xl animate-pulse" />
+              <div className="absolute inset-0 rounded-full bg-linear-to-tr from-cyan-500/20 to-blue-600/20 blur-2xl animate-pulse" />
 
               {/* Circular Image Container */}
               <div className="relative h-full w-full rounded-full overflow-hidden border-4 border-cyan-400/20 shadow-2xl">

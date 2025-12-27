@@ -48,7 +48,6 @@ export default function Footer() {
               <li><Link href="/">Home</Link></li>
               <li><Link href="/schools">Browse Schools</Link></li>
               <li><Link href="/about">About Us</Link></li>
-              <li><Link href="/profile">My Profile</Link></li>
             </ul>
           </div>
 
@@ -58,7 +57,6 @@ export default function Footer() {
             <ul className="space-y-4 text-sm text-blue-100/80">
               <li><Link href="/policy">Privacy Policy</Link></li>
               <li><Link href="/terms">Terms of Service</Link></li>
-              <li><Link href="/contact">Help Center</Link></li>
             </ul>
           </div>
 
@@ -76,7 +74,7 @@ export default function Footer() {
               </li>
               <li className="flex gap-3">
                 <Mail size={18} className="text-cyan-400" />
-                support@globenest.in
+                support@glow-nest.in
               </li>
             </ul>
           </div>

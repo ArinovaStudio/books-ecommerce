@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Menu, X, Phone, ShoppingCart, User, LogIn, LogOut } from "lucide-react";
+import { Menu, X, Phone, User, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -60,7 +60,7 @@ export default function Header() {
           <Link href="/" className="flex items-center gap-2 group transition-transform hover:scale-105">
             <div className="relative w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center">
               <Image
-                src="/logo .png"
+                src="/logo.png"
                 alt="Glow Nest Logo"
                 fill
                 className="object-contain"
@@ -127,9 +127,9 @@ export default function Header() {
 
             {!loading && (
               user ? (
-                <button onClick={() => handleNavClick("/profile", true)} className="text-left py-4 text-lg font-medium text-cyan-400 flex items-center gap-3">
+                <Link href={user.role === "ADMIN" ? "/admin" : "/profile"} className="text-left py-4 text-lg font-medium text-cyan-400 flex items-center gap-3">
                   <User size={22} /> My Profile
-                </button>
+                </Link>
               ) : (
                 <button onClick={() => handleNavClick("/signin", true)} className="mt-4 py-4 rounded-xl bg-cyan-400 text-[#141f38] font-bold flex items-center justify-center gap-2 shadow-lg">
                   <LogIn size={20} /> Sign In

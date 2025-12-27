@@ -174,7 +174,7 @@ export function AnalyticsCharts() {
           <CardHeader>
             <CardTitle>Revenue Overview</CardTitle>
             <CardDescription>
-              Monthly revenue in USD
+              Monthly revenue in INR
             </CardDescription>
           </CardHeader>
 
