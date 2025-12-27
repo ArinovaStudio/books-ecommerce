@@ -18,6 +18,7 @@ import { Trash2, Pencil } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import AddEditProductDialog from "./AddProduct"
 import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation";
 
 type Product = {
     id: string
@@ -49,6 +50,31 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
     const { toast } = useToast()
     const [products, setProducts] = useState<Product[]>([])
     const [loading, setLoading] = useState(false)
+
+    const [activeCategory, setActiveCategory] = useState<
+        "TEXTBOOK" | "NOTEBOOK" | "STATIONARY"
+    >("TEXTBOOK")
+
+    const [categoryProducts, setCategoryProducts] = useState<Product[]>([])
+    const [totalPrice, setTotalPrice] = useState<number>(0)
+    const [showAuthModal, setShowAuthModal] = useState(false);
+    const router = useRouter();
+
+    const handleNextClick = async () => {
+        const res = await fetch("/api/auth/check");
+        const data = await res.json();
+
+        if (data.authenticated) {
+            const query = new URLSearchParams({
+                schoolId: params.schoolId,
+                classId: params.classId,
+            }).toString();
+            window.open(`/guardian-form?${query}`, "_blank");
+        } else {
+            setShowAuthModal(true);
+        }
+    };
+
 
     /** USER cannot edit/delete/add */
     const isAdmin = role !== "USER"
@@ -100,6 +126,26 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
     useEffect(() => {
         fetchProducts()
     }, [])
+
+    useEffect(() => {
+        const filtered = products.filter(
+            (p) => p.category.toUpperCase() === activeCategory
+        )
+        console.log(filtered);
+        setCategoryProducts(filtered)
+
+        const total = filtered.reduce(
+            (sum, p) => sum + p.price,
+            0
+        )
+
+        console.log(total);
+
+
+        setTotalPrice(total)
+
+    }, [activeCategory, products])
+
 
     const renderRow = (product: Product) => (
         <div
@@ -192,12 +238,69 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
             </CardHeader>
 
             <CardContent className="px-0">
-                <Tabs defaultValue="TEXTBOOK">
-                    <TabsList className="mb-6">
-                        <TabsTrigger value="TEXTBOOK">Textbooks</TabsTrigger>
-                        <TabsTrigger value="NOTEBOOK">Notebooks</TabsTrigger>
-                        <TabsTrigger value="STATIONARY">Stationary</TabsTrigger>
-                    </TabsList>
+                <Tabs value={activeCategory} onValueChange={(val) =>
+                    setActiveCategory(val as "TEXTBOOK" | "NOTEBOOK" | "STATIONARY")
+                }>
+                    <div className="flex justify-between">
+                        <div>
+                            <TabsList className="mb-6">
+                                <TabsTrigger value="TEXTBOOK">Textbooks</TabsTrigger>
+                                <TabsTrigger value="NOTEBOOK">Notebooks</TabsTrigger>
+                                <TabsTrigger value="STATIONARY">Stationary</TabsTrigger>
+                            </TabsList>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleNextClick}
+                            className="
+    inline-flex items-center justify-center
+    rounded-md
+    bg-green-600
+    px-4 py-1.5
+    text-xs font-semibold text-white
+    shadow-sm
+    transition-all duration-200 ease-in-out
+    hover:bg-green-700
+    active:scale-[0.97]
+    disabled:cursor-not-allowed disabled:opacity-50
+cursor-pointer
+  "
+                        >
+                            Next
+                        </button>
+
+                    </div>
+
+                    {showAuthModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                            <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg">
+                                <h2 className="text-lg font-semibold text-gray-900">
+                                    Authentication Required
+                                </h2>
+
+                                <p className="mt-2 text-sm text-gray-600">
+                                    You must be logged in to continue. Do you want to sign in now?
+                                </p>
+
+                                <div className="mt-5 flex justify-end gap-3">
+                                    <button
+                                        onClick={() => setShowAuthModal(false)}
+                                        className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                                    >
+                                        No
+                                    </button>
+
+                                    <button
+                                        onClick={() => router.push("/signin")}
+                                        className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                                    >
+                                        Yes, Sign In
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
 
                     {loading ? (
                         <div className="py-20 text-center text-muted-foreground">
@@ -205,6 +308,29 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                         </div>
                     ) : (
                         (["TEXTBOOK", "NOTEBOOK", "STATIONARY"] as const).map((cat) => (
+                            // <TabsContent key={cat} value={cat}>
+                            //     <div className="border rounded-xl overflow-hidden">
+                            //         <div className={`${GRID_STYLE} hidden md:grid bg-muted/50 px-6 py-3`}>
+                            //             <span>Preview</span>
+                            //             <span>Product</span>
+                            //             <span className="text-center">Brand</span>
+                            //             <span className="text-center">Qty</span>
+                            //             <span className="text-right">Price</span>
+                            //             {isAdmin && <span className="text-right">Action</span>}
+                            //         </div>
+
+                            //         {products
+                            //             .filter(p => p.category.toUpperCase() === cat)
+                            //             .map(renderRow)}
+
+                            //         {products.filter(p => p.category.toUpperCase() === cat).length === 0 && (
+                            //             <div className="py-12 text-center text-sm text-muted-foreground">
+                            //                 No items found.
+                            //             </div>
+                            //         )}
+                            //     </div>
+                            // </TabsContent>
+
                             <TabsContent key={cat} value={cat}>
                                 <div className="border rounded-xl overflow-hidden">
                                     <div className={`${GRID_STYLE} hidden md:grid bg-muted/50 px-6 py-3`}>
@@ -216,17 +342,25 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                                         {isAdmin && <span className="text-right">Action</span>}
                                     </div>
 
-                                    {products
-                                        .filter(p => p.category.toUpperCase() === cat)
-                                        .map(renderRow)}
+                                    {(() => {
+                                        const filtered = products.filter(
+                                            (p) => p.category.toUpperCase() === cat
+                                        )
 
-                                    {products.filter(p => p.category.toUpperCase() === cat).length === 0 && (
-                                        <div className="py-12 text-center text-sm text-muted-foreground">
-                                            No items found.
-                                        </div>
-                                    )}
+                                        if (filtered.length === 0) {
+                                            return (
+                                                <div className="py-12 text-center text-sm text-muted-foreground">
+                                                    No items found.
+                                                </div>
+                                            )
+                                        }
+
+                                        return filtered.map(renderRow)
+                                    })()}
                                 </div>
                             </TabsContent>
+
+
                         ))
                     )}
                 </Tabs>
