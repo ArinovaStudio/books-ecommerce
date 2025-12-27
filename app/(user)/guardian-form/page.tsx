@@ -1,12 +1,10 @@
-import React from 'react'
+import { Suspense } from "react";
+import { GuardianForm } from "@/components/guardian-form";
 
-
-import { GuardianForm } from '@/components/guardian-form'
-
-const page = () => {
+export default function Page() {
   return (
-    <div><GuardianForm /></div>
-  )
+    <Suspense fallback={<div>Loading...</div>}>
+      <GuardianForm />
+    </Suspense>
+  );
 }
-
-export default page
