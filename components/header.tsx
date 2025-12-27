@@ -89,7 +89,7 @@ export default function Header() {
             <div className="flex items-center gap-5">
               {!loading && (
                 user ? (
-                  <Link href="/profile" className="p-2 rounded-full bg-white/5 border border-white/10 text-white hover:bg-cyan-400 hover:text-[#141f38] transition-all" title="Profile">
+                  <Link href={user.role === "ADMIN" ? "/admin" : "/profile"} className="p-2 rounded-full bg-white/5 border border-white/10 text-white hover:bg-cyan-400 hover:text-[#141f38] transition-all" title="Profile">
                     <User size={20} />
                   </Link>
                 ) : (

@@ -53,7 +53,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }
 
         setUser(data.user)
-        setSchoolId(data.user.school.id);
+        setSchoolId(data.user?.school?.id || "");
         setRole(data.user.role)
 
         setActiveTab(data.user.role === "SUB_ADMIN" ? "users" : "analytics")

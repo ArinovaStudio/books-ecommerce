@@ -95,7 +95,7 @@ export default function Footer() {
         </div>
 
         {/* SOCIAL + CONTACT */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 py-10 border-y border-white/10 text-sm text-blue-100">
+        {/* <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 py-10 border-y border-white/10 text-sm text-blue-100">
           <div className="space-y-2">
             <p>Home</p>
             <p>Browse Schools</p>
@@ -122,7 +122,7 @@ export default function Footer() {
             <p>+91 98765 43210</p>
             <p>support@globenest.in</p>
           </div>
-        </div>
+        </div> */}
 
         {/* BOTTOM BAR */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 text-xs text-blue-100/50">
