@@ -20,6 +20,7 @@ interface AdminContextType {
   setSidebarOpen: (open: boolean) => void
   role: Role
   user: User
+  schoolId: string
   loading: boolean
 }
 
@@ -30,6 +31,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [role, setRole] = useState<Role | null>(null)
+  const [schoolId, setSchoolId] = useState<string>("")
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
@@ -51,6 +53,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }
 
         setUser(data.user)
+        setSchoolId(data.user.school.id);
         setRole(data.user.role)
 
         setActiveTab(data.user.role === "SUB_ADMIN" ? "users" : "analytics")
@@ -79,6 +82,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         setSidebarOpen,
         role: role!,
         user: user!,
+        schoolId,
         loading,
       }}
     >

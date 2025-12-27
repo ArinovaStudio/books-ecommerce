@@ -14,12 +14,13 @@ import SchoolSection from "@/components/admin/school-section"
 import ProductTables from "@/components/product-tables"
 
 export default function AdminDashboard() {
-    const { activeTab, user } = useAdmin()
+    const { activeTab, user, schoolId } = useAdmin()
     const [refreshTrigger, setRefreshTrigger] = useState(0);
-
     const [selectedClass, setSelectedClass] = useState<string | null>(null)
     const [selectedSection, setSelectedSection] = useState<string | null>(null)
     const [selectedLang, setSelectedLang] = useState<string | null>(null)
+
+    // console.log("subadmin user", user.);
 
     useEffect(() => {
         setSelectedClass(null)
@@ -38,14 +39,14 @@ export default function AdminDashboard() {
                         <CardContent>
                             {!selectedClass && (
                                 <SchoolClasses
-                                    schoolId={user.schoolId}
+                                    schoolId={schoolId}
                                     onSelectClass={setSelectedClass}
                                 />
                             )}
 
                             {selectedClass && !selectedSection && (
                                 <SchoolSection
-                                    school={user.schoolId}
+                                    school={schoolId}
                                     classes={selectedClass}
                                     onSelectSection={setSelectedSection}
                                     onBack={() => setSelectedClass(null)}
@@ -69,7 +70,7 @@ export default function AdminDashboard() {
                 {activeTab === "orders" && (
                     <Card>
                         <CardContent>
-                            <OrdersTable role={user.role} subAdminSchoolId={user.schoolId} />
+                            <OrdersTable role={user.role} subAdminSchoolId={schoolId} />
                         </CardContent>
                     </Card>
                 )}
