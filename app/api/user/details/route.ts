@@ -27,7 +27,14 @@ export const GET = Wrapper(async (req: NextRequest): Promise<NextResponse> => {
             { status: 401 }
         )
     }
-    const user = await prisma.user.findFirst({where:{id:decoded.id}});
+    const user = await prisma.user.findFirst({
+        where: { id: decoded.id },
+        include: {
+            school: true,
+            children: true,
+            orders: true,
+        },
+    })
 
-    return NextResponse.json({success:true,user:user})
+    return NextResponse.json({ success: true, user: user })
 })
