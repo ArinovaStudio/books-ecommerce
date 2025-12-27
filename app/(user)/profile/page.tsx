@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
     User,
     Mail,
@@ -11,90 +11,33 @@ import {
     Droplets,
     Baby,
     ChevronRight,
-    LogOut
+    LogOut,
+    Loader2Icon
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
+import { useUser, UserProfile, Student } from "@/app/context/userContext"
 
 /* ---------------- TYPES ---------------- */
 
-interface Student {
-    id: string
-    name: string
-    rollNo: string
-    section: string
-    school: string
-    dob: string | null
-    bloodGroup: string | null
-    gender: string | null
-    class: {
-        name: string
-    }
-}
 
-interface UserProfile {
-    name: string
-    email: string
-    phone: string | null
-    address: string | null
-    role: "USER" | "ADMIN" | "SUB_ADMIN"
-    status: "ACTIVE" | "INACTIVE"
-    children: Student[]
-}
-
-/* ---------------- MOCK DATA ---------------- */
-
-const userData: UserProfile = {
-    name: "Sarah Mitchell",
-    email: "sarah.m@example.com",
-    phone: "+1 555-0198",
-    address: "742 Evergreen Terrace, Springfield, IL 62704",
-    role: "USER",
-    status: "ACTIVE",
-    children: [
-        {
-            id: "s-101",
-            name: "Leo Mitchell",
-            school: "BVM High School",
-            rollNo: "15",
-            section: "B",
-            dob: "2016-04-12T00:00:00Z",
-            gender: "Male",
-            bloodGroup: "O+",
-            class: {
-                name: "Grade 3"
-            }
-        },
-        {
-            id: "s-102",
-            name: "Maya Mitchell",
-            school: "Ranber Hr. Secondary",
-            rollNo: "09",
-            section: "A",
-            dob: "2018-09-30T00:00:00Z",
-            gender: "Female",
-            bloodGroup: "A-",
-            class: {
-                name: "Grade 1"
-            }
-        }
-    ]
-}
 
 /* ---------------- COMPONENT ---------------- */
 
 const ProfilePage = () => {
     const { toast } = useToast();
     const router = useRouter();
+    const { user, loading, logout } = useUser();
 
-    const [profile] = useState<UserProfile>(userData)
-    const [loading, setLoading] = useState(false);
+    // console.log("user from profile", user);
+
+    const [profile, setProfile] = useState<UserProfile | null>(null)
 
     const handleLogout = async () => {
-        setLoading(true);
+        // setLoading(true);
         try {
             const response = await fetch(`api/auth/logout`)
             const data = await response.json();
@@ -109,8 +52,23 @@ const ProfilePage = () => {
         } catch (error) {
             console.error("Unable to Logout", error);
         } finally {
-            setLoading(false);
+            // setLoading(false);
         }
+    }
+
+    useEffect(() => {
+        if (user) {
+            setProfile(user);
+        }
+    }, [user])
+
+
+    {
+        loading && (
+            <div className="w-full h-full flex items-center justify-center">
+                <Loader2Icon className="animate-spin w-8 l-8" />
+            </div>
+        )
     }
 
     return (
@@ -142,16 +100,16 @@ const ProfilePage = () => {
                                     </div>
                                     <div>
                                         <CardTitle className="text-lg sm:text-xl font-bold mb-2">
-                                            {profile.name}
+                                            {profile?.name}
                                         </CardTitle>
                                         <Badge
                                             variant="secondary"
-                                            className={`px-3 py-1 rounded-full text-xs font-medium ${profile.status === "ACTIVE"
+                                            className={`px-3 py-1 rounded-full text-xs font-medium ${profile?.status === "ACTIVE"
                                                 ? "bg-green-100 text-green-700 hover:bg-green-100"
                                                 : "bg-red-100 text-red-700 hover:bg-red-100"
                                                 }`}
                                         >
-                                            {profile.status}
+                                            {profile?.status}
                                         </Badge>
                                     </div>
                                 </div>
@@ -162,14 +120,14 @@ const ProfilePage = () => {
                                     <div className="p-2 bg-blue-50 rounded-lg">
                                         <Mail size={16} className="text-blue-600" />
                                     </div>
-                                    {profile.email}
+                                    {profile?.email}
                                 </div>
 
                                 <div className="flex items-center gap-3 text-gray-600">
                                     <div className="p-2 bg-blue-50 rounded-lg">
                                         <Phone size={16} className="text-blue-600" />
                                     </div>
-                                    {profile.phone ?? "Not provided"}
+                                    {profile?.phone ?? "Not provided"}
                                 </div>
 
                                 <div className="flex items-start gap-3 text-gray-600">
@@ -177,7 +135,7 @@ const ProfilePage = () => {
                                         <MapPin size={16} className="text-blue-600" />
                                     </div>
                                     <span className="leading-relaxed">
-                                        {profile.address ?? "No address added"}
+                                        {profile?.address ?? "No address added"}
                                     </span>
                                 </div>
                             </CardContent>
@@ -185,7 +143,7 @@ const ProfilePage = () => {
                             <div className="bg-red-600 absolute bottom-0 w-full">
                                 <Button
                                     variant="secondary"
-                                    onClick={handleLogout}
+                                    onClick={logout}
                                     className="w-full text-center h-14 rounded-none border-t border-gray-100 bg-gray-50 hover:bg-red-50 hover:text-red-600 text-gray-600 font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
                                 >
                                     <LogOut size={18} />
@@ -199,11 +157,11 @@ const ProfilePage = () => {
                     <div className="lg:col-span-2 flex flex-col gap-4 lg:overflow-hidden">
                         <h2 className="text-base sm:text-lg font-bold text-gray-800 flex items-center gap-2 px-1">
                             <Baby size={20} className="text-blue-600" />
-                            Registered Students ({profile.children.length})
+                            Registered Students ({profile?.children.length})
                         </h2>
 
                         <div className="space-y-4 lg:overflow-y-auto lg:pr-2 scrollbar-thin scrollbar-thumb-gray-200">
-                            {profile.children.map((student) => (
+                            {profile?.children.map((student) => (
                                 <Card
                                     key={student.id}
                                     className="rounded-2xl border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 group border-l-4 border-l-transparent hover:border-l-blue-600"

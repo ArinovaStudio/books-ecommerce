@@ -94,7 +94,7 @@ export default function Header() {
                   </Link>
                 ) : (
                   <Button
-                    className="bg-cyan-400 hover:bg-cyan-300 text-[#141f38] font-bold rounded-full px-6 transition-all shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+                    className="bg-cyan-400 hover:bg-cyan-300 cursor-pointer text-[#141f38] font-bold rounded-full px-6 transition-all shadow-[0_0_15px_rgba(34,211,238,0.3)]"
                     onClick={() => router.push("/signin")}
                   >
                     Sign In

@@ -8,14 +8,12 @@ const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY"
 
 interface JwtPayload {
     id: string
-    email: string
-    role: "ADMIN" | "SUB_ADMIN"
+    role: "ADMIN" | "SUB_ADMIN" | "USER"
 }
 
 export const GET = Wrapper(async (_req: NextRequest) => {
     try {
-        const cookieStore = await cookies()
-        const token = cookieStore.get("token")?.value
+        const token = (await cookies()).get("token")?.value
 
         if (!token) {
             return NextResponse.json(
@@ -24,17 +22,71 @@ export const GET = Wrapper(async (_req: NextRequest) => {
             )
         }
 
-        let decoded: JwtPayload
-        try {
-            decoded = jwt.verify(token, SECRET_KEY) as JwtPayload
-        } catch {
+        const decoded = jwt.verify(token, SECRET_KEY) as JwtPayload
+
+        /* ================= USER ================= */
+        if (decoded.role === "USER") {
+            const user = await prisma.user.findUnique({
+                where: { id: decoded.id },
+                include: {
+                    children: {
+                        include: {
+                            school: {
+                                select: { name: true },
+                            },
+                            class: {
+                                select: { name: true },
+                            },
+                        },
+                    },
+                },
+            })
+
+            if (!user) {
+                return NextResponse.json(
+                    { success: false, message: "User not found" },
+                    { status: 404 }
+                )
+            }
+
+            if (user.status !== "ACTIVE") {
+                return NextResponse.json(
+                    { success: false, message: `Account is ${user.status}` },
+                    { status: 403 }
+                )
+            }
+
+            /* 🔥 MAP TO FRONTEND SHAPE */
+            const userData = {
+                name: user.name,
+                email: user.email,
+                phone: user.phone ?? null,
+                address: user.address ?? null,
+                role: user.role,
+                status: user.status,
+                children: user.children.map((child) => ({
+                    id: child.id,
+                    name: child.name,
+                    school: child.school.name,
+                    rollNo: child.rollNo,
+                    section: child.section,
+                    dob: child.dob ? child.dob.toISOString() : null,
+                    gender: child.gender ?? null,
+                    bloodGroup: child.bloodGroup ?? null,
+                    class: {
+                        name: child.class.name,
+                    },
+                })),
+            }
+
             return NextResponse.json(
-                { success: false, message: "Invalid token" },
-                { status: 401 }
+                { success: true, user: userData },
+                { status: 200 }
             )
         }
 
-        const user = await prisma.user.findUnique({
+        /* ================= ADMIN / SUB_ADMIN ================= */
+        const admin = await prisma.user.findUnique({
             where: { id: decoded.id },
             select: {
                 id: true,
@@ -42,41 +94,27 @@ export const GET = Wrapper(async (_req: NextRequest) => {
                 email: true,
                 role: true,
                 status: true,
-
-                // ONLY FETCH SCHOOL FOR SUB_ADMIN
-                school: decoded.role === "SUB_ADMIN"
-                    ? {
-                        select: {
-                            id: true,
-                            name: true,
-                        },
-                    }
-                    : false,
+                school:
+                    decoded.role === "SUB_ADMIN"
+                        ? {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        }
+                        : false,
             },
         })
 
-        if (!user) {
+        if (!admin) {
             return NextResponse.json(
                 { success: false, message: "User not found" },
                 { status: 404 }
             )
         }
 
-        if (user.status !== "ACTIVE") {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: `Account is ${user.status.toLowerCase()}`,
-                },
-                { status: 403 }
-            )
-        }
-
         return NextResponse.json(
-            {
-                success: true,
-                user,
-            },
+            { success: true, user: admin },
             { status: 200 }
         )
     } catch (error) {

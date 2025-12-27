@@ -2,6 +2,7 @@ import type React from "react"
 import "../globals.css"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import { UserProvider } from "../context/userContext"
 
 
 export default function RootLayout({
@@ -10,7 +11,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <>
+    <UserProvider>
       {/* GLOBAL HEADER */}
       <Header />
 
@@ -21,6 +22,6 @@ export default function RootLayout({
 
       {/* GLOBAL FOOTER */}
       <Footer />
-    </>
+    </UserProvider>
   )
 }
