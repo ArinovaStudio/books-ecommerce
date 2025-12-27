@@ -66,6 +66,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             })
 
             if (!res.ok) {
+                setUser(null)
                 router.push("/signin")
                 return
             }
@@ -77,7 +78,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             }
 
             setUser(data.user)
-        } catch (err) {
+        } catch (error) {
+            console.error("User auth failed:", error)
+            setUser(null)
             router.push("/signin")
         } finally {
             setLoading(false)
