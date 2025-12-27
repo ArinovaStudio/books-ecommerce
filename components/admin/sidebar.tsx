@@ -57,7 +57,6 @@ export function AdminSidebar() {
       console.error("Logout failed", error);
     }
   };
-  
   return (
     <>
       <aside
