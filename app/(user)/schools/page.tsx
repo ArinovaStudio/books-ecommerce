@@ -1,127 +1,160 @@
-import prisma from "@/lib/prisma"
-import { NextRequest, NextResponse } from "next/server"
-import { cookies } from "next/headers"
-import jwt from "jsonwebtoken"
-import { Wrapper } from "@/lib/api-handler"
+"use client";
 
-const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY"
+import { Card } from "@/components/ui/card";
+import { MapPin, ChevronRight, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+// import { schools } from "@/data/demodata";
+import Image from "next/image";
+import SchoolSearch from "@/components/schoolSearch";
+type School = {
+  id: string;
+  name: string;
+  address: string;
+  image: string;
+  board?: string;
+  status: string;
+};
+export default function SchoolsPage() {
+  const [schools, setSchools] = useState([]);
+  const [cities, setCities] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const fetchSchools = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("/api/schools");
+        const data = await response.json();
 
-interface JwtPayload {
-  id: string
-  role: "ADMIN" | "SUB_ADMIN" | "USER"
+        if (data.success) {
+          const filtered_schools = data.schools.filter(
+            (school: School) => school.status === "ACTIVE"
+          );
+          setSchools(filtered_schools);
+          console.log(filtered_schools);
+          setCities([...new Set(filtered_schools.map((s: School) => s.address))])
+        }
+      } catch (error) {
+        console.error("Error fetching schools:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSchools();
+  }, []);
+  // const cities = [...new Set(schools.map((s) => s.city))];
+
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  /* Debounce search */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query.trim());
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  /* Filter logic */
+  const filteredSchools = schools.filter((s: School) => {
+    const q = debouncedQuery.toLowerCase();
+    return s.name.toLowerCase().includes(q) || s.address.toLowerCase().includes(q);
+  });
+
+  return (
+    <section className="min-h-screen bg-[#f7f4f2]">
+      <div className="bg-[linear-gradient(135deg,#141f38_0%,#22345e_50%,#1f5c7a_100%)] text-white px-30 py-15">
+        {/* Title */}
+        <h1 className="text-4xl md:text-4xl font-bold">Find Your School</h1>
+        <p className="mt-3 text-md text-gray-200">
+          Search for your child's school to browse available book bundles and
+          stationery kits.
+        </p>
+
+        {/* Search Bar (REUSED COMPONENT) */}
+        <SchoolSearch
+          value={query}
+          onChange={setQuery}
+          results={filteredSchools}
+          placeholder="Search by school name, city, or pincode..."
+          className="mt-10 max-w-3xl text-black"
+        />
+      </div>
+      {/* MAIN CONTENT */}
+      {loading ? (
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-orange-400" />
+        </div>
+      ) : (
+        <div className="max-w-7xl mx-auto py-10 space-y-12">
+          {filteredSchools.length === 0 && (
+            <p className="text-center text-gray-500 mt-20 text-lg">
+              No schools found
+            </p>
+          )}
+          {cities.map((address) => {
+            const citySchools = filteredSchools.filter(
+              (s: School) => s.address === address
+            );
+
+            if (citySchools.length === 0) return null;
+
+            return (
+              <div key={address} className="space-y-5">
+                {/* CITY HEADER */}
+                <div className="flex items-center gap-2">
+                  <MapPin size={18} className="text-blue-900" />
+                  <h2 className="text-xl font-semibold text-blue-950">
+                    {address}
+                  </h2>
+                  <span className="text-gray-500 text-sm font-medium">
+                    ({citySchools.length} Schools)
+                  </span>
+                </div>
+
+                {/* GRID */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {citySchools.map((school: School) => (
+                    <Link key={school.id} href={`/schools/${school.id}`}>
+                      <Card className="flex flex-row justify-between p-6 rounded-2xl bg-white shadow-sm border hover:shadow-md transition cursor-pointer hover:-translate-y-1 group">
+                        <div className="flex items-center gap-5">
+                          <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden group-hover:bg-gray-200">
+                            <Image
+                              src={school.image || "/school.jpg"}
+                              alt={school.name}
+                              width={64}
+                              height={64}
+                              className="object-cover"
+                            />
+                          </div>
+
+                          <div>
+                            <h3 className="text-lg font-semibold text-blue-950">
+                              {school.name}
+                            </h3>
+                            <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
+                              <MapPin size={14} />
+                              {school.address}
+                            </div>
+                          </div>
+                        </div>
+
+                        <ChevronRight
+                          size={22}
+                          className="text-gray-500 group-hover:translate-x-1 transition"
+                        />
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
 }
-
-export const GET = Wrapper(async (_req: NextRequest) => {
-  try {
-    const token = (await cookies()).get("token")?.value
-
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "Not authenticated" },
-        { status: 401 }
-      )
-    }
-
-    const decoded = jwt.verify(token, SECRET_KEY) as JwtPayload
-
-    /* ================= USER ================= */
-    if (decoded.role === "USER") {
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.id },
-        include: {
-          children: {
-            include: {
-              school: {
-                select: { name: true },
-              },
-              class: {
-                select: { name: true },
-              },
-            },
-          },
-        },
-      })
-
-      if (!user) {
-        return NextResponse.json(
-          { success: false, message: "User not found" },
-          { status: 404 }
-        )
-      }
-
-      if (user.status !== "ACTIVE") {
-        return NextResponse.json(
-          { success: false, message: `Account is ${user.status}` },
-          { status: 403 }
-        )
-      }
-
-      /* 🔥 MAP TO FRONTEND SHAPE */
-      const userData = {
-        name: user.name,
-        email: user.email,
-        phone: user.phone ?? null,
-        address: user.address ?? null,
-        role: user.role,
-        status: user.status,
-        children: user.children.map((child) => ({
-          id: child.id,
-          name: child.name,
-          school: child.school.name,
-          rollNo: child.rollNo,
-          section: child.section,
-          dob: child.dob ? child.dob.toISOString() : null,
-          gender: child.gender ?? null,
-          bloodGroup: child.bloodGroup ?? null,
-          class: {
-            name: child.class.name,
-          },
-        })),
-      }
-
-      return NextResponse.json(
-        { success: true, user: userData },
-        { status: 200 }
-      )
-    }
-
-    /* ================= ADMIN / SUB_ADMIN ================= */
-    const admin = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        status: true,
-        school:
-          decoded.role === "SUB_ADMIN"
-            ? {
-              select: {
-                id: true,
-                name: true,
-              },
-            }
-            : false,
-      },
-    })
-
-    if (!admin) {
-      return NextResponse.json(
-        { success: false, message: "User not found" },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json(
-      { success: true, user: admin },
-      { status: 200 }
-    )
-  } catch (error) {
-    console.error("Auth Me Error:", error)
-    return NextResponse.json(
-      { success: false, message: "Internal Server Error" },
-      { status: 500 }
-    )
-  }
-})
