@@ -11,17 +11,17 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <UserProvider>
+    <>
       {/* GLOBAL HEADER */}
       <Header />
 
       {/* PAGE CONTENT */}
-      <main className="grow bg-[#fffaf3] ">
+      <main className="grow bg-[#fffaf3]">
         {children}
       </main>
 
       {/* GLOBAL FOOTER */}
       <Footer />
-    </UserProvider>
+    </>
   )
 }

@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
-import { useUser, UserProfile, Student } from "@/app/context/userContext"
+import { useUser, UserProfile } from "@/app/context/userContext"
 
 /* ---------------- TYPES ---------------- */
 
@@ -56,20 +56,14 @@ const ProfilePage = () => {
         }
     }
 
+
     useEffect(() => {
-        if (user) {
-            setProfile(user);
+        if (!loading && user) {
+            setProfile(user)
         }
     }, [user])
 
 
-    {
-        loading && (
-            <div className="w-full h-full flex items-center justify-center">
-                <Loader2Icon className="animate-spin w-8 l-8" />
-            </div>
-        )
-    }
 
     return (
         <div className="min-h-screen w-full bg-gray-50/50 p-4 sm:p-6 lg:p-8 flex flex-col items-center">

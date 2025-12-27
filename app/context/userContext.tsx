@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { Loader2Icon } from "lucide-react"
 
 /* ================= TYPES ================= */
 
@@ -65,7 +66,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             })
 
             if (!res.ok) {
-                setUser(null)
                 router.push("/signin")
                 return
             }
@@ -77,29 +77,24 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             }
 
             setUser(data.user)
-        } catch (error) {
-            console.error("User auth failed:", error)
-            setUser(null)
+        } catch (err) {
             router.push("/signin")
         } finally {
             setLoading(false)
         }
     }
 
-    const logout = async () => {
-        await fetch("/api/auth/logout", {
-            method: "POST",
-        })
-
-        setUser(null)
-        router.push("/signin")
-    }
-
     useEffect(() => {
         fetchUser()
     }, [])
 
-    if (loading) return null
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <Loader2Icon className="animate-spin w-8 h-8" />
+            </div>
+        )
+    }
 
     return (
         <UserContext.Provider
@@ -107,7 +102,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                 user,
                 loading,
                 refreshUser: fetchUser,
-                logout,
+                logout: async () => {
+                    await fetch("/api/auth/logout", { method: "POST" })
+                    router.push("/signin")
+                },
             }}
         >
             {children}
@@ -119,8 +117,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
 export function useUser() {
     const context = useContext(UserContext)
+
     if (!context) {
         throw new Error("useUser must be used inside UserProvider")
     }
+
     return context
 }
