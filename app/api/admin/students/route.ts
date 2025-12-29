@@ -15,6 +15,8 @@ export const GET = Wrapper(async (req: NextRequest) => {
 
         const user = auth.user;
 
+        // console.log("\nuser = ",user)
+
         // if (user.role !== "SUB_ADMIN" || !user.schoolId) {
         //     return NextResponse.json({ success: false, message: "Only School Admins can view students" }, { status: 403 });
         // }

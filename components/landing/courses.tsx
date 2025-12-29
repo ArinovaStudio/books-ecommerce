@@ -12,7 +12,7 @@ const courseCards = [
     layout: "text-bottom" as const,
   },
   {
-    title: "Pick Class & Bundle",
+    title: "Select Class",
     description: "Select the class and choose from book or stationery bundles",
     image: "/notebooks.png",
     bgColor: "#1E7F4D" as const,
@@ -20,8 +20,8 @@ const courseCards = [
     layout: "text-bottom" as const,
   },
   {
-    title: "Add to Cart",
-    description: "Review your selection and add to cart with just one click",
+    title: "Make Payment",
+    description: "Review your order and complete the payment in just one click",
     image: "/cart.png",
     bgColor: "#4A92C6" as const,
     doodle: "cloud" as const,

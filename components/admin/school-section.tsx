@@ -27,6 +27,7 @@ const sortSections = (a: string, b: string) => {
 /* ================= TYPES ================= */
 
 type SectionType = {
+    id: string
     name: string
 }
 
@@ -62,7 +63,7 @@ export default function SchoolSection({
                 `/api/admin/classes/${classes}/sections`
             )
             const data = await res.json()
-            console.log("data = ", data.section)
+            console.log("data = ", data.sections)
 
             if (data.success) {
                 setSections(data.sections.sort(sortSections))

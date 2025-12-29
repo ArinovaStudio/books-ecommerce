@@ -27,9 +27,14 @@ type School = {
     }
 }
 
+type SelectableItem = {
+    id: string
+    name: string
+}
+
 type Props = {
     activeTab: string
-    onSelectSchool: (id: string) => void
+    onSelectSchool: (school: SelectableItem) => void
     refreshTrigger?: number
 }
 
@@ -142,7 +147,7 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                                     <div
                                         className="flex gap-3 cursor-pointer"
                                         onClick={() =>
-                                            onSelectSchool(school.id)
+                                            onSelectSchool(school)
                                         }
                                     >
                                         {school.image ? (
@@ -233,7 +238,7 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                                 <div
                                     className="flex items-center gap-2 text-sm text-muted-foreground mt-2 cursor-pointer"
                                     onClick={() =>
-                                        onSelectSchool(school.id)
+                                        onSelectSchool(school)
                                     }
                                 >
                                     <MapPin className="h-4 w-4" />

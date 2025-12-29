@@ -18,10 +18,15 @@ type ClassType = {
     name: string
 }
 
+type SelectableItem = {
+    id: string
+    name: string
+}
+
 type Props = {
     schoolId: string
     onBack?: () => void
-    onSelectClass?: (id: string) => void
+    onSelectClass?: (school: SelectableItem) => void
 }
 
 export function SchoolClasses({
@@ -83,7 +88,7 @@ export function SchoolClasses({
                     {classes.map((cls, index) => (
                         <Card
                             key={index}
-                            onClick={() => onSelectClass ? onSelectClass(cls.id) : undefined}
+                            onClick={() => onSelectClass ? onSelectClass(cls) : undefined}
                             className={`transition cursor-pointer hover:shadow-md hover:text-white hover:bg-[var(--primary)]`}
                         >
                             <CardHeader>

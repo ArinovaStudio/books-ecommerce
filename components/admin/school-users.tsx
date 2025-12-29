@@ -19,49 +19,55 @@ type UserType = {
     joinDate: string
 }
 
+type ClassType = {
+    id: string, name: string
+}
+
 type Props = {
     schoolId: string
     activeTab: string
-    classId: string
+    classItem: ClassType
     sectionId: string
     className?: string
     onBack: () => void
 }
 
-export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, className, onBack }: Props) {
+export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, className, onBack }: Props) {
     const [users, setUsers] = useState<UserType[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
     const { toast } = useToast()
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            setLoading(true)
-            try {
-                const res = await fetch(`/api/admin/students?classId=${classId}&section=${sectionId}`)
-                const data = await res.json()
+    const classId = classItem?.id
 
-                if (data.success) {
-                    setUsers(data.students.map((student: any) => ({
-                        id: student.id,
-                        name: student.name,
-                        email: student.parent?.email || student.parentEmail,
-                        phone: student.parent?.phone || "",
-                        role: "User",
-                        status: student.isActive ? "Active" : "Inactive",
-                        joinDate: new Date(student.createdAt).toLocaleDateString()
-                    })))
-                } else {
-                    setUsers([])
-                }
-            } catch (error) {
-                console.error("Failed to fetch users", error)
-                toast({ title: "Error", description: "Failed to fetch students", variant: "destructive" })
-            } finally {
-                setLoading(false)
+    const fetchUsers = async () => {
+        setLoading(true)
+        try {
+            const res = await fetch(`/api/admin/students?classId=${classId}&section=${sectionId}`)
+            const data = await res.json()
+
+            if (data.success) {
+                setUsers(data.students.map((student: any) => ({
+                    id: student.id,
+                    name: student.name,
+                    email: student.parent?.email || student.parentEmail,
+                    phone: student.parent?.phone || "",
+                    role: "User",
+                    status: student.isActive ? "Active" : "Inactive",
+                    joinDate: new Date(student.createdAt).toLocaleDateString()
+                })))
+            } else {
+                setUsers([])
             }
+        } catch (error) {
+            console.error("Failed to fetch users", error)
+            toast({ title: "Error", description: "Failed to fetch students", variant: "destructive" })
+        } finally {
+            setLoading(false)
         }
+    }
 
+    useEffect(() => {
         if (classId && sectionId) fetchUsers()
     }, [classId, sectionId])
 
@@ -115,9 +121,9 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
                 </Button>
                 <AddUserDialog
                     schoolId={schoolId}
-                    classId={classId}
+                    classItem={classItem}
                     sectionId={sectionId}
-                    onStudentAdded={() => window.location.reload()}
+                    onStudentAdded={fetchUsers}
                 />
             </div>
 
