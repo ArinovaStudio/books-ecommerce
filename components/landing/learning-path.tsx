@@ -18,14 +18,14 @@ const kidsData = [
     {
         title: "Best Bundle Pricing",
         description:
-            "Save up to 20% when you buy complete book sets and stationery kits",
+            "Transparent pricing on complete book sets and stationery kits",
         icon: IndianRupee,
         blobColor: "#ffe2c6",
     },
     {
         title: "Quick Delivery",
         description:
-            "Get your order delivered within 3-5 business days across India",
+            "Get your order delivered within 4-7 business days across India",
         icon: Clock,
         blobColor: "#e2f6e9",
     },
@@ -38,7 +38,7 @@ const kidsData = [
     },
     {
         title: "Easy Returns",
-        description: "Hassle-free return policy within 7 days of delivery",
+        description: "Hassle-free return policy within 9 days of delivery",
         icon: RefreshCw,
         blobColor: "#e2f6e9",
     },

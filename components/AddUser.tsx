@@ -41,9 +41,13 @@ interface StudentType {
     address?: string
 }
 
+type ClassType = {
+    id: string, name: string
+}
+
 interface Props {
     schoolId?: string
-    classId?: string
+    classItem?: ClassType
     sectionId?: string
     student?: StudentType // optional: if provided, we are editing
     onStudentAdded?: () => void
@@ -52,7 +56,7 @@ interface Props {
 
 export default function AddUserDialog({
     schoolId,
-    classId,
+    classItem,
     sectionId,
     student,
     onStudentAdded,
@@ -65,6 +69,8 @@ export default function AddUserDialog({
     const [parentExists, setParentExists] = useState<boolean | null>(null)
 
     const { toast } = useToast()
+
+    const classId = classItem?.id
 
     const [formData, setFormData] = useState<StudentType>({
         name: "",
@@ -220,7 +226,7 @@ export default function AddUserDialog({
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label>Class *</Label>
-                            <Input name="classId" value={formData.classId} disabled />
+                            <Input name="classId" value={classItem?.name} disabled />
                         </div>
                         <div>
                             <Label>Section *</Label>

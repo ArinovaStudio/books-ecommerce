@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useAdmin } from "@/app/context/admin"
 import { AdminTab } from "@/app/types/admin"
+import { useToast } from "@/hooks/use-toast"
 
 type Role = "ADMIN" | "SUB_ADMIN"
 
@@ -40,18 +41,24 @@ export function AdminSidebar() {
     loading,
   } = useAdmin()
 
+  const { toast } = useToast()
+
   if (loading || !role) return null
 
   const visibleNavItems = navItems.filter((item) =>
     item.roles.includes(role)
   )
 
-    const handleLogout = async () => {
+  const handleLogout = async () => {
     try {
       const response = await fetch("/api/auth/logout", { method: "POST" });
       if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Logged Out successfully",
+        })
         console.log("Logout successful");
-        window.location.href = "/logout";
+        window.location.href = "/signin";
       }
     } catch (error) {
       console.error("Logout failed", error);
@@ -67,8 +74,8 @@ export function AdminSidebar() {
         )}
       >
         <div className="flex h-full flex-col relative">
-          <div onClick={() => handleLogout()} className="absolute w-5/6 h-fit bottom-4 left-5 bg-red-500/10 text-red-400 gap-2 flex justify-center items-center py-3 rounded-lg">
-          <LucideLogOut className="rotate-180" size={18} /> Logout
+          <div onClick={() => handleLogout()} className="absolute w-5/6 h-fit bottom-4 left-5 bg-red-500/10 text-red-400 gap-2 flex justify-center items-center py-3 rounded-lg cursor-pointer">
+            <LucideLogOut className="rotate-180" size={18} /> Logout
           </div>
           {/* Header */}
           <div className="flex items-center gap-3 border-b px-6 py-[18px]">
