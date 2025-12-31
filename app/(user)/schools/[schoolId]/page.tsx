@@ -205,22 +205,26 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
                           `}
                         />
                       </button>
-
                       <div
                         className={`transition-all duration-300 ease-in-out
                           ${isOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"}
                         `}
                       >
                         <div className="border-t border-gray-100 px-3 sm:px-4 py-3 bg-linear-to-b from-gray-50 to-white">
-                          <p className="text-xs font-medium text-gray-500 mb-2 text-center">Select Language</p>
-                          <div className="flex flex-col gap-2">
+                          <p className="text-xs font-medium text-gray-500 mb-2 text-center">
+                            Select Language
+                          </p>
+
+                          {/* Scrollable container */}
+                          <div className="flex flex-col gap-2 max-h-40 overflow-y-auto pb-3 no-scrollbar">
                             {availableLanguages.map((lang) => (
                               <Link
                                 key={lang}
                                 href={`/schools/${schoolId}/${classData.id}?language=${lang.toLowerCase()}`}
-                                className="border border-blue-200 rounded-lg py-2.5 px-3 text-sm font-medium text-blue-900 text-center 
-                                  bg-white hover:bg-blue-50 hover:border-blue-400 hover:shadow-sm
-                                  transition-all duration-200 active:scale-95"
+                                className="border border-blue-200 rounded-lg py-2.5 px-3 text-sm font-medium 
+          text-blue-900 text-center bg-white
+          hover:bg-blue-50 hover:border-blue-400 hover:shadow-sm
+          transition-all duration-200 active:scale-95"
                               >
                                 {lang}
                               </Link>

@@ -6,16 +6,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "./ui/button"
 import { Label } from "./ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ImageIcon, Loader2 } from "lucide-react"
+import { ImageIcon, Loader2, Plus, X } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import {
+    DialogFooter,
+    DialogHeader,
+} from "@/components/ui/dialog"
+import { Input } from "./ui/input"
 
 type School = {
     id: string
     name: string
-    email?: string 
+    email?: string
     address: string
     classRange?: string
     languages?: string[]
+    board?: string
     image?: string
 }
 
@@ -23,18 +29,22 @@ type Props = {
     open: boolean
     onOpenChange: (open: boolean) => void
     school?: School
-    onUpdate?: () => void 
+    onUpdate?: () => void
 }
 
 export function EditSchoolModal({ open, onOpenChange, school, onUpdate }: Props) {
     const { toast } = useToast()
     const [loading, setLoading] = useState(false)
-
+    const [isLangDialogOpen, setIsLangDialogOpen] = useState(false)
     const [email, setEmail] = useState("")
     const [name, setName] = useState("")
     const [location, setLocation] = useState("")
     const [classes, setClasses] = useState("")
+    const [board, setBoard] = useState("")
+    const [password, setPassword] = useState("")
     const [selectedLangs, setSelectedLangs] = useState<string[]>([])
+    const [availableLangs, setAvailableLangs] = useState(["English", "Hindi", "Telugu"])
+    const [newLang, setNewLang] = useState("")
     const [logoPreview, setLogoPreview] = useState<string | null>(null)
     const [imageFile, setImageFile] = useState<File | null>(null)
 
@@ -43,8 +53,18 @@ export function EditSchoolModal({ open, onOpenChange, school, onUpdate }: Props)
             setEmail(school.email || "")
             setName(school.name || "")
             setLocation(school.address || "")
-            setClasses(school.classRange || "upto-10") 
-            setSelectedLangs(school.languages || [])
+            setClasses(school.classRange || "upto-10")
+            setBoard(school.board || "CBSE")
+            
+            // Remove duplicates from school languages and selected languages
+            const schoolLangs = [...new Set(school.languages || [])]
+            setSelectedLangs(schoolLangs)
+            
+            // Update available languages to include school's existing languages
+            const defaultLangs = ["English", "Hindi", "Telugu"]
+            const allLangs = [...new Set([...defaultLangs, ...schoolLangs])]
+            setAvailableLangs(allLangs)
+            
             setLogoPreview(school.image || null)
         }
     }, [school])
@@ -55,19 +75,41 @@ export function EditSchoolModal({ open, onOpenChange, school, onUpdate }: Props)
         )
     }
 
+    const addLanguage = () => {
+        if (newLang.trim() && !availableLangs.includes(newLang.trim())) {
+            setAvailableLangs(prev => [...prev, newLang.trim()])
+            setSelectedLangs(prev => [...prev, newLang.trim()])
+            setNewLang("")
+            setIsLangDialogOpen(false)
+        }
+    }
+
+    const removeLanguage = (lang: string) => {
+        setAvailableLangs(prev => prev.filter(l => l !== lang))
+        setSelectedLangs(prev => prev.filter(l => l !== lang))
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!school) return
         setLoading(true)
 
         try {
+            // Remove duplicates before sending
+            const uniqueLanguages = [...new Set(selectedLangs)]
+            
             const formData = new FormData()
             formData.append("name", name)
             formData.append("email", email)
             formData.append("location", location)
             formData.append("classes", classes)
-            formData.append("languages", JSON.stringify(selectedLangs))
-            
+            formData.append("board", board)
+            formData.append("languages", JSON.stringify(uniqueLanguages))
+
+            if (password.trim()) {
+                formData.append("password", password)
+            }
+
             if (imageFile) {
                 formData.append("image", imageFile)
             }
@@ -83,7 +125,7 @@ export function EditSchoolModal({ open, onOpenChange, school, onUpdate }: Props)
 
             toast({ title: "Success", description: "School updated successfully" })
             onOpenChange(false)
-            
+
             if (onUpdate) onUpdate()
 
         } catch (error: any) {
@@ -98,7 +140,7 @@ export function EditSchoolModal({ open, onOpenChange, school, onUpdate }: Props)
             <DialogPortal>
                 <DialogOverlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
                 <DialogContent className="fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-background p-6 shadow-lg focus:outline-none max-h-[90vh] overflow-y-auto">
-                    
+
                     <div className="mb-6">
                         <DialogTitle className="text-xl font-semibold">Edit School</DialogTitle>
                         <DialogDescription className="text-sm text-muted-foreground">Update details</DialogDescription>
@@ -116,7 +158,7 @@ export function EditSchoolModal({ open, onOpenChange, school, onUpdate }: Props)
                                 <input name="name" value={name} onChange={(e) => setName(e.target.value)} className="px-3 py-2 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none" required />
                             </div>
                             <div className="flex flex-col md:flex-row gap-4">
-                                <div className="flex-1 space-y-2">
+                                <div className="flexspace-y-2">
                                     <Label>Classes</Label>
                                     <Select value={classes} onValueChange={setClasses}>
                                         <SelectTrigger className="rounded-xl h-10"><SelectValue placeholder="Select class" /></SelectTrigger>
@@ -128,23 +170,89 @@ export function EditSchoolModal({ open, onOpenChange, school, onUpdate }: Props)
                                     </Select>
                                 </div>
                                 <div className="flex-[2] space-y-3">
-                                    <Label>Languages</Label>
-                                    <div className="flex flex-wrap gap-1">
-                                        {["English", "Hindi", "Telugu"].map((lang) => {
-                                            const isChecked = selectedLangs.includes(lang)
-                                            return (
-                                                <label key={lang} className={`flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer transition-all text-xs ${isChecked ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:bg-muted"}`}>
-                                                    <Checkbox checked={isChecked} onCheckedChange={() => toggleLanguage(lang)} />
-                                                    <span>{lang}</span>
-                                                </label>
-                                            )
-                                        })}
+                                    <Label>Board</Label>
+                                    <Select value={board} onValueChange={setBoard}>
+                                        <SelectTrigger className="rounded-xl h-10"><SelectValue placeholder="Select board" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="CBSE">CBSE</SelectItem>
+                                            <SelectItem value="ICSE">ICSE</SelectItem>
+                                            <SelectItem value="State Board">State Board</SelectItem>
+                                            <SelectItem value="IB">IB</SelectItem>
+                                            <SelectItem value="IGCSE">IGCSE</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setIsLangDialogOpen(true)}
+                                    className="h-8 text-xs"
+                                >
+                                    <Plus className="w-3 h-3 mr-1" /> Add Language
+                                </Button>
+                            </div>
+                            <Dialog open={isLangDialogOpen} onOpenChange={setIsLangDialogOpen}>
+                                <DialogContent className="sm:max-w-[400px]">
+                                    <DialogHeader>
+                                        <DialogTitle>Add Language</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="py-1">
+                                        <Input
+                                            placeholder="e.g. Hindi, Spanish"
+                                            value={newLang}
+                                            onChange={(e) => setNewLang(e.target.value)}
+                                            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addLanguage())}
+                                        />
                                     </div>
+                                    <DialogFooter>
+                                        <Button type="button" variant="ghost" onClick={() => setIsLangDialogOpen(false)}>Cancel</Button>
+                                        <Button type="button" onClick={addLanguage}>Add Language</Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+
+                            <div className="space-y-3">
+                                <Label>Languages</Label>
+                                <div className="flex flex-wrap gap-1">
+                                    {availableLangs.map((lang) => {
+                                        const isChecked = selectedLangs.includes(lang)
+                                        const isDefault = ["English", "Hindi", "Telugu"].includes(lang)
+                                        return (
+                                            <label key={lang} className={`flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer transition-all text-xs ${isChecked ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-input hover:bg-muted"}`}>
+                                                <Checkbox checked={isChecked} onCheckedChange={() => toggleLanguage(lang)} />
+                                                <span>{lang}</span>
+                                                {!isDefault && (
+                                                    <X
+                                                        className="w-3 h-3 ml-1 text-muted-foreground hover:text-destructive cursor-pointer"
+                                                        onClick={(e) => {
+                                                            e.preventDefault()
+                                                            removeLanguage(lang)
+                                                        }}
+                                                    />
+                                                )}
+                                            </label>
+                                        )
+                                    })}
                                 </div>
                             </div>
                             <div className="grid gap-2">
                                 <Label>Location</Label>
                                 <input name="location" value={location} onChange={(e) => setLocation(e.target.value)} className="px-3 py-2 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none" required />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>Access Password</Label>
+                                <input
+                                    name="password"
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="px-3 py-2 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none"
+                                    placeholder="Enter new password (leave blank to keep current)"
+                                />
                             </div>
                         </div>
 
@@ -164,7 +272,7 @@ export function EditSchoolModal({ open, onOpenChange, school, onUpdate }: Props)
                             }} />
                         </div>
 
-                        <div className="flex justify-end gap-3 mt-8 pt-4 border-t col-span-full">
+                        <div className="flex justify-end gap-3 pt-1 border-t col-span-full">
                             <Button variant="ghost" type="button" onClick={() => onOpenChange(false)}>Cancel</Button>
                             <Button type="submit" className="px-8" disabled={loading}>
                                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Update School
