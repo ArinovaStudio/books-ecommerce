@@ -101,8 +101,8 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
             const res = await fetch(`/api/admin/students/${userId}/toggle`, { method: "PATCH" })
             const data = await res.json()
             if (data.success) {
-                setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: "Inactive" } : u))
-                toast({ title: `${!status ? "Deactivate" : "Activate"}`, description: "Student deactivated successfully" })
+                setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: data.isActive ? "Active" : "Inactive" } : u))
+                toast({ title: `${status ? "Deactivate" : "Activate"}`, description: `Student ${status ? "Deactivated" : "Activated"} successfully` })
             } else {
                 toast({ title: "Error", description: data.message || "Failed to deactivate student", variant: "destructive" })
             }

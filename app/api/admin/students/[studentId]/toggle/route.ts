@@ -30,7 +30,7 @@ export const PATCH = Wrapper(async( req: NextRequest, { params }: { params: Prom
 
     const updatedStudent = await prisma.student.update({ where: { id: studentId }, data: { isActive: newStatus }});
 
-    return NextResponse.json({ success: true, message: `Student ${newStatus ? 'activated' : 'deactivated'} successfully`}, { status: 200 });
+    return NextResponse.json({ success: true, message: `Student ${newStatus ? 'activated' : 'deactivated'} successfully`, updatedStudent}, { status: 200 });
 
   } catch (error) {
     console.error("Toggle Student Error:", error);
