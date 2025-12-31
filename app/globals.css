@@ -3,6 +3,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* global.css */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 :root {
   /* Primary colors - Navy and Gold scheme */
   --background: oklch(100% 0.00011 271.152);
