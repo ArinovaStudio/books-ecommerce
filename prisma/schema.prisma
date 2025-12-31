@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
+  // url = env("DATABASE_URL")
 }
 
 enum UserRole {
@@ -186,7 +186,6 @@ model Order {
   school String
   class String
   section String
-  kitType KitType
   academicYear String
   status String
   totalAmount Float

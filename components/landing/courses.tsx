@@ -12,7 +12,7 @@ const courseCards = [
     layout: "text-bottom" as const,
   },
   {
-    title: "Pick Class & Bundle",
+    title: "Select Class",
     description: "Select the class and choose from book or stationery bundles",
     image: "/notebooks.png",
     bgColor: "#1E7F4D" as const,
@@ -20,8 +20,8 @@ const courseCards = [
     layout: "text-bottom" as const,
   },
   {
-    title: "Add to Cart",
-    description: "Review your selection and add to cart with just one click",
+    title: "Make Payment",
+    description: "Review your order and complete the payment in just one click",
     image: "/cart.png",
     bgColor: "#4A92C6" as const,
     doodle: "cloud" as const,
@@ -153,7 +153,7 @@ export default function Courses() {
         <div className="text-center mb-12 flex justify-center ">
           <div className="">
             <h2 className="text-5xl  font-bold text-gray-900 mb-4">
-              How It <span className="text-orange-400">Works</span>
+              How It <span className="text-[#4169B4]">Works</span>
             </h2>
             <p className="text-gray-600 mb-8 text-left">
               Learn amazing with us. We teach 'One Smart Lesson' at a time!
@@ -170,11 +170,10 @@ export default function Courses() {
             >
               {/* Text */}
               <div
-                className={`absolute ${
-                  card.layout === "text-top"
+                className={`absolute ${card.layout === "text-top"
                     ? "top-6 left-6"
                     : "bottom-6 left-6"
-                } text-white max-w-[180px] leading-snug z-10`}
+                  } text-white max-w-[180px] leading-snug z-10`}
               >
                 <h3 className="font-bold text-lg">{card.title}</h3>
                 <h6 className="text-sm">{card.description}</h6>
@@ -183,21 +182,19 @@ export default function Courses() {
               {/* Main doodle */}
               <Doodle
                 type={card.doodle}
-                className={`absolute top-0  w-28 opacity-60 z-10 ${
-                  card.layout === "text-bottom"
+                className={`absolute top-0  w-28 opacity-60 z-10 ${card.layout === "text-bottom"
                     ? "left-6"
                     : "right-1 top-5"
-                }`}
+                  }`}
               />
 
               {/* Star doodle bottom-left */}
               <Doodle
                 type="star"
-                className={`absolute bottom-4  w-6 opacity-70 z-30  ${
-                  card.layout === "text-bottom"
+                className={`absolute bottom-4  w-6 opacity-70 z-30  ${card.layout === "text-bottom"
                     ? "right-4"
                     : "left-4"
-                }`}
+                  }`}
               />
 
               {/* Image */}
@@ -205,11 +202,10 @@ export default function Courses() {
                 src={card.image}
                 alt={card.title}
                 fill
-                className={`object-contain z-20 drop-shadow-2xl ${
-                  card.layout === "text-bottom"
+                className={`object-contain z-20 drop-shadow-2xl ${card.layout === "text-bottom"
                     ? "object-top mt-5"
                     : "object-bottom"
-                }`}
+                  }`}
               />
             </div>
           ))}

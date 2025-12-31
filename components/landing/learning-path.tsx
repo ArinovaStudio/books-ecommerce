@@ -18,14 +18,14 @@ const kidsData = [
     {
         title: "Best Bundle Pricing",
         description:
-            "Save up to 20% when you buy complete book sets and stationery kits",
+            "Transparent pricing on complete book sets and stationery kits",
         icon: IndianRupee,
         blobColor: "#ffe2c6",
     },
     {
         title: "Quick Delivery",
         description:
-            "Get your order delivered within 3-5 business days across India",
+            "Get your order delivered within 5-7 business days across India",
         icon: Clock,
         blobColor: "#e2f6e9",
     },
@@ -38,7 +38,7 @@ const kidsData = [
     },
     {
         title: "Easy Returns",
-        description: "Hassle-free return policy within 7 days of delivery",
+        description: "Hassle-free return policy within 9 days of delivery",
         icon: RefreshCw,
         blobColor: "#e2f6e9",
     },
@@ -95,7 +95,7 @@ export default function KidsFutureSection() {
             </p>
 
             <h2 className="text-5xl font-bold mb-7 text-gray-800">
-                Why Parents <span className="text-orange-500">Trust </span>Us
+                Why Parents <span className="text-[#4169B4]">Trust </span>Us
             </h2>
 
             <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-20 ">

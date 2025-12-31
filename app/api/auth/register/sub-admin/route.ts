@@ -9,7 +9,7 @@ import jwt from "jsonwebtoken";
 const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY";
 
 function getClassNames(range: string): string[] {
-    const basics = ["Nursery", "LKG", "UKG"];
+    const basics = ["Nursery", "PP I", "PP II"];
     const upTo8 = ["Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8"];
     const upTo10 = [...upTo8, "Class 9", "Class 10"];
     const upTo12 = [...upTo10, "Class 11", "Class 12"];

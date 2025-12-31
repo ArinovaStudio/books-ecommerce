@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Search, Mail, User, ArrowLeft, Loader2, Pencil, Trash, ShieldOff } from "lucide-react"
+import { MoreHorizontal, Search, Mail, User, ArrowLeft, Loader2, Pencil, Trash, ShieldOff, Shield } from "lucide-react"
 import AddUserDialog from "../AddUser"
 import { useToast } from "@/hooks/use-toast"
 
@@ -19,49 +19,55 @@ type UserType = {
     joinDate: string
 }
 
+type ClassType = {
+    id: string, name: string
+}
+
 type Props = {
     schoolId: string
     activeTab: string
-    classId: string
+    classItem: ClassType
     sectionId: string
     className?: string
     onBack: () => void
 }
 
-export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, className, onBack }: Props) {
+export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, className, onBack }: Props) {
     const [users, setUsers] = useState<UserType[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
     const { toast } = useToast()
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            setLoading(true)
-            try {
-                const res = await fetch(`/api/admin/students?classId=${classId}&section=${sectionId}`)
-                const data = await res.json()
+    const classId = classItem?.id
 
-                if (data.success) {
-                    setUsers(data.students.map((student: any) => ({
-                        id: student.id,
-                        name: student.name,
-                        email: student.parent?.email || student.parentEmail,
-                        phone: student.parent?.phone || "",
-                        role: "User",
-                        status: student.isActive ? "Active" : "Inactive",
-                        joinDate: new Date(student.createdAt).toLocaleDateString()
-                    })))
-                } else {
-                    setUsers([])
-                }
-            } catch (error) {
-                console.error("Failed to fetch users", error)
-                toast({ title: "Error", description: "Failed to fetch students", variant: "destructive" })
-            } finally {
-                setLoading(false)
+    const fetchUsers = async () => {
+        setLoading(true)
+        try {
+            const res = await fetch(`/api/admin/students?schoolId=${schoolId}&classId=${classId}&section=${sectionId}`)
+            const data = await res.json()
+
+            if (data.success) {
+                setUsers(data.students.map((student: any) => ({
+                    id: student.id,
+                    name: student.name,
+                    email: student.parent?.email || student.parentEmail,
+                    phone: student.parent?.phone || "",
+                    role: "User",
+                    status: student.isActive ? "Active" : "Inactive",
+                    joinDate: new Date(student.createdAt).toLocaleDateString()
+                })))
+            } else {
+                setUsers([])
             }
+        } catch (error) {
+            console.error("Failed to fetch users", error)
+            toast({ title: "Error", description: "Failed to fetch students", variant: "destructive" })
+        } finally {
+            setLoading(false)
         }
+    }
 
+    useEffect(() => {
         if (classId && sectionId) fetchUsers()
     }, [classId, sectionId])
 
@@ -89,14 +95,14 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
     }
 
     // DEACTIVATE STUDENT
-    const handleDeactivate = async (userId: string) => {
-        if (!confirm("Are you sure you want to deactivate this student?")) return
+    const handleDeactivate = async (userId: string, status: boolean) => {
+        if (!confirm(`Are you sure you want to ${status ? "deactivate" : "activate"} this student?`)) return
         try {
             const res = await fetch(`/api/admin/students/${userId}/toggle`, { method: "PATCH" })
             const data = await res.json()
             if (data.success) {
-                setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: "Inactive" } : u))
-                toast({ title: "Deactivated", description: "Student deactivated successfully" })
+                setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: data.isActive ? "Active" : "Inactive" } : u))
+                toast({ title: `${status ? "Deactivate" : "Activate"}`, description: `Student ${status ? "Deactivated" : "Activated"} successfully` })
             } else {
                 toast({ title: "Error", description: data.message || "Failed to deactivate student", variant: "destructive" })
             }
@@ -115,9 +121,9 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
                 </Button>
                 <AddUserDialog
                     schoolId={schoolId}
-                    classId={classId}
+                    classItem={classItem}
                     sectionId={sectionId}
-                    onStudentAdded={() => window.location.reload()}
+                    onStudentAdded={fetchUsers}
                 />
             </div>
 
@@ -155,9 +161,11 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
                                             </DropdownMenuTrigger>
 
                                             <DropdownMenuContent align="end" className="w-36">
-                                                <DropdownMenuItem className="gap-2 cursor-pointer">
+                                                {/* <DropdownMenuItem
+                                                
+                                                className="gap-2 cursor-pointer">
                                                     <Pencil className="h-4 w-4" /> Edit
-                                                </DropdownMenuItem>
+                                                </DropdownMenuItem> */}
 
                                                 <DropdownMenuItem
                                                     className="gap-2 text-destructive cursor-pointer"
@@ -170,13 +178,14 @@ export function SchoolClassUsers({ schoolId, activeTab, classId, sectionId, clas
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuItem
-                                                    className="gap-2 text-destructive cursor-pointer"
+                                                    className={`gap-2 ${user.status === "Active" ? "text-destructive" : "text-blue-500"} cursor-pointer`}
                                                     onClick={(e) => {
                                                         e.stopPropagation()
-                                                        handleDeactivate(user.id)
+                                                        handleDeactivate(user.id, user.status === "Active" ? true : false)
                                                     }}
                                                 >
-                                                    <ShieldOff className="h-4 w-4 text-red-400" /> Deactivate
+                                                    {user.status === "Active" 
+                                                    ? <><ShieldOff className="h-4 w-4 text-red-400" /> Deactivate</> : <><Shield className="h-4 w-4 text-blue-400" /> Activate</>}
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>

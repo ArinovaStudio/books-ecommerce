@@ -1,109 +1,18 @@
 import { Button } from "@/components/ui/button"
 import { ArrowRight, CheckCircle, Play } from "lucide-react"
+import Link from "next/link"
 import Image from "next/image"
 
 export default function Hero() {
   return (
-    // <section
-    //   className="relative text-white py-12 md:py-24 overflow-hidden"
-    //   style={{
-    //     background: `
-    //   radial-gradient(circle at 70% 40%, rgba(34,197,94,0.25), transparent 45%),
-    //   radial-gradient(circle at 20% 30%, rgba(20,184,166,0.18), transparent 40%),
-    //   linear-gradient(135deg, #052e2b 0%, #064e3b 50%, #022c22 100%)
-    // `
-    //   }}
-    // >
-    //   <svg
-    //     className="absolute bottom-0 left-0 w-full h-24 text-white"
-    //     viewBox="0 0 1200 120"
-    //     preserveAspectRatio="none"
-    //   >
-    //     <path d="M0,50 Q300,0 600,50 T1200,50 L1200,120 L0,120 Z" fill="currentColor" />
-    //   </svg>
-
-    //   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 relative z-10">
-    //     <div className="pb-20 flex flex-col lg:flex-row items-center w-full gap-12">
-    //       <div className="space-y-7 max-w-xl lg:max-w-4xl xl:max-w-4xl">
-    //         {/* Badge */}
-    //         <div className="inline-flex items-center gap-2 bg-amber-500/20 border border-amber-500/50 rounded-full px-4 py-2 w-fit">
-    //           <span className="text-amber-400">🎁</span>
-    //           <span className="text-sm text-amber-300">Save up to 20% on bundles</span>
-    //         </div>
-
-    //         {/* Headline */}
-    //         <div className="space-y-7 max-w-xl lg:max-w-9xl">
-    //           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
-    //             School Books & Stationery
-    //             {/* <br className="hidden md:block" /> */}
-    //             <br />
-    //             <span className="text-amber-400">Delivered to Your Door</span>
-    //           </h1>
-    //         </div>
-
-
-
-    //         {/* Description */}
-    //         <p className="text-lg text-blue-100 leading-relaxed max-w-xl">
-    //           Get the complete book set and stationery kit for your child's school. Select your school, pick the class,
-    //           and we'll handle the rest.
-    //         </p>
-
-    //         {/* CTA Buttons */}
-    //         <div className="flex flex-col sm:flex-row gap-4 pt-4">
-    //           <Button
-    //             size="lg"
-    //             className="bg-amber-500 hover:bg-amber-500 text-blue-900 font-semibold gap-2 rounded-xl py-7 px-9! cursor-pointer shadow-[0_0_50px_3px_rgba(255,193,7,0.25)] hover:shadow-none  transition-all duration-300"
-    //           >
-
-    //             Start Shopping <ArrowRight size={18} />
-    //           </Button>
-
-    //           <Button
-    //             size="lg"
-    //             variant="outline"
-    //             className="border-2 border-white text-white hover:bg-white/10 hover:text-white font-semibold bg-transparent rounded-xl py-7 px-13 cursor-pointer"
-    //           >
-    //             Learn More
-    //           </Button>
-    //         </div>
-
-    //         {/* Trust Indicators */}
-    //         <div className="flex flex-col sm:flex-row gap-6 pt-6 text-sm">
-    //           <div className="flex items-center gap-2">
-    //             <CheckCircle size={20} className="text-amber-400" />
-    //             <span className="text-blue-100">100% Authentic Books</span>
-    //           </div>
-    //           <div className="flex items-center gap-2">
-    //             <CheckCircle size={20} className="text-amber-400" />
-    //             <span className="text-blue-100">Free Delivery 500+</span>
-    //           </div>
-    //           <div className="flex items-center gap-2">
-    //             <CheckCircle size={20} className="text-amber-400" />
-    //             <span className="text-blue-100">Secure Payments</span>
-    //           </div>
-    //         </div>
-    //       </div>
-    //       {/* Right Image */}
-    //       <div className="relative flex-1 flex justify-end items-center w-full h-[300px] md:h-[400px] lg:h-[600px] lg:min-w-[700px]">
-    //         <Image
-    //           src="/hero.png"
-    //           alt="School stationery kit"
-    //           fill
-    //           priority
-    //           className="object-contain object-top mx-29"
-    //         />
-    //       </div>
-    //     </div>
-    //   </div>
-    // </section >
-
-
-    <section id='home' className="relative overflow-hidden bg-linear-to-br from-[#0c2f25] via-[#17340d] to-[#0a241c]">
-      {/* Decorative blobs */}
+    <section
+      id='home'
+      className="relative overflow-hidden bg-[linear-gradient(135deg,#141f38_0%,#22345e_50%,#1f5c7a_100%)] text-white"
+    >
+      {/* Decorative blobs for added depth on the new gradient */}
       <div className="absolute inset-0">
-        <div className="absolute top-10 sm:top-24 right-6 sm:right-24 w-40 sm:w-64 h-40 sm:h-64 bg-green-600/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 sm:bottom-24 left-6 sm:left-16 w-40 sm:w-64 h-40 sm:h-64 bg-lime-400/10 rounded-full blur-3xl" />
+        <div className="absolute top-10 sm:top-24 right-6 sm:right-24 w-40 sm:w-64 h-40 sm:h-64 bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 sm:bottom-24 left-6 sm:left-16 w-40 sm:w-64 h-40 sm:h-64 bg-cyan-400/5 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
@@ -112,70 +21,52 @@ export default function Hero() {
           {/* LEFT CONTENT */}
           <div className="space-y-8 sm:space-y-11 py-4 text-center lg:text-left">
             <div>
-              {/* <p className="text-xs sm:text-sm font-semibold text-lime-400 tracking-wide uppercase">
-                • LMS EDUCATION
-              </p> */}
-              <h1 className="mt-4 text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-bold text-white leading-tight">
-                School Books & Stationery,  Delivered to Your Door
+              <h1 className="mt-4 text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-bold text-white leading-tight tracking-tight">
+                School Books & Stationery, Delivered to Your Door
               </h1>
             </div>
 
-            <p className="max-w-md mx-auto lg:mx-0 text-sm sm:text-base text-gray-300 leading-relaxed">
+            <p className="max-w-md mx-auto lg:mx-0 text-sm sm:text-base text-blue-100/70 leading-relaxed">
               Get the complete book set and stationery kit for your child's school. Select your school, pick the class, and we'll handle the rest.
             </p>
 
             {/* Buttons */}
-            <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
-              <button className="px-7 py-3 rounded-full bg-lime-400 text-[#0c2f25] font-semibold hover:bg-lime-300 transition">
-                Browse Schools
-              </button>
+            <div className="flex flex-col items-center sm:flex-row justify-center lg:justify-start gap-4">
+              <Link href="/schools">
+                <button className="px-7 py-3 cursor-pointer rounded-full bg-cyan-400 text-white/90 font-bold hover:bg-cyan-300 transition-all hover:shadow-[0_0_20px_rgba(34,211,238,0.4)]">
+                  Browse Schools
+                </button>
+              </Link>
 
-              <button className="px-7 py-3 rounded-full bg-white/10 text-white font-semibold flex items-center justify-center gap-3 hover:bg-white/20 transition">
-                <div className="w-8 h-8 rounded-full bg-lime-400 flex items-center justify-center">
-                  <Play className="text-black fill-black" size={12} />
+              <Link href={"/about"} className="px-7 py-3 rounded-full bg-white/5 border border-white/10 text-white font-semibold flex items-center justify-center gap-3 hover:bg-white/10 transition">
+                <div className="w-8 h-8 rounded-full bg-cyan-400 flex items-center justify-center shadow-lg">
+                  <Play className="text-[#141f38] fill-[#141f38]" size={12} />
                 </div>
                 Learn More
-              </button>
+              </Link>
             </div>
           </div>
 
-          {/* RIGHT IMAGE */}
+          {/* RIGHT IMAGE - OVAL SHAPE */}
           <div className="relative flex justify-center lg:justify-end mt-6 lg:mt-0">
-            <div className="relative w-56 h-56 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-96 lg:h-96">
-              {/* Glow ring */}
-              <div className="absolute inset-0 rounded-full bg-linear-to-tr  from-lime-400/30 to-green-600/30 blur-2xl" />
+            {/* Changed aspect-[3/4] to aspect-square to ensure width equals height */}
+            <div className="relative w-64 h-72 sm:w-72 sm:h-80 md:w-80 md:h-96 lg:w-80 lg:h-96 aspect-square">
 
-              {/* Image */}
-              <div className="relative rounded-full overflow-hidden border-4 border-lime-400/30 md:h-100">
+              {/* Circular Glow ring */}
+              <div className="absolute inset-0 rounded-full bg-linear-to-tr from-cyan-500/20 to-blue-600/20 blur-2xl animate-pulse" />
+
+              {/* Circular Image Container */}
+              <div className="relative h-full w-full rounded-full overflow-hidden border-4 border-cyan-400/20 shadow-2xl">
                 <img
                   src="/24985 boy.jpg"
-                  alt="Graduate"
-                  className="w-full h-full object-cover"
+                  alt="Student with school supplies"
+                  className="w-full h-full object-cover scale-110"
                 />
               </div>
             </div>
           </div>
         </div>
-
-        {/* Pagination */}
-        {/* <div className="flex justify-center items-center gap-4 sm:gap-6 mt-12 sm:mt-20">
-          {["01", "02", "03", "04"].map((num, idx) => (
-            <div key={num} className="flex items-center gap-2">
-              <span
-                className={`text-xs sm:text-sm font-semibold ${idx === 2 ? "text-lime-400" : "text-gray-400"
-                  }`}
-              >
-                {num}
-              </span>
-              {idx !== 3 && (
-                <span className="w-6 sm:w-10 h-px bg-white/20" />
-              )}
-            </div>
-          ))}
-        </div> */}
       </div>
     </section>
-
-
   )
 }

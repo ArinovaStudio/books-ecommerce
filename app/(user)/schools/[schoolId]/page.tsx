@@ -39,18 +39,18 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
         // Fetch school details
         const schoolResponse = await fetch(`/api/schools/${schoolId}`)
         const schoolData = await schoolResponse.json()
-        
+
         if (!schoolData.success) {
           setError('School not found')
           return
         }
-        
+
         setSchool(schoolData.school)
-        
+
         // Fetch school classes
         const classesResponse = await fetch(`/api/admin/schools/${schoolId}/classes`)
         const classesData = await classesResponse.json()
-        
+
         if (classesData.success) {
           setClasses(classesData.classes)
         }
@@ -105,7 +105,8 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
         />
       )}
 
-      <div className="bg-linear-to-br from-green-950 via-green-900 to-green-950 py-8 sm:py-10 lg:py-12 px-4 sm:px-6 relative z-50 shadow-lg">
+      <div className="relative py-8 sm:py-10 lg:py-12 px-4 sm:px-6 relative z-50 shadow-lg bg-center bg-contain bg-size-[100%_auto]" style={{ backgroundImage: `url(${school.image || "/school.jpg"})` }}>
+        <div className="absolute bg-black/50 w-full h-full top-0 left-0 -z-1"></div>
         <div className="max-w-7xl mx-auto">
           <button
             onClick={() => router.back()}
@@ -117,9 +118,9 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
 
           <div className="flex flex-row items-start sm:items-center gap-4 sm:gap-6">
             <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-2xl overflow-hidden shadow-xl ring-4 ring-white/20 shrink-0">
-              <img 
-                src={school.image || "/school.jpg"} 
-                alt={school.name} 
+              <img
+                src={school.image || "/school.jpg"}
+                alt={school.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement

@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+type Role = "ADMIN" | "SUB_ADMIN" | "USER";
+
+interface JwtPayload {
+  id: string;
+  role: Role;
+}
+
+
 const publicRoutes = [
   "/signin",
   "/signup",
@@ -8,11 +16,21 @@ const publicRoutes = [
   "/unauthorized",
 ];
 
-const roleHome: Record<"ADMIN" | "SUB_ADMIN" | "USER", string> = {
+const roleHome: Record<Role, string> = {
   ADMIN: "/admin",
   SUB_ADMIN: "/subadmin",
   USER: "/",
 };
+
+function decodeJwt(token: string) {
+  try {
+    const base64Payload = token.split(".")[1];
+    const payload = Buffer.from(base64Payload, "base64").toString("utf8");
+    return JSON.parse(payload);
+  } catch {
+    return null;
+  }
+}
 
 export function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname.toLowerCase();
@@ -28,12 +46,17 @@ export function middleware(req: NextRequest) {
      2️⃣ Read auth cookies
   ---------------------------------------------- */
   const token = req.cookies.get("token")?.value;
-  const role = req.cookies.get("role")?.value as
+
+  const decoded = token ? decodeJwt(token) as JwtPayload | null : null;
+  const role: Role | undefined = decoded?.role;
+
+  /*const role = req.cookies.get("role")?.value as
     | "ADMIN"
     | "SUB_ADMIN"
     | "USER"
-    | undefined;
+    | undefined;*/
 
+  // console.log("\ntoken = ", token, "\nrole = ", role)
   /* ---------------------------------------------
      3️⃣ Public routes handling
   ---------------------------------------------- */

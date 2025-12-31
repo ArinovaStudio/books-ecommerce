@@ -15,6 +15,8 @@ export const GET = Wrapper(async (req: NextRequest) => {
 
         const user = auth.user;
 
+        // console.log("\nuser = ",user)
+
         // if (user.role !== "SUB_ADMIN" || !user.schoolId) {
         //     return NextResponse.json({ success: false, message: "Only School Admins can view students" }, { status: 403 });
         // }
@@ -24,7 +26,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
         const section = searchParams.get("section");
         const name = searchParams.get("name");
         const rollNo = searchParams.get("rollNo");
-        const schoolId = user.schoolId;
+        const schoolId = searchParams.get("schoolId");
 
         if (!schoolId) {
             return NextResponse.json({ success: false, message: "School ID not found" }, { status: 404 });
@@ -44,6 +46,8 @@ export const GET = Wrapper(async (req: NextRequest) => {
         if (name) {
             whereClause.name = { contains: name, mode: "insensitive" };
         }
+        console.log(whereClause);
+        
 
         const students = await prisma.student.findMany({
             where: whereClause,
@@ -73,6 +77,7 @@ const createStudentValidation = z.object({
     gender: z.string().optional(),
     bloodGroup: z.string().optional(),
     address: z.string().optional(),
+    password: z.string().optional(),
 });
 
 // Add new student
@@ -96,10 +101,9 @@ export const POST = Wrapper(async (req: NextRequest) => {
             return NextResponse.json({ success: false, message: "Validation error", errors }, { status: 400 });
         }
 
-        const { name, rollNo, classId, section, parentEmail, dob, gender, bloodGroup, address } = validation.data;
-        const schoolId = user.schoolId;
+        const { name, rollNo, classId, section, parentEmail, dob, gender, bloodGroup, address, password } = validation.data;
 
-        const classExists = await prisma.class.findFirst({ where: { id: classId, schoolId } });
+        const classExists = await prisma.class.findFirst({ where: { id: classId } });
         if (!classExists) {
             return NextResponse.json({ success: false, message: "Invalid Class ID for this school" }, { status: 400 });
         }
@@ -107,6 +111,8 @@ export const POST = Wrapper(async (req: NextRequest) => {
         if (!classExists.sections.includes(section)) {
             return NextResponse.json({ success: false, message: `Section '${section}' does not exist in Class '${classExists.name}'` }, { status: 400 });
         }
+
+        const schoolId = classExists.schoolId;
 
         const existingStudent = await prisma.student.findFirst({ where: { schoolId, classId, section, rollNo } });
 
@@ -120,9 +126,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
         if (existingParent) {
             parentId = existingParent.id;
         } else {
-
-            const randomPassword = Math.random().toString(36).slice(-8) + "1!";
-            const hashedPassword = await bcrypt.hash(randomPassword, 12);
+            const hashedPassword = await bcrypt.hash(password, 12);
 
             const newParent = await prisma.user.create({
                 data: {

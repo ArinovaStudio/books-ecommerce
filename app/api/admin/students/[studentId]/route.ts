@@ -102,19 +102,11 @@ export const DELETE = Wrapper(async( req: NextRequest, { params }: { params: Pro
     }
 
     const user = auth.user;
-    if (user.role !== "SUB_ADMIN" || !user.schoolId) {
-        return NextResponse.json({ success: false, message: "Only School Admins can delete students" }, { status: 403 });
-    }
-
     const { studentId } = await params;
 
     const existingStudent = await prisma.student.findUnique({ where: { id: studentId } });
     if (!existingStudent) {
         return NextResponse.json({ success: false, message: "Student not found" }, { status: 404 });
-    }
-
-    if (existingStudent.schoolId !== user.schoolId) {
-        return NextResponse.json({ success: false, message: "You can only delete students in your own school" }, { status: 403 });
     }
 
     await prisma.student.delete({ where: { id: studentId } });

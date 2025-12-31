@@ -71,7 +71,7 @@ export default function TestimonialSection() {
                 <div className="text-center mb-20">
                     <p className="text-sm text-gray-600 mb-4">Trusted by parents worldwide</p>
                     <h3 className="text-5xl font-bold text-black mb-6">
-                        What Parents Say <span className="text-orange-400">About</span> Us
+                        What Parents Say <span className="text-[#4169B4]">About</span> Us
                     </h3>
                 </div>
 
@@ -108,9 +108,8 @@ export default function TestimonialSection() {
                                         setIsTransitioning(true);
                                         setActive(i);
                                     }}
-                                    className={`w-3 h-3 rounded-full transition ${
-                                        displayActive === i ? "bg-orange-500" : "bg-gray-300"
-                                    }`}
+                                    className={`w-3 h-3 rounded-full transition ${displayActive === i ? "bg-orange-500" : "bg-gray-300"
+                                        }`}
                                 />
                             ))}
                         </div>

@@ -18,8 +18,9 @@ export default function Companies() {
       try {
         const response = await fetch('/api/schools')
         const data = await response.json()
-        
+
         if (data.success) {
+          console.log("Schools count: ", data.schools.length)
           setSchools(data.schools.filter((school: School) => school.status === 'ACTIVE'))
         }
       } catch (error) {
@@ -54,7 +55,7 @@ export default function Companies() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <p className="text-sm text-muted-foreground font-semibold uppercase tracking-wide">
-            Trusted Schools All Over the World
+            Trusted Schools
           </p>
         </div>
 
@@ -90,7 +91,7 @@ export default function Companies() {
           }
         }
         .animate-marquee {
-          animation: marquee 30s linear infinite;
+          animation: marquee 15s linear infinite;
         }
       `}</style>
     </section>

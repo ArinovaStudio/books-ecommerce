@@ -14,18 +14,18 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Seeding database...");
 
-  await prisma.orderItem.deleteMany();
-  await prisma.payment.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.kitItem.deleteMany();
-  await prisma.kit.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.student.deleteMany();
-  await prisma.class.deleteMany();
-  await prisma.school.deleteMany();
-  await prisma.otp.deleteMany();
-  await prisma.apiTraffic.deleteMany();
-  await prisma.user.deleteMany();
+//   await prisma.orderItem.deleteMany();
+//   await prisma.payment.deleteMany();
+//   await prisma.order.deleteMany();
+//   await prisma.kitItem.deleteMany();
+//   await prisma.kit.deleteMany();
+//   await prisma.product.deleteMany();
+//   await prisma.student.deleteMany();
+//   await prisma.class.deleteMany();
+//   await prisma.school.deleteMany();
+//   await prisma.otp.deleteMany();
+//   await prisma.apiTraffic.deleteMany();
+//   await prisma.user.deleteMany();
 
   const hashedAdminPassword = await bcrypt.hash("admin123", 12);
 

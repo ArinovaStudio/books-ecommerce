@@ -1,177 +1,113 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Menu, X, Phone, ShoppingCart, User, BookOpen } from "lucide-react";
+import { Menu, X, Phone, User, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useToast } from "@/hooks/use-toast";
 
-type User = {
-  id: string
-  name: string
-  email: string
-  role: string
-}
+type UserType = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+};
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/me', {
-          credentials: 'include'
-        });
+        const response = await fetch('/api/auth/me', { credentials: 'include' });
         const data = await response.json();
-        
-        if (data.success) {
-          setUser(data.user);
-        }
+        if (data.success) setUser(data.user);
       } catch (error) {
         console.error('Auth check failed:', error);
       } finally {
         setLoading(false);
       }
     };
-
     checkAuth();
   }, []);
 
-  const handleScroll = (id: string) => {
-    const section = document.getElementById(id);
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
+  const handleNavClick = (target: string, isExternal: boolean = false) => {
+    setIsOpen(false);
+    if (isExternal) {
+      router.push(target);
+    } else {
+      const section = document.getElementById(target);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      } else {
+        router.push(`/#${target}`);
+      }
     }
   };
 
-  const NavLink = ({
-    target,
-    label,
-  }: {
-    target: string;
-    label: string;
-  }) => {
-    const onClick = () => {
-      if (window.location.pathname === "/") {
-        handleScroll(target);
-      }
-    };
-
-    return (
-      <Link
-        href={`/#${target}`}
-        scroll={false}
-        onClick={onClick}
-        className="text-white hover:text-orange-400 font-medium text-sm transition cursor-pointer"
-      >
-        {label}
-      </Link>
-    );
-  };
-
   return (
-    <header className="bg-[#0c2f25]/95 backdrop-blur-sm sticky top-0 z-70 shadow-sm border-b border-orange-400/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 sm:py-1">
-        <div className="flex justify-between items-center h-16">
+    <header className="sticky top-0 z-50 w-full bg-[linear-gradient(135deg,#141f38_0%,#22345e_50%,#1f5c7a_100%)] backdrop-blur-md shadow-lg border-b border-white/10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex justify-between items-center h-20">
+
           {/* LOGO */}
-          <Link href="/" scroll={false}>
-            <div className="flex items-center gap-2 cursor-pointer">
-              <div className="rounded-lg flex items-center justify-center ">
-                {/* <BookOpen className="text-white" /> */}
-                <Image src="/logo .png" alt="GlobeNest Logo"
-                  width={80}
-                  height={80}
-                  className="object-contain " />
-              </div>
-              <div>
-                <div className="font-bold text-lg text-orange-400">
-                  Glow Nest
-                </div>
-                <div className="text-xs text-white">
-                  School Supplies
-                </div>
-              </div>
+          <Link href="/" className="flex items-center gap-2 group transition-transform hover:scale-105">
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center">
+              <Image
+                src="/logo.png"
+                alt="Glow Nest Logo"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-lg sm:text-xl text-white leading-tight tracking-tight">Glow Nest</span>
+              <span className="text-[10px] sm:text-xs text-cyan-400 uppercase tracking-widest font-semibold">School Supplies</span>
             </div>
           </Link>
 
           {/* DESKTOP NAV */}
-          <nav className="hidden lg:flex gap-5">
-            <NavLink target="home" label="Home" />
-            <Link href="/about" className="text-white font-medium text-sm" scroll={false}>About us</Link>
-            <Link href="/schools" className="text-white font-medium text-sm" scroll={false}>Browse Schools</Link>
+          <nav className="hidden lg:flex items-center gap-8">
+            <button onClick={() => handleNavClick("home")} className="text-white/80 hover:text-cyan-400 cursor-pointer font-medium text-sm transition-colors">Home</button>
+            <Link href="/about" className="text-white/80 hover:text-cyan-400 font-medium text-sm transition-colors">About Us</Link>
+            <Link href="/schools" className="text-white/80 hover:text-cyan-400 font-medium text-sm transition-colors">Browse Schools</Link>
           </nav>
 
-          {/* DESKTOP CTA */}
+          {/* DESKTOP ACTIONS */}
           <div className="hidden lg:flex items-center gap-6">
-            <div className="flex items-center gap-1 text-white text-sm">
-              <Phone size={16} />
+            <div className="flex items-center gap-2 text-white/70 text-sm border-r border-white/10 pr-6">
+              <Phone size={14} className="text-cyan-400" />
               <span>+91 98765 43210</span>
             </div>
 
-            <ShoppingCart
-              size={20}
-              className="text-white hover:text-orange-600 cursor-pointer transition"
-            />
-            {user ? (
-              <Link href="/profile">
-                <User
-                  size={20}
-                  className="text-white hover:text-orange-600 cursor-pointer transition"
-                />
-              </Link>
-            ) : null}
-
-            {!user && (
-              <Button
-                className="bg-orange-500 hover:bg-orange-600 text-white px-6 rounded-lg cursor-pointer"
-                onClick={() => router.push("/signin")}
-              >
-                Login
-              </Button>
-            )}
+            <div className="flex items-center gap-5">
+              {!loading && (
+                user ? (
+                  <Link href={user.role === "ADMIN" ? "/admin" : "/profile"} className="p-2 rounded-full bg-white/5 border border-white/10 text-white hover:bg-cyan-400 hover:text-[#141f38] transition-all" title="Profile">
+                    <User size={20} />
+                  </Link>
+                ) : (
+                  <Button
+                    className="bg-cyan-400 hover:bg-cyan-300 cursor-pointer text-[#141f38] font-bold rounded-full px-6 transition-all shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+                    onClick={() => router.push("/signin")}
+                  >
+                    Sign In
+                  </Button>
+                )
+              )}
+            </div>
           </div>
 
-          {/* TABLET ICONS */}
-          <div className="hidden md:flex lg:hidden items-center gap-4">
-            <ShoppingCart
-              size={22}
-              className="text-white hover:text-orange-600 cursor-pointer transition"
-            />
-            {user ? (
-              <User
-                size={22}
-                className="text-white hover:text-orange-600 cursor-pointer transition"
-              />
-            ) : null}
-
-            {/* <Button
-              className="px-4 py-1.5 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-lg cursor-pointer"
-              onClick={() => router.push("/schools")}
-            >
-              Shop Now
-            </Button> */}
-
+          {/* MOBILE TOGGLE & CART */}
+          <div className="flex lg:hidden items-center gap-4">
             <button
-              className="p-1 rounded hover:bg-orange-400/20"
-              onClick={() => setIsOpen(!isOpen)}
-            >
-              {isOpen ? <X size={26} /> : <Menu size={26} />}
-            </button>
-          </div>
-
-          {/* MOBILE ICONS */}
-          <div className="flex md:hidden items-center gap-4">
-            <ShoppingCart
-              size={22}
-              className="text-white hover:text-orange-600 cursor-pointer transition"
-            />
-
-            <button
-              className="p-1 rounded hover:bg-orange-400/20 text-white"
+              className="p-2 rounded-xl bg-white/5 text-white border border-white/10 transition-all active:scale-95"
               onClick={() => setIsOpen(!isOpen)}
             >
               {isOpen ? <X size={26} /> : <Menu size={26} />}
@@ -179,23 +115,32 @@ export default function Header() {
           </div>
         </div>
 
-        {/* MOBILE NAV */}
+        {/* MOBILE OVERLAY MENU */}
         <div
-          className={`md:hidden transition-all overflow-hidden ${isOpen ? "max-h-96" : "max-h-0"
+          className={`lg:hidden fixed inset-x-0 top-[80px] bg-[#141f38] border-b border-white/10 shadow-2xl transition-all duration-300 ease-in-out z-40 ${isOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
             }`}
         >
-          <div className="pb-4 space-y-2 px-2">
-            {["home", "schools", "about", "contact"].map((item) => (
-              <button
-                key={item}
-                onClick={() => handleScroll(item)}
-                className="block w-full text-left px-4 py-2 text-white hover:bg-orange-400/20 rounded"
-              >
-                {item === "schools"
-                  ? "Browse Schools"
-                  : item.charAt(0).toUpperCase() + item.slice(1)}
-              </button>
-            ))}
+          <div className="p-6 space-y-2 flex flex-col">
+            <button onClick={() => handleNavClick("home")} className="text-left py-4 text-lg font-medium text-white border-b border-white/5 hover:text-cyan-400 transition-colors">Home</button>
+            <button onClick={() => handleNavClick("/about", true)} className="text-left py-4 text-lg font-medium text-white border-b border-white/5 hover:text-cyan-400 transition-colors">About Us</button>
+            <button onClick={() => handleNavClick("/schools", true)} className="text-left py-4 text-lg font-medium text-white border-b border-white/5 hover:text-cyan-400 transition-colors">Browse Schools</button>
+
+            {!loading && (
+              user ? (
+                <Link href={user.role === "ADMIN" ? "/admin" : "/profile"} className="text-left py-4 text-lg font-medium text-cyan-400 flex items-center gap-3">
+                  <User size={22} /> My Profile
+                </Link>
+              ) : (
+                <button onClick={() => handleNavClick("/signin", true)} className="mt-4 py-4 rounded-xl bg-cyan-400 text-[#141f38] font-bold flex items-center justify-center gap-2 shadow-lg">
+                  <LogIn size={20} /> Sign In
+                </button>
+              )
+            )}
+
+            <div className="mt-6 py-4 flex items-center justify-center gap-3 text-white/40 text-xs tracking-wider uppercase">
+              <Phone size={14} />
+              <span>Support: +91 98765 43210</span>
+            </div>
           </div>
         </div>
       </div>

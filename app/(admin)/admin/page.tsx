@@ -8,21 +8,45 @@ import { SchoolClasses } from "@/components/admin/school-classes"
 import { SchoolClassUsers } from "@/components/admin/school-users"
 import { AdminHeader } from "@/components/admin/header"
 import { useAdmin } from "@/app/context/admin"
-import LanguageSelector from "@/components/languageSelector"
-import { AddSchoolModal } from "@/components/addSchoolModal"
-import { Bundels } from "@/components/Bundels"
 import { OrdersTable } from "@/components/admin/user-table"
 import SchoolSection from "@/components/admin/school-section"
 import ProductTables from "@/components/product-tables"
 import FilteredProductTable from "@/components/admin/filtered-products-tables"
 import { PromoteUserDialog } from "@/components/PromoteUser"
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+
+type School = {
+  id: string
+  name: string
+}
+
+type Class = {
+  id: string
+  name: string
+}
+
+type Section = {
+  id: string
+  name: string
+}
 
 export default function AdminDashboard() {
   const { activeTab, role } = useAdmin()
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const [selectedSchool, setSelectedSchool] = useState<string | null>(null)
-  const [selectedClass, setSelectedClass] = useState<string | null>(null)
+  const [selectedSchool, setSelectedSchool] = useState<School | null>(null)
+  const [selectedClass, setSelectedClass] = useState<Class | null>(null)
+  // const [selectedSection, setSelectedSection] = useState<Section | null>(null)
+
+  /*const [selectedSchool, setSelectedSchool] = useState<string | null>(null)
+  const [selectedClass, setSelectedClass] = useState<string | null>(null)*/
   const [selectedSection, setSelectedSection] = useState<string | null>(null)
   const [selectedLang, setSelectedLang] = useState<string | null>(null)
 
@@ -30,6 +54,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     setSelectedSchool(null)
     setSelectedClass(null)
+    setSelectedSection(null)
     setSelectedLang(null)
   }, [activeTab])
 
@@ -42,6 +67,70 @@ export default function AdminDashboard() {
       <AdminHeader />
 
       <main className="flex-1 overflow-y-auto p-4 lg:p-8">
+        <div className="mb-4">
+          <Breadcrumb>
+            <BreadcrumbList>
+
+              {/* Active Tab */}
+              <BreadcrumbItem>
+                <BreadcrumbPage className="capitalize">
+                  {activeTab}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+
+              {/* School */}
+              {selectedSchool && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink
+                      onClick={() => {
+                        setSelectedSchool(null)
+                        setSelectedClass(null)
+                        setSelectedSection(null)
+                      }}
+                      className="cursor-pointer"
+                    >
+                      {selectedSchool?.name || 'School'}
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                </>
+              )}
+
+              {/* Class */}
+              {selectedClass && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink
+                      onClick={() => {
+                        setSelectedClass(null)
+                        setSelectedSection(null)
+                      }}
+                      className="cursor-pointer"
+                    >
+                      {selectedClass?.name || 'Class'}
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                </>
+              )}
+
+              {/* Section (current page) */}
+              {selectedSection && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>
+                      {selectedSection || 'Section'}
+                    </BreadcrumbPage>
+                  </BreadcrumbItem>
+                </>
+              )}
+
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+
         {/* Analytics Tab */}
         {activeTab === "analytics" && <AnalyticsCharts />}
 
@@ -64,7 +153,7 @@ export default function AdminDashboard() {
 
               {selectedSchool && !selectedClass && (
                 <SchoolClasses
-                  schoolId={selectedSchool}
+                  schoolId={selectedSchool.id}
                   onBack={() => setSelectedSchool(null)}
                   onSelectClass={setSelectedClass}
                 />
@@ -72,20 +161,18 @@ export default function AdminDashboard() {
 
               {selectedSchool && selectedClass && !selectedSection && (
                 <SchoolSection
-                  school={selectedSchool}
-                  classes={selectedClass}
+                  school={selectedSchool.name}
+                  classes={selectedClass.id}
                   onSelectSection={setSelectedSection}
                   onBack={() => setSelectedClass(null)}
                 />
               )}
 
-
-
               {selectedSchool && selectedClass && selectedSection && (
                 <SchoolClassUsers
                   activeTab={activeTab}
-                  schoolId={selectedSchool}
-                  classId={selectedClass}
+                  schoolId={selectedSchool.id}
+                  classItem={selectedClass}
                   sectionId={selectedSection}
                   // className={selectedClass.name}
                   onBack={() => setSelectedSection(null)}
@@ -110,14 +197,14 @@ export default function AdminDashboard() {
               {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab={activeTab} />}
               {selectedSchool && !selectedClass && (
                 <SchoolClasses
-                  schoolId={selectedSchool}
+                  schoolId={selectedSchool.id}
                   onSelectClass={setSelectedClass}
                   onBack={() => setSelectedSchool(null)}
                 />
               )}
               {
                 selectedSchool && selectedClass && (
-                  <FilteredProductTable setSelectedClass={setSelectedClass} selectedSchool={selectedSchool} selectedClass={selectedClass} />
+                  <FilteredProductTable setSelectedClass={setSelectedClass} selectedSchool={selectedSchool.id} selectedClass={selectedClass.id} />
                 )
               }
             </CardContent>

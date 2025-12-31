@@ -13,9 +13,9 @@ export const PATCH = Wrapper(async( req: NextRequest, { params }: { params: Prom
 
     const user = auth.user;
 
-    if (user.role !== "SUB_ADMIN" || !user.schoolId) {
-        return NextResponse.json({ success: false, message: "Only School Admins can manage students" }, { status: 403 });
-    }
+    // if (user.role !== "SUB_ADMIN" || !user.schoolId) {
+    //     return NextResponse.json({ success: false, message: "Only School Admins can manage students" }, { status: 403 });
+    // }
 
     const { studentId } = await params;
 
@@ -25,15 +25,12 @@ export const PATCH = Wrapper(async( req: NextRequest, { params }: { params: Prom
         return NextResponse.json({ success: false, message: "Student not found" }, { status: 404 });
     }
 
-    if (existingStudent.schoolId !== user.schoolId) {
-        return NextResponse.json({ success: false, message: "You can only modify students in your own school" }, { status: 403 });
-    }
 
     const newStatus = !existingStudent.isActive;
 
     const updatedStudent = await prisma.student.update({ where: { id: studentId }, data: { isActive: newStatus }});
 
-    return NextResponse.json({ success: true, message: `Student ${newStatus ? 'activated' : 'deactivated'} successfully`}, { status: 200 });
+    return NextResponse.json({ success: true, message: `Student ${newStatus ? 'activated' : 'deactivated'} successfully`, updatedStudent}, { status: 200 });
 
   } catch (error) {
     console.error("Toggle Student Error:", error);
