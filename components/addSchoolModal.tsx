@@ -159,7 +159,9 @@ export function AddSchoolModal({ onSchoolAdded }: AddSchoolModalProps) {
                                         <SelectContent>
                                             <SelectItem value="ICSE">ICSE</SelectItem>
                                             <SelectItem value="CBSE">CBSE</SelectItem>
-                                            <SelectItem value="TSBIE">TSBIE</SelectItem>
+                                            {/* <SelectItem value="TSBIE">TSBIE</SelectItem> */}
+                                            <SelectItem value="TG_STATE_BOARD">TG State Board</SelectItem>
+
                                         </SelectContent>
                                     </Select>
                                 </div>

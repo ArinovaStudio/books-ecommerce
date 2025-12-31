@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Search, Mail, User, ArrowLeft, Loader2, Pencil, Trash, ShieldOff } from "lucide-react"
+import { MoreHorizontal, Search, Mail, User, ArrowLeft, Loader2, Pencil, Trash, ShieldOff, Shield } from "lucide-react"
 import AddUserDialog from "../AddUser"
 import { useToast } from "@/hooks/use-toast"
 
@@ -43,7 +43,7 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
     const fetchUsers = async () => {
         setLoading(true)
         try {
-            const res = await fetch(`/api/admin/students?classId=${classId}&section=${sectionId}`)
+            const res = await fetch(`/api/admin/students?schoolId=${schoolId}&classId=${classId}&section=${sectionId}`)
             const data = await res.json()
 
             if (data.success) {
@@ -95,14 +95,14 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
     }
 
     // DEACTIVATE STUDENT
-    const handleDeactivate = async (userId: string) => {
-        if (!confirm("Are you sure you want to deactivate this student?")) return
+    const handleDeactivate = async (userId: string, status: boolean) => {
+        if (!confirm(`Are you sure you want to ${status ? "deactivate" : "activate"} this student?`)) return
         try {
             const res = await fetch(`/api/admin/students/${userId}/toggle`, { method: "PATCH" })
             const data = await res.json()
             if (data.success) {
                 setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: "Inactive" } : u))
-                toast({ title: "Deactivated", description: "Student deactivated successfully" })
+                toast({ title: `${!status ? "Deactivate" : "Activate"}`, description: "Student deactivated successfully" })
             } else {
                 toast({ title: "Error", description: data.message || "Failed to deactivate student", variant: "destructive" })
             }
@@ -161,9 +161,11 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
                                             </DropdownMenuTrigger>
 
                                             <DropdownMenuContent align="end" className="w-36">
-                                                <DropdownMenuItem className="gap-2 cursor-pointer">
+                                                {/* <DropdownMenuItem
+                                                
+                                                className="gap-2 cursor-pointer">
                                                     <Pencil className="h-4 w-4" /> Edit
-                                                </DropdownMenuItem>
+                                                </DropdownMenuItem> */}
 
                                                 <DropdownMenuItem
                                                     className="gap-2 text-destructive cursor-pointer"
@@ -176,13 +178,14 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuItem
-                                                    className="gap-2 text-destructive cursor-pointer"
+                                                    className={`gap-2 ${user.status === "Active" ? "text-destructive" : "text-blue-500"} cursor-pointer`}
                                                     onClick={(e) => {
                                                         e.stopPropagation()
-                                                        handleDeactivate(user.id)
+                                                        handleDeactivate(user.id, user.status === "Active" ? true : false)
                                                     }}
                                                 >
-                                                    <ShieldOff className="h-4 w-4 text-red-400" /> Deactivate
+                                                    {user.status === "Active" 
+                                                    ? <><ShieldOff className="h-4 w-4 text-red-400" /> Deactivate</> : <><Shield className="h-4 w-4 text-blue-400" /> Activate</>}
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>

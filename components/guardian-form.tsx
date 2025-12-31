@@ -129,7 +129,7 @@ export function GuardianForm() {
     const newErrors: Record<string, string> = {}
 
     if (!formData.guardianName.trim()) {
-      newErrors.guardianName = "Guardian name is required"
+      newErrors.guardianName = "Parent / Guardian name is required"
     }
 
     if (!formData.guardianPhone) {
@@ -340,7 +340,7 @@ export function GuardianForm() {
         <Card className="border-border shadow-lg">
           <CardHeader className="space-y-1 pb-4 sm:pb-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
-              <CardTitle className="text-2xl sm:text-3xl font-semibold">Guardian Information</CardTitle>
+              <CardTitle className="text-2xl sm:text-3xl font-semibold">Parent / Guardian Information</CardTitle>
               {/* <div className="flex flex-col items-start sm:items-end">
                 <span className="text-sm text-muted-foreground">Selected Plan</span>
                 <span className="text-lg sm:text-xl font-semibold text-primary">{planName}</span>
@@ -354,10 +354,10 @@ export function GuardianForm() {
 
           <CardContent className="space-y-4 sm:space-y-6">
             <form onSubmit={sendOrder} className="space-y-4 sm:space-y-5">
-              {/* Guardian Name */}
+              {/* Parent / Guardian Name */}
               <div className="space-y-2">
                 <Label htmlFor="guardianName" className="text-sm sm:text-base font-medium">
-                  Guardian Name <span className="text-destructive">*</span>
+                  Parent / Guardian Name <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
@@ -377,10 +377,10 @@ export function GuardianForm() {
                 {errors.guardianName && <p className="text-sm text-destructive">{errors.guardianName}</p>}
               </div>
 
-              {/* Guardian Phone */}
+              {/* Parent / Guardian Phone */}
               <div className="space-y-2">
                 <Label htmlFor="guardianPhone" className="text-sm sm:text-base font-medium">
-                  Guardian Phone Number <span className="text-destructive">*</span>
+                  Parent / Guardian Phone Number <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
@@ -400,10 +400,10 @@ export function GuardianForm() {
                 {errors.guardianPhone && <p className="text-sm text-destructive">{errors.guardianPhone}</p>}
               </div>
 
-              {/* Guardian Email with OTP */}
+              {/* Parent / Guardian Email with OTP */}
               <div className="space-y-2">
                 <Label htmlFor="guardianEmail" className="text-sm sm:text-base font-medium">
-                  Guardian Email <span className="text-destructive">*</span>
+                  Parent / Guardian Email <span className="text-destructive">*</span>
                 </Label>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <div className="relative flex-1">

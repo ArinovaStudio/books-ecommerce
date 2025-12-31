@@ -154,7 +154,6 @@ export default function AddEditProductDialog({
                                     <SelectItem value="TEXTBOOK">Textbook</SelectItem>
                                     <SelectItem value="NOTEBOOK">Notebook</SelectItem>
                                     <SelectItem value="STATIONARY">Stationary</SelectItem>
-                                    <SelectItem value="OTHER">Other</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

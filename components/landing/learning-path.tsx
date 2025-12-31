@@ -25,7 +25,7 @@ const kidsData = [
     {
         title: "Quick Delivery",
         description:
-            "Get your order delivered within 4-7 business days across India",
+            "Get your order delivered within 5-7 business days across India",
         icon: Clock,
         blobColor: "#e2f6e9",
     },

@@ -26,7 +26,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
         const section = searchParams.get("section");
         const name = searchParams.get("name");
         const rollNo = searchParams.get("rollNo");
-        const schoolId = user.schoolId;
+        const schoolId = searchParams.get("schoolId");
 
         if (!schoolId) {
             return NextResponse.json({ success: false, message: "School ID not found" }, { status: 404 });
@@ -46,6 +46,8 @@ export const GET = Wrapper(async (req: NextRequest) => {
         if (name) {
             whereClause.name = { contains: name, mode: "insensitive" };
         }
+        console.log(whereClause);
+        
 
         const students = await prisma.student.findMany({
             where: whereClause,

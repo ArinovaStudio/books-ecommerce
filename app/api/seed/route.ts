@@ -7,7 +7,7 @@ export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
 function getClassNames(range: string): string[] {
-    const basics = ["Nursery", "LKG", "UKG"];
+    const basics = ["Nursery", "PP I", "PP II"];
     const upTo10 = ["Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
     return [...basics, ...upTo10];
 }
