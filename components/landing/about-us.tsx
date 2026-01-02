@@ -15,8 +15,8 @@ const team = [
         image: "/team/rajesh.jpg",
     },
     {
-        name: "Shravan Kumar",
-        role: "Head of Partnerships",
+        name: "Mary Prathyusha",
+        role: "Relationship Manager",
         description:
             "Building relationships with schools across India to expand our network.",
         image: "/team/amit.jpg",

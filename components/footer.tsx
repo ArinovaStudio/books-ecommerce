@@ -66,16 +66,16 @@ export default function Footer() {
             <ul className="space-y-4 text-sm text-blue-100/80">
               <li className="flex gap-3">
                 <MapPin size={18} className="text-cyan-400" />
-                123 Education Lane, New Delhi
+                Hyderabad, TELANGANA- 500043
               </li>
-              <li className="flex gap-3">
+              <a href="tel:+919391779949" className="flex gap-3">
                 <Phone size={18} className="text-cyan-400" />
-                +91 98765 43210
-              </li>
-              <li className="flex gap-3">
+                +91 939-177-9949
+              </a>
+              <a href="mailto:support@glow-nest.in" className="flex gap-3">
                 <Mail size={18} className="text-cyan-400" />
                 support@glow-nest.in
-              </li>
+              </a>
             </ul>
           </div>
         </div>
@@ -126,7 +126,7 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 text-xs text-blue-100/50">
           <p>© {currentYear} Glow Nest. All rights reserved.</p>
           <p>
-            Powered by <span className="text-white">Arinova Studio</span>
+            Powered by <span className="text-white">Outright Creators X Arinova Studio</span>
           </p>
         </div>
       </div>

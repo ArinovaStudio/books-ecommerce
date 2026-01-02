@@ -93,13 +93,6 @@ export const POST = Wrapper(async (req: NextRequest, { params }: { params: Promi
     return NextResponse.json({ success: false, message: "Class not found" }, { status: 404 });
   }
 
-  // Sub admin check
-  if (auth.user.role === "SUB_ADMIN") {
-    if (!auth.user.schoolId || auth.user.schoolId !== existingClass.schoolId) {
-      return NextResponse.json({ success: false, message: "You are not authorized to manage this school's classes" }, { status: 403 });
-    }
-  }
-
   if (existingClass.sections.includes(section)) {
     return NextResponse.json({ success: false, message: "Section already exists" }, { status: 409 });
   }
@@ -142,12 +135,6 @@ export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promis
     return NextResponse.json({ success: false, message: "Class not found" }, { status: 404 });
   }
 
-  // Sub admin check
-  if (auth.user.role === "SUB_ADMIN") {
-    if (!auth.user.schoolId || auth.user.schoolId !== existingClass.schoolId) {
-      return NextResponse.json({ success: false, message: "You are not authorized to manage this school's classes" }, { status: 403 });
-    }
-  }
 
   if (!existingClass.sections.includes(oldSection)) {
     return NextResponse.json({ success: false, message: "Old section not found" }, { status: 404 });
@@ -191,12 +178,6 @@ export const DELETE = Wrapper(async (req: NextRequest, { params }: { params: Pro
     return NextResponse.json({ success: false, message: "Class not found" }, { status: 404 });
   }
 
-  // Sub admin check
-  if (auth.user.role === "SUB_ADMIN") {
-    if (!auth.user.schoolId || auth.user.schoolId !== existingClass.schoolId) {
-      return NextResponse.json({ success: false, message: "You are not authorized to manage this school's classes" }, { status: 403 });
-    }
-  }
 
   if (!existingClass.sections.includes(section)) {
     return NextResponse.json({ success: false, message: "Section not found" }, { status: 404 });

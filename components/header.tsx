@@ -81,10 +81,10 @@ export default function Header() {
 
           {/* DESKTOP ACTIONS */}
           <div className="hidden lg:flex items-center gap-6">
-            <div className="flex items-center gap-2 text-white/70 text-sm border-r border-white/10 pr-6">
+            <a href="tel:+919391779949" className="flex items-center gap-2 text-white/70 text-sm border-r border-white/10 pr-6">
               <Phone size={14} className="text-cyan-400" />
-              <span>+91 98765 43210</span>
-            </div>
+              <span>+91 939-177-9949</span>
+            </a>
 
             <div className="flex items-center gap-5">
               {!loading && (
@@ -137,10 +137,10 @@ export default function Header() {
               )
             )}
 
-            <div className="mt-6 py-4 flex items-center justify-center gap-3 text-white/40 text-xs tracking-wider uppercase">
+            <a href="tel:+919391779949" className="mt-6 py-4 flex items-center justify-center gap-3 text-white/40 text-xs tracking-wider uppercase">
               <Phone size={14} />
-              <span>Support: +91 98765 43210</span>
-            </div>
+              <span>Support: +91 939-177-9949</span>
+            </a>
           </div>
         </div>
       </div>
