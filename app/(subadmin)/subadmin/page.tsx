@@ -16,11 +16,9 @@ import ProductTables from "@/components/product-tables"
 export default function AdminDashboard() {
     const { activeTab, user, schoolId } = useAdmin()
     const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const [selectedClass, setSelectedClass] = useState<string | null>(null)
+    const [selectedClass, setSelectedClass] = useState<any | null>(null)
     const [selectedSection, setSelectedSection] = useState<string | null>(null)
     const [selectedLang, setSelectedLang] = useState<string | null>(null)
-
-    // console.log("subadmin user", user.);
 
     useEffect(() => {
         setSelectedClass(null)
@@ -57,7 +55,8 @@ export default function AdminDashboard() {
                                 <SchoolClassUsers
                                     activeTab={activeTab}
                                     schoolId={user.schoolId}
-                                    classId={selectedClass}
+                                    // classId={selectedClass}
+                                    classItem={selectedClass}
                                     sectionId={selectedSection}
                                     onBack={() => setSelectedSection(null)}
                                 />

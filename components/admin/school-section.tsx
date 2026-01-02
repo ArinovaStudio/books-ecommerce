@@ -33,7 +33,7 @@ type SectionType = {
 
 type Props = {
     school: string
-    classes: string
+    classes: {id: string, name: string}
     onSelectSection?: (section: string) => void
     onBack?: () => void
 }
@@ -52,6 +52,8 @@ export default function SchoolSection({
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [newSection, setNewSection] = useState("")
 
+    console.log(classes.id);
+    
 
     /* ================= FETCH SECTIONS ================= */
 
@@ -60,7 +62,7 @@ export default function SchoolSection({
         setLoading(true)
         try {
             const res = await fetch(
-                `/api/admin/classes/${classes}/sections`
+                `/api/admin/classes/${classes.id}/sections`
             )
             const data = await res.json()
             console.log("data = ", data.sections)
@@ -97,7 +99,7 @@ export default function SchoolSection({
         setLoading(true)
         try {
             const res = await fetch(
-                `/api/admin/classes/${classes}/sections`,
+                `/api/admin/classes/${classes.id}/sections`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -129,7 +131,7 @@ export default function SchoolSection({
 
         try {
             const res = await fetch(
-                `/api/admin/classes/${classes}/sections`,
+                `/api/admin/classes/${classes.id}/sections`,
                 {
                     method: "DELETE",
                     headers: { "Content-Type": "application/json" },
