@@ -46,7 +46,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
         if (name) {
             whereClause.name = { contains: name, mode: "insensitive" };
         }
-        console.log(whereClause);
+        // console.log(whereClause);
         
 
         const students = await prisma.student.findMany({

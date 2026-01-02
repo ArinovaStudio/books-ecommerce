@@ -58,9 +58,9 @@ export default function Hero() {
               {/* Circular Image Container */}
               <div className="relative h-full w-full rounded-full overflow-hidden border-4 border-cyan-400/20 shadow-2xl">
                 <img
-                  src="/24985 boy.jpg"
+                  src="/main.png"
                   alt="Student with school supplies"
-                  className="w-full h-full object-cover scale-110"
+                  className="w-full h-full object-cover"
                 />
               </div>
             </div>

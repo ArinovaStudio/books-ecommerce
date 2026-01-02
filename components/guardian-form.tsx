@@ -173,7 +173,7 @@ export function GuardianForm() {
       }
 
       const data = await res.json();
-      console.log("School API response:", data);
+      // console.log("School API response:", data);
 
       if (data.success) {
         setSchool(data.school); // ✅ correct key
@@ -199,7 +199,7 @@ export function GuardianForm() {
         }),
       });
       const data = await res.json()
-      console.log(data, "this is product");
+      // console.log(data, "this is product");
       setProducts(data.success ? data.data : [])
     } catch (err) {
       console.error("Failed to fetch products", err)
@@ -309,7 +309,7 @@ export function GuardianForm() {
       const resData = await user.json();
       if (resData.success) {
         const { user: userData } = resData;
-        console.log("user Details:", userData);
+        // console.log("user Details:", userData);
         setUser(userData);
 
         setFormData({
@@ -325,10 +325,6 @@ export function GuardianForm() {
     fetchSchool(schoolId as string)
   }, []);
 
-  useEffect(() => {
-    console.log("Address changed:", formData.address, formData.guardianPhone);
-  }, [formData]);
-
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
@@ -342,12 +338,12 @@ export function GuardianForm() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
               <CardTitle className="text-2xl sm:text-3xl font-semibold">Parent / Guardian Information</CardTitle>
               {/* <div className="flex flex-col items-start sm:items-end">
-                <span className="text-sm text-muted-foreground">Selected Plan</span>
+                <span className="text-sm">Selected Plan</span>
                 <span className="text-lg sm:text-xl font-semibold text-primary">{planName}</span>
-                <span className="text-sm text-muted-foreground">{planPrice}</span>
+                <span className="text-sm">{planPrice}</span>
               </div> */}
             </div>
-            <p className="text-sm sm:text-base text-muted-foreground">
+            <p className="text-sm sm:text-base">
               Please provide guardian details to complete your registration
             </p>
           </CardHeader>
@@ -360,7 +356,7 @@ export function GuardianForm() {
                   Parent / Guardian Name <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5" />
                   <Input
                     disabled
                     id="guardianName"
@@ -383,7 +379,7 @@ export function GuardianForm() {
                   Parent / Guardian Phone Number <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5" />
                   <Input
                     id="guardianPhone"
                     type="tel"
@@ -407,7 +403,7 @@ export function GuardianForm() {
                 </Label>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <div className="relative flex-1">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5" />
                     <Input
                       id="guardianEmail"
                       type="email"
@@ -438,7 +434,7 @@ export function GuardianForm() {
                 {/* OTP Input */}
                 {/* {otpSent && !isVerified && (
                   <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-muted/50 rounded-lg space-y-3">
-                    <p className="text-xs sm:text-sm text-muted-foreground">
+                    <p className="text-xs sm:text-sm">
                       Enter the 6-digit OTP sent to{" "}
                       <span className="font-medium text-foreground">{formData.guardianEmail}</span>
                     </p>
@@ -486,7 +482,7 @@ export function GuardianForm() {
                   Address <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-3 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                  <MapPin className="absolute left-3 top-3 w-4 h-4 sm:w-5 sm:h-5" />
                   <Textarea
                     id="address"
                     placeholder="Enter complete address"
@@ -561,7 +557,7 @@ export function GuardianForm() {
                 </div>
               ) : (
                 <div className="pt-2 sm:pt-4 text-center">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm">
                     You don’t have any children in this school or the fees haven’t been paid.
                   </p>
                 </div>

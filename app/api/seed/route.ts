@@ -20,7 +20,7 @@ function getRandomName(type: 'parent' | 'student') {
 
 export async function GET(req: NextRequest) {
     try {
-        console.log("--- Starting Seeding Process ---");
+        // console.log("--- Starting Seeding Process ---");
 
         // Hash passwords ONCE to save time
         const commonAdminPass = await bcrypt.hash("admin123", 10);
@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
 
         const createdSchools = [];
         for (const [index, s] of schoolsList.entries()) {
-            console.log(`Processing School ${index + 1}/${schoolsList.length}: ${s.name}`);
+            // console.log(`Processing School ${index + 1}/${schoolsList.length}: ${s.name}`);
             
             const cleanName = s.name.toLowerCase().replace(/[^a-z0-9]/g, "");
             const schoolEmail = `admin.${cleanName}${index}@globe.com`;
@@ -189,7 +189,7 @@ export async function GET(req: NextRequest) {
                     await Promise.all(studentPromises);
                 }
             } else {
-                console.log(`Skipping ${s.name} - Already exists`);
+                // console.log(`Skipping ${s.name} - Already exists`);
             }
             createdSchools.push(school);
         }

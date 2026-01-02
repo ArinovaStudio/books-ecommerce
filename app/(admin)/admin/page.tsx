@@ -59,7 +59,7 @@ export default function AdminDashboard() {
   }, [activeTab])
 
   useEffect(() => {
-    console.log("selected school = ", selectedSchool, "\nselected class =", selectedClass, "\nselected section = ", selectedSection)
+    // console.log("selected school = ", selectedSchool, "\nselected class =", selectedClass, "\nselected section = ", selectedSection)
   }, [selectedClass, selectedSchool, selectedSection])
 
   return (
@@ -162,7 +162,7 @@ export default function AdminDashboard() {
               {selectedSchool && selectedClass && !selectedSection && (
                 <SchoolSection
                   school={selectedSchool.name}
-                  classes={selectedClass.id}
+                  classes={selectedClass}
                   onSelectSection={setSelectedSection}
                   onBack={() => setSelectedClass(null)}
                 />

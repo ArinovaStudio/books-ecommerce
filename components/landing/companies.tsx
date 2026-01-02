@@ -20,7 +20,7 @@ export default function Companies() {
         const data = await response.json()
 
         if (data.success) {
-          console.log("Schools count: ", data.schools.length)
+          // console.log("Schools count: ", data.schools.length)
           setSchools(data.schools.filter((school: School) => school.status === 'ACTIVE'))
         }
       } catch (error) {

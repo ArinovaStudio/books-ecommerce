@@ -3,15 +3,28 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft, Loader2 } from "lucide-react"
 
-const sortClasses = (a: { name: string }, b: { name: string }) => {
-    const order = [
-        "Nursery", "PP1", "PP2",
-        "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
-        "Class 6", "Class 7", "Class 8", "Class 9", "Class 10",
-        "Class 11", "Class 12"
-    ]
-    return order.indexOf(a.name) - order.indexOf(b.name)
+type ClassItem = { name: string }
+
+const CLASS_ORDER = [
+  "Nursery", "PP I", "PP II",
+  "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
+  "Class 6", "Class 7", "Class 8", "Class 9", "Class 10",
+  "Class 11", "Class 12"
+]
+
+const normalize = (name: string) =>
+  name
+    .replace(/\s+/g, " ")
+    .trim()
+
+const sortClasses = (a: ClassItem, b: ClassItem): number => {
+  const indexA = CLASS_ORDER.indexOf(normalize(a.name))
+  const indexB = CLASS_ORDER.indexOf(normalize(b.name))
+
+  return (indexA === -1 ? Infinity : indexA) -
+         (indexB === -1 ? Infinity : indexB)
 }
+
 
 type ClassType = {
     id: string
@@ -49,7 +62,6 @@ export function SchoolClasses({
             try {
                 const res = await fetch(`/api/admin/schools/${schoolId}/classes`)
                 const data = await res.json()
-                // console.log("data  = ",data.classes)
                 if (data.success) {
                     setClasses(data.classes.sort(sortClasses))
                 } else {

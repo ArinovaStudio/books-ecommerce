@@ -51,7 +51,7 @@ export default function SchoolSearch({
       </div>
       {value && results && results.length > 0 && (
         <div className="absolute z-20 mt-2 w-full bg-white border rounded-lg shadow">
-          {results.slice(0, 5).map((school) => (
+          {results.map((school) => (
             <div
               key={school.id}
               className="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100"

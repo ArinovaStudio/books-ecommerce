@@ -45,7 +45,7 @@ export default function LanguageSelector({ schoolId, classId, onSelectingLang, o
             const data = await res.json();
 
             if (data.success) {
-                console.log(data);
+                // console.log(data);
                 setLanguages(data.languages);
             }
         } catch (error) {

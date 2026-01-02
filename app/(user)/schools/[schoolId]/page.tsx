@@ -22,6 +22,30 @@ type Class = {
   academicYear: string
 }
 
+type ClassItem = { name: string }
+
+const CLASS_ORDER = [
+  "Nursery", "PP I", "PP II",
+  "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
+  "Class 6", "Class 7", "Class 8", "Class 9", "Class 10",
+  "Class 11", "Class 12"
+]
+
+const normalize = (name: string) =>
+  name
+    .replace(/\s+/g, " ")
+    .trim()
+
+const sortClasses = (a: ClassItem, b: ClassItem): number => {
+  const indexA = CLASS_ORDER.indexOf(normalize(a.name))
+  const indexB = CLASS_ORDER.indexOf(normalize(b.name))
+
+  return (indexA === -1 ? Infinity : indexA) -
+         (indexB === -1 ? Infinity : indexB)
+}
+
+
+
 export default function SchoolClassesPage({ params }: { params: Promise<{ schoolId: string }> }) {
   const [expandedClassId, setExpandedClassId] = useState<string | null>(null)
   const [school, setSchool] = useState<School | null>(null)
@@ -52,7 +76,7 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
         const classesData = await classesResponse.json()
 
         if (classesData.success) {
-          setClasses(classesData.classes)
+          setClasses(classesData.classes.sort(sortClasses))
         }
       } catch (error) {
         setError('Failed to load school data')

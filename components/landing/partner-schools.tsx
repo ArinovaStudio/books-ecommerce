@@ -7,6 +7,7 @@ import Link from "next/link"
 
 import SchoolSearch from "../schoolSearch"
 import { Button } from "../ui/button"
+import { useRouter } from "next/navigation"
 
 type School = {
   id: string
@@ -22,7 +23,9 @@ export default function PartnerSchools() {
   const [schools, setSchools] = useState<School[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
+  const [isLogged, setIsLogged] = useState(false);
+  const [popup, setPopUp] = useState(false);
+  const router = useRouter()
   useEffect(() => {
     const fetchSchools = async () => {
       setLoading(true)
@@ -42,9 +45,26 @@ export default function PartnerSchools() {
         setLoading(false)
       }
     }
-
+    const me = async () => {
+      const req = await fetch("/api/auth/check")
+      if (req.status === 200) {
+        const data = await req.json()
+        // console.log(data);
+        setIsLogged(data.authenticated)
+      } 
+    }
     fetchSchools()
+    me()
   }, [])
+
+  const handleClick = (id: string) => {
+    if (isLogged) {
+      router.push(`/schools/${id}`)
+    }
+    else {
+      setPopUp(true)
+    }
+  }
 
   const filteredSchools = schools.filter((school) =>
     school.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -56,8 +76,22 @@ export default function PartnerSchools() {
 
   return (
     <section id="schools" className="py-20 md:pb-25">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+      {
+        popup && (
+          <div className="w-screen h-screen fixed inset-0 bg-black/40 z-9999 flex justify-center items-center">
+            <div className="w-1/3 h-auto bg-white rounded-2xl p-8 px-8 pb-6">
+              <h1 className="text-xl">Please <b>Login</b> First to access</h1>
+              <p className="text-sm text-gray-600 mt-2">You must be logged in to access the school portal. Please sign in with your registered credentials to continue.</p>
 
+              <div className="w-full flex justify-end items-center gap-4 mt-6">
+                <button className="text-base px-4 py-2 border border-red-400 rounded-lg cursor-pointer text-red-400" onClick={() => setPopUp(false)}>Cancel</button>
+                <button className="text-base px-4 py-2 bg-yellow-500 rounded-lg cursor-pointer text-white" onClick={() => router.push("/signin")}>Login</button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-10 md:mb-16">
           <div className="space-y-2">
@@ -117,9 +151,9 @@ export default function PartnerSchools() {
         {!loading && !error && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {visibleSchools.map((school) => (
-              <Link
+              <div
                 key={school.id}
-                href={`/schools/${school.id}`}
+                onClick={() => handleClick(school.id)}
                 className="block h-full"
               >
                 <Card className="px-6 py-4 hover:shadow-lg flex flex-col gap-3 h-full rounded-none rounded-tr-3xl rounded-bl-3xl border-none transition-transform duration-300 hover:-translate-y-2">
@@ -150,7 +184,7 @@ export default function PartnerSchools() {
                     <span className="text-sm truncate">{school.address}</span>
                   </div>
                 </Card>
-              </Link>
+              </div>
             ))}
           </div>
         )}

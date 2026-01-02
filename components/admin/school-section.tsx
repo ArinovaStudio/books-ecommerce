@@ -52,8 +52,6 @@ export default function SchoolSection({
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [newSection, setNewSection] = useState("")
 
-    console.log(classes.id);
-    
 
     /* ================= FETCH SECTIONS ================= */
 
@@ -65,7 +63,7 @@ export default function SchoolSection({
                 `/api/admin/classes/${classes.id}/sections`
             )
             const data = await res.json()
-            console.log("data = ", data.sections)
+            // console.log("data = ", data.sections)
 
             if (data.success) {
                 setSections(data.sections.sort(sortSections))

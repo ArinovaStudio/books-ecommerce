@@ -57,7 +57,7 @@ export function AdminSidebar() {
           title: "Success",
           description: "Logged Out successfully",
         })
-        console.log("Logout successful");
+        // console.log("Logout successful");
         window.location.href = "/signin";
       }
     } catch (error) {
