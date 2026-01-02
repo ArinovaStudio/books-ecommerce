@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Mail, Phone, User, MapPin, CheckCircle } from "lucide-react"
+import { ArrowLeft, Mail, Phone, User, MapPin, CheckCircle, LucideLoader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSearchParams } from "next/navigation";
+import { toast } from "sonner"
 
 interface GuardianFormProps {
   planName: string
@@ -277,7 +278,7 @@ export function GuardianForm() {
         },
         body: JSON.stringify({
           userId: user?.id,
-          studentId: user?.studentId,
+          studentId: user?.children[0].id,
           school: school?.name,
           class: className,
           totalAmount: grandTotal,
@@ -288,7 +289,11 @@ export function GuardianForm() {
       });
 
       const data = await res.json();
-      console.log("Order response:", data);
+      if (data.success) {
+        toast.success("Order Placed Successfully");
+        window.alert("Order Placed Successfully")
+        window.location.replace("/")
+      }
     } catch (err) {
       console.error("Failed to create order", err);
     } finally {
@@ -304,7 +309,7 @@ export function GuardianForm() {
       const resData = await user.json();
       if (resData.success) {
         const { user: userData } = resData;
-        console.log(userData);
+        console.log("user Details:", userData);
         setUser(userData);
 
         setFormData({
@@ -322,11 +327,6 @@ export function GuardianForm() {
 
   useEffect(() => {
     console.log("Address changed:", formData.address, formData.guardianPhone);
-    console.log(user);
-    console.log(products[0]?.class?.name);
-
-
-
   }, [formData]);
 
   return (
@@ -366,7 +366,7 @@ export function GuardianForm() {
                     id="guardianName"
                     type="text"
                     placeholder="Enter guardian's full name"
-                    value={formData.guardianName}
+                    value={formData.guardianName || ""}
                     onChange={(e) => handleInputChange("guardianName", e.target.value)}
                     className={cn(
                       "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base",
@@ -388,7 +388,7 @@ export function GuardianForm() {
                     id="guardianPhone"
                     type="tel"
                     placeholder="Enter 10-digit phone number"
-                    value={formData.guardianPhone}
+                    value={formData.guardianPhone || ""}
                     onChange={(e) => handleInputChange("guardianPhone", e.target.value.replace(/\D/g, "").slice(0, 10))}
                     className={cn(
                       "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base",
@@ -412,7 +412,7 @@ export function GuardianForm() {
                       id="guardianEmail"
                       type="email"
                       placeholder="Enter guardian's email"
-                      value={formData.guardianEmail}
+                      value={formData.guardianEmail || ""}
                       onChange={(e) => handleInputChange("guardianEmail", e.target.value)}
                       className={cn(
                         "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base",
@@ -490,7 +490,7 @@ export function GuardianForm() {
                   <Textarea
                     id="address"
                     placeholder="Enter complete address"
-                    value={formData.address}
+                    value={formData.address || ""}
                     onChange={(e) => handleInputChange("address", e.target.value)}
                     className={cn(
                       "pl-10 sm:pl-11 pt-3 min-h-[100px] sm:min-h-[120px] resize-none text-sm sm:text-base",
@@ -501,6 +501,19 @@ export function GuardianForm() {
                 </div>
                 {errors.address && <p className="text-sm text-destructive">{errors.address}</p>}
               </div>
+              <Label htmlFor="address" className="text-sm sm:text-base font-medium">
+                  Child Info
+              </Label>
+              {
+                user?.children?.length > 0 && user.children.map((items: any, index: number) => (
+                  <div key={index} className="w-full flex justify-start items-center gap-3">
+                    <p className="py-2 bg-gray-200 text-gray-700 px-4 w-1/3 rounded-lg">NAME: {items.name}</p>
+                    <p className="py-2 bg-gray-200 text-gray-700 px-4 w-1/3 rounded-lg">ROLL NO: {items.rollNo}</p>
+                    <p className="py-2 bg-gray-200 text-gray-700 px-4 w-1/3 rounded-lg">SECTION: {items.section}</p>
+
+                  </div> 
+                ))
+              }
 
               <div className="mt-6 rounded-lg border bg-muted/40 p-4 space-y-5">
                 <h3 className="text-lg font-semibold">Order Summary</h3>
@@ -512,7 +525,7 @@ export function GuardianForm() {
                     {items.map((product) => (
                       <div
                         key={product.id}
-                        className="flex justify-between text-sm text-muted-foreground pl-3"
+                        className="flex justify-between text-sm text-black pl-3"
                       >
                         <span>
                           {product.name} × {product.stock}
@@ -534,17 +547,16 @@ export function GuardianForm() {
                   <span>₹{grandTotal}</span>
                 </div>
               </div>
-
-
+              
               {/* Submit Button */}
               {user?.children?.length > 0 ? (
                 <div className="pt-2 sm:pt-4">
                   <Button
                     type="submit"
-                    className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium cursor-pointer bg-amber-400 hover:bg-amber-300 text-black"
+                    className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium cursor-pointer flex justify-center items-center bg-amber-400 hover:bg-amber-300 text-black"
                     size="lg"
                   >
-                    Place Order
+                    {loading ? <LucideLoader2 className="text-white animate-spin" size={20}/> : "Place Order"}
                   </Button>
                 </div>
               ) : (

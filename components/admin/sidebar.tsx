@@ -74,7 +74,7 @@ export function AdminSidebar() {
         )}
       >
         <div className="flex h-full flex-col relative">
-          <div onClick={() => handleLogout()} className="absolute w-5/6 h-fit bottom-4 left-5 bg-red-500/10 text-red-400 gap-2 flex justify-center items-center py-3 rounded-lg cursor-pointer">
+          <div onClick={() => handleLogout()} className="absolute w-5/6 h-fit bottom-4 left-5 bg-red-500/40 text-red-600 gap-2 flex justify-center items-center py-3 rounded-lg cursor-pointer">
             <LucideLogOut className="rotate-180" size={18} /> Logout
           </div>
           {/* Header */}

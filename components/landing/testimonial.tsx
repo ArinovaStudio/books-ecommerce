@@ -128,7 +128,7 @@ export default function TestimonialSection() {
                                         <img
                                             src={item.image}
                                             alt={item.name}
-                                            className="object-fit object-bottom drop-shadow-xl max-w-full max-h-full w-96 h-[36rem]"
+                                            className="object-contain object-bottom drop-shadow-xl max-w-full max-h-full h-[36rem]"
                                         />
                                     </div>
                                 </div>

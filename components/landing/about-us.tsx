@@ -133,13 +133,13 @@ export default function AboutUs() {
                                     </p>
                                 </div>
 
-                                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
+                                <h2 className="text-3xl sm:text-3xl lg:text-4xl font-bold leading-tight">
                                     Empower Your Learning Journey Everyday
                                 </h2>
                             </div>
 
                             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                                There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration.
+                                Discover a vast selection of school books for all grades. Our website offers competitive pricing and fast delivery to help students succeed academically. Easily find textbooks and resources.
                             </p>
 
                             {/* Stats */}
@@ -152,13 +152,13 @@ export default function AboutUs() {
                                 </div>
                                 <div>
                                     <p className="text-3xl font-bold text-orange-400">
-                                        {loading ? "..." : formatNumber(stats.users)}
+                                        72000+
                                     </p>
                                     <p className="text-sm text-muted-foreground">Students Served</p>
                                 </div>
                                 <div>
                                     <p className="text-3xl font-bold text-orange-400">
-                                        {loading ? "..." : formatNumber(stats.orders)}
+                                        10000+
                                     </p>
                                     <p className="text-sm text-muted-foreground">Happy Parents</p>
                                 </div>
@@ -291,7 +291,7 @@ export default function AboutUs() {
                         </span>
 
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                            Meet the People Behind Globe Nest
+                            Meet the People Behind Glow Nest
                         </h2>
 
                         <p className="mt-4 text-gray-600 max-w-xl mx-auto">
@@ -320,9 +320,10 @@ export default function AboutUs() {
                                 <h3 className="text-xl font-semibold text-gray-900">
                                     {member.name}
                                 </h3>
+                                <p className="my-2 text-sm text-gray-600">{member.role}</p>
 
                                 {/* DESCRIPTION */}
-                                <p className="text-gray-600 text-sm mt-3 leading-relaxed max-w-xs mx-auto">
+                                <p className="text-gray-600 text-sm mt-3 leading-relaxed max-w-xs mx-auto border-t border-gray-400 py-1">
                                     {member.description}
                                 </p>
                             </div>
