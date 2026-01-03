@@ -365,7 +365,7 @@ export function GuardianForm() {
                     value={formData.guardianName || ""}
                     onChange={(e) => handleInputChange("guardianName", e.target.value)}
                     className={cn(
-                      "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base",
+                      "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base text-black disabled:text-black",
                       errors.guardianName && "border-destructive focus-visible:ring-destructive",
                     )}
                   />
@@ -387,7 +387,7 @@ export function GuardianForm() {
                     value={formData.guardianPhone || ""}
                     onChange={(e) => handleInputChange("guardianPhone", e.target.value.replace(/\D/g, "").slice(0, 10))}
                     className={cn(
-                      "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base",
+                      "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base text-black disabled:text-black",
                       errors.guardianPhone && "border-destructive focus-visible:ring-destructive",
                     )}
                     maxLength={10}
@@ -411,7 +411,7 @@ export function GuardianForm() {
                       value={formData.guardianEmail || ""}
                       onChange={(e) => handleInputChange("guardianEmail", e.target.value)}
                       className={cn(
-                        "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base",
+                        "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base text-black disabled:text-black",
                         errors.guardianEmail && "border-destructive focus-visible:ring-destructive",
                       )}
                       disabled
