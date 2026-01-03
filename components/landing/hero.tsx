@@ -7,7 +7,7 @@ export default function Hero() {
   return (
     <section
       id='home'
-      className="relative overflow-hidden bg-[linear-gradient(135deg, #141f38_0%, #22345e_50%, #1f5c7a_100%)] text-white"
+      className="relative overflow-hidden bg-[linear-gradient(135deg,#141f38_0%,#22345e_50%,#1f5c7a_100%)] text-white"
     >
       {/* Decorative blobs for added depth on the new gradient */}
       <div className="absolute inset-0">
