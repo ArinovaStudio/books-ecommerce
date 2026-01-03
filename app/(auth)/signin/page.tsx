@@ -158,14 +158,14 @@ const SignInPage = () => {
                     </div>
 
                     {/* Links Section */}
-                    <div className="flex items-center justify-end">
+                    {/* <div className="flex items-center justify-end">
                         <Link
                             href="/forgot-password"
                             className="text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
                         >
                             Forgot Password?
                         </Link>
-                    </div>
+                    </div> */}
 
                     {/* Submit Button */}
                     <Button

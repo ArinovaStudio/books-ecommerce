@@ -54,7 +54,7 @@ export default function AdminDashboard() {
                             {selectedClass && selectedSection && (
                                 <SchoolClassUsers
                                     activeTab={activeTab}
-                                    schoolId={user.schoolId}
+                                    schoolId={schoolId}
                                     // classId={selectedClass}
                                     classItem={selectedClass}
                                     sectionId={selectedSection}
