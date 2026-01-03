@@ -15,7 +15,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="relative overflow-hidden bg-[linear-gradient(135deg,#141f38_0%,#22345e_50%,#1f5c7a_100%)] text-white">
+    <footer className="relative overflow-hidden bg-linear-to-br from-blue-800 to-blue-400 text-white">
       {/* Background glow */}
       <div className="absolute top-0 left-1/4 w-64 h-64 bg-cyan-500/5 rounded-full blur-[120px]" />
 

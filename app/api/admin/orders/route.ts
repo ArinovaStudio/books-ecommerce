@@ -45,7 +45,15 @@ export const GET = Wrapper(async (req: NextRequest) => {
                 student: {
                     select: {
                         name: true,
+                        parentEmail: true,
                         rollNo: true,
+                        parent: {
+                            select: {
+                                email: true,
+                                phone: true,
+                                address: true
+                            }
+                        }
                     },
                 },
                 payment: {

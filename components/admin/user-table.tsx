@@ -24,11 +24,15 @@ type Order = {
   userName: string
   email: string
   phone: string
-  className: string
+  class: string
   bundleName: string
   orderNumber: string
   orderDate: string
   totalAmount: number
+  createdAt: string
+  student: {name: string, rollNo: number, 
+    parent: {email: string, phone: string, address: string}
+  }
   status: "Pending" | "Completed" | "Cancelled"
 }
 
@@ -70,7 +74,11 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
 
       const res = await fetch(`/api/admin/orders?schoolId=${school.id}`)
       const data = await res.json()
-      if (data.success) setOrders(data.orders)
+      if (data.success) {
+        console.log(data.orders);
+        
+        setOrders(data.orders)
+      }
       else setOrders([])
     } catch (err) {
       console.error(err)
@@ -178,9 +186,10 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
                   <CardHeader>
                     <div className="flex justify-between">
                       <div>
-                        <CardTitle className="text-base">{order.userName}</CardTitle>
+                        <CardTitle className="text-base">{order.student.name}</CardTitle>
+                        <p className="text-sm">Roll No: {order.student.rollNo} • {order.class}</p>
                         <CardDescription>
-                          {order.email} • {order.phone}
+                          {order?.student.parent.email} {order?.student.parent.phone && `• ${order?.student.parent.phone}`}
                         </CardDescription>
                       </div>
                       <Badge
@@ -199,8 +208,8 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
 
                   <CardContent className="flex justify-between">
                     <div>
-                      <p className="text-sm">Order: {order.orderNumber}</p>
-                      <p className="text-sm">Date: {order.orderDate}</p>
+                      <p className="text-sm">Date: {order.createdAt.split("T")[0]}</p>
+                      <p className="text-sm">Date: {order.student.parent.address}</p>
                     </div>
 
                     <div className="text-right">
