@@ -2,6 +2,7 @@ import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { deleteImage, getFullImageUrl, saveImage } from "@/lib/upload";
 import { verifyAdmin } from "@/lib/verify";
+import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
 function getClassNames(range: string): string[] {
@@ -24,9 +25,9 @@ export const PUT = Wrapper(async(req: NextRequest, { params }: { params: Promise
     if (!auth.success) return NextResponse.json({ success: false, message: auth.message }, { status: 403 });
 
     const { schoolId } = await params;
-    const existingSchool = await prisma.school.findUnique({ where: { id: schoolId } });
+    const existingSchool = await prisma.school.findMany({ where: { id: schoolId }, include: {subAdmins: {select: {id: true, email: true, password: true}}}});
     if (!existingSchool) return NextResponse.json({ success: false, message: "School not found" }, { status: 404 });
-
+    
     const isSuperAdmin = auth.user.role === "ADMIN";
     const isOwner = auth.user.role === "SUB_ADMIN" && auth.user.schoolId === schoolId;
     if (!isSuperAdmin && !isOwner) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
@@ -40,18 +41,18 @@ export const PUT = Wrapper(async(req: NextRequest, { params }: { params: Promise
     const languagesRaw = formData.get("languages") as string;
     const board = formData.get("board") as string;
     const imageFile = formData.get("image") as File | null;
-
-    let imageUrl = existingSchool.image;
+    const password = formData.get("password") as string
+    let imageUrl = existingSchool[0].image;
     if (imageFile && imageFile.size > 0) {
       const newImageUrl = await saveImage(imageFile);
-      if (existingSchool.image) await deleteImage(existingSchool.image);
+      if (existingSchool[0].image) await deleteImage(existingSchool[0].image);
       imageUrl = newImageUrl;
     }
 
     const updatedSchool = await prisma.$transaction(async (tx) => {
-        let newNumberOfClasses = existingSchool.numberOfClasses;
+        let newNumberOfClasses = existingSchool[0].numberOfClasses;
 
-        if (classRange && classRange !== existingSchool.classRange) {
+        if (classRange && classRange !== existingSchool[0].classRange) {
             const expectedClasses = getClassNames(classRange);
             
             const currentClasses = await tx.class.findMany({
@@ -93,16 +94,27 @@ export const PUT = Wrapper(async(req: NextRequest, { params }: { params: Promise
         const school = await tx.school.update({
             where: { id: schoolId },
             data: {
-                name: name || existingSchool.name,
-                email: email || existingSchool.email,
-                address: address || existingSchool.address,
-                classRange: classRange || existingSchool.classRange,
-                languages: languagesRaw ? JSON.parse(languagesRaw) : existingSchool.languages,
+                name: name || existingSchool[0].name,
+                email: email || existingSchool[0].email,
+                address: address || existingSchool[0].address,
+                classRange: classRange || existingSchool[0].classRange,
+                languages: languagesRaw ? JSON.parse(languagesRaw) : existingSchool[0].languages,
                 image: imageUrl,
                 numberOfClasses: newNumberOfClasses,
-                board: board || existingSchool.board
+                board: board || existingSchool[0].board,
             },
         });
+
+        if (email || password) {
+          const hash = await bcrypt.hash(password, 10)
+          await tx.user.update({
+            where: {id: existingSchool[0].subAdmins[0].id},
+            data: {
+              email: email || existingSchool[0].subAdmins[0].email,
+              password: hash || existingSchool[0].subAdmins[0].password
+            }
+          })
+        }
 
         return school;
     });

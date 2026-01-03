@@ -35,6 +35,8 @@ export const POST = Wrapper(async (req: NextRequest) => {
       return NextResponse.json({ success: false, message: `Account is ${user.status.toLowerCase()}. Contact support.` }, { status: 403 });
     }
 
+    console.log(user.password);
+    
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
