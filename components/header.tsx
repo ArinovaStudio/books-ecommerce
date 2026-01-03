@@ -52,7 +52,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-linear-to-br from-blue-800 to-blue-300 backdrop-blur-md border-b border-white/10">
+    <header className="sticky top-0 z-50 w-full bg-[linear-gradient(135deg,#141f38_0%,#22345e_50%,#1f5c7a_100%)] backdrop-blur-md shadow-lg border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center h-20">
 
