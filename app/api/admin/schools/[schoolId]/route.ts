@@ -106,7 +106,10 @@ export const PUT = Wrapper(async(req: NextRequest, { params }: { params: Promise
         });
 
         if (email || password) {
-          const hash = await bcrypt.hash(password, 10)
+          let hash = undefined
+          if (password) {
+            hash = await bcrypt.hash(password, 10)
+          }
           await tx.user.update({
             where: {id: existingSchool[0].subAdmins[0].id},
             data: {
