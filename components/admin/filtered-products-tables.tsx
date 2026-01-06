@@ -195,6 +195,7 @@ export default function FilteredProductTable({
             selectedSchool={selectedSchool}
             selectedClass={selectedClass}
             product={product}
+            setProducts={setProducts}
             onSuccess={fetchProducts}
             trigger={
               <Button
@@ -225,6 +226,7 @@ export default function FilteredProductTable({
             selectedSchool={selectedSchool}
             selectedClass={selectedClass}
             onSuccess={fetchProducts}
+            // setProducts={}
           />
         </div>
       </CardHeader>

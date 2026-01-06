@@ -120,10 +120,27 @@ export default function AddUserDialog({
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target
-        setFormData(prev => ({ ...prev, [name]: value }))
-        if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }))
+  const { name, value, type } = e.target
+
+  let finalValue = value
+
+  if (type === "number") {
+    // allow empty input while typing
+    if (value === "") {
+      finalValue = ""
+    } else {
+      const num = Number(value)
+      finalValue = isNaN(num) || num < 0 ? "0" : value
     }
+  }
+
+  setFormData(prev => ({ ...prev, [name]: finalValue }))
+
+  if (errors[name]) {
+    setErrors(prev => ({ ...prev, [name]: "" }))
+  }
+}
+
 
     const handleSelectChange = (name: string, value: string) => {
         setFormData(prev => ({ ...prev, [name]: value }))
@@ -161,6 +178,7 @@ export default function AddUserDialog({
         return Object.keys(newErrors).length === 0
     }
 
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!validateForm()) return
@@ -181,6 +199,18 @@ export default function AddUserDialog({
 
             if (data.success) {
                 toast({ title: "Success", description: student ? "Student updated successfully" : "Student created successfully" })
+                setFormData({
+                name: "",
+                rollNo: "",
+                classId: "",
+                section: "",
+                parentEmail: "",
+                password: "",
+                dob: "",
+                gender: "",
+                bloodGroup: "",
+                address: ""
+                })
                 setOpen(false)
                 student ? onStudentUpdated?.() : onStudentAdded?.()
             } else {
@@ -218,7 +248,7 @@ export default function AddUserDialog({
                         </div>
                         <div>
                             <Label>Roll Number *</Label>
-                            <Input name="rollNo" value={formData.rollNo} onChange={handleChange} />
+                            <Input type="number" name="rollNo" value={formData.rollNo} min={0} onChange={handleChange} />
                         </div>
                     </div>
 
@@ -300,7 +330,19 @@ export default function AddUserDialog({
                     </div>
 
                     <DialogFooter className="pt-4">
-                        <Button variant="ghost" type="button" onClick={() => setOpen(false)}>Cancel</Button>
+                        <Button variant="ghost" type="button" onClick={() => {setOpen(false), setFormData({
+                name: "",
+                rollNo: "",
+                classId: "",
+                section: "",
+                parentEmail: "",
+                password: "",
+                dob: "",
+                gender: "",
+                bloodGroup: "",
+                address: ""
+                })}}
+                >Cancel</Button>
                         <Button type="submit" disabled={loading}>
                             {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{student ? "Updating..." : "Creating..."}</>
                                 : student ? "Update Student" : "Create Student"}

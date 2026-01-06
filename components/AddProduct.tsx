@@ -35,6 +35,7 @@ type Product = {
 }
 
 type Props = {
+    setProducts?: any
     selectedSchool?: any
     selectedClass?: any
     product?: Product          // 👈 optional
@@ -49,6 +50,7 @@ export default function AddEditProductDialog({
     product,
     onSuccess,
     trigger,
+    setProducts
 }: Props) {
     const { toast } = useToast()
     const isEdit = !!product
@@ -110,6 +112,18 @@ export default function AddEditProductDialog({
         }
     }
 
+    const sanitizePositiveNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value
+
+  if (value === "") return
+
+  const num = Number(value)
+
+  if (isNaN(num) || num < 1) {
+    e.target.value = "1"
+  }
+}
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild={true}>
@@ -163,6 +177,8 @@ export default function AddEditProductDialog({
                             <Input
                                 name="stock"
                                 type="number"
+                                min={1}
+                                onChange={sanitizePositiveNumber}
                                 defaultValue={product?.stock}
                                 required
                             />
@@ -197,6 +213,8 @@ export default function AddEditProductDialog({
                             <Input
                                 name="price"
                                 type="number"
+                                min={0}
+                                onChange={sanitizePositiveNumber}
                                 defaultValue={product?.price}
                                 required
                             />
@@ -235,7 +253,7 @@ export default function AddEditProductDialog({
                     </div>
 
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                        <Button type="button" variant="outline" onClick={() => {setOpen(false), setProducts && setProducts([]), setImagePreview(null)}}>
                             Cancel
                         </Button>
                         <Button type="submit" disabled={loading}>

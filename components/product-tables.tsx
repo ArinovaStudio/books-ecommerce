@@ -218,6 +218,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                     <AddEditProductDialog
                         product={product}
                         onSuccess={fetchProducts}
+                        setProducts={setProducts}
                         trigger={
                             <Button size="icon" variant="ghost" className="h-8 w-8">
                                 <Pencil className="w-4 h-4" />
@@ -233,11 +234,15 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
         <Card className="border-none shadow-none bg-transparent">
             <CardHeader className="flex flex-row justify-between items-center px-0">
                 <CardTitle className="text-2xl font-bold">Included Items</CardTitle>
-                {isAdmin && <AddEditProductDialog onSuccess={fetchProducts} />}
+                {isAdmin && <AddEditProductDialog onSuccess={fetchProducts} setProducts={setProducts} />}
             </CardHeader>
 
             <CardContent className="px-0">
                 <div className="flex justify-end mb-6">
+                   {/* {categoryProducts} */}
+
+                    {
+                        products.length > 0 && (
                     <button
                         type="button"
                         onClick={handleNextClick}
@@ -245,11 +250,14 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                     >
                         Next
                     </button>
+                        )
+                    }
                 </div>
 
                 {loading ? (
                     <div className="text-center py-12 text-muted-foreground">Loading...</div>
                 ) : (
+                    products.length > 0 ? (
                     <div className="space-y-8">
                         {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
                             <div key={category}>
@@ -262,7 +270,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                                         <span className="col-span-1 text-center">Product</span>
                                         <span className="col-span-3">Name</span>
                                         <span className="col-span-2 text-center">Brand</span>
-                                        <span className="col-span-1 text-center">Stock</span>
+                                        <span className="col-span-1 text-center">Minimum Buy</span>
                                         <span className="col-span-2 text-center">Description</span>
                                         <span className="col-span-2 text-center md:text-right">Price</span>
                                         {isAdmin && <span className="col-span-1 text-right">Actions</span>}
@@ -273,6 +281,10 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                             </div>
                         ))}
                     </div>
+                    ) : (
+                    <div className="text-center py-12 text-muted-foreground">NO Products Found</div>
+                    )
+
                 )}
 
                 {/* Auth Modal */}

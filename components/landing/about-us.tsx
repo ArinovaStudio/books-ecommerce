@@ -12,14 +12,14 @@ const team = [
         role: "Founder & CEO",
         description:
             "Former education consultant with 15 years of experience in the Indian education sector.",
-        image: "/team/rajesh.jpg",
+        image: "/avatar2.jpg",
     },
     {
         name: "Mary Prathyusha",
         role: "Relationship Manager",
         description:
             "Building relationships with schools across India to expand our network.",
-        image: "/team/amit.jpg",
+        image: "/avatar1.jpg",
     },
 ];
 
