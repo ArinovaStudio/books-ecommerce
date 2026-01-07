@@ -277,14 +277,20 @@ export function GuardianForm() {
           "Content-Type": "application/json", // ✅ REQUIRED
         },
         body: JSON.stringify({
-          userId: user?.id,
+          // userId: user?.id,
           studentId: user?.children[0].id,
-          school: school?.name,
-          class: className,
-          totalAmount: grandTotal,
-          section: section,
-          academicYear: academicYear,
-          status: "PENDING",
+          paymentMethod: "Cash",
+          items: products.map((product) => ({
+            productId: product.id,
+            quantity: product.stock
+          }))
+
+          // school: school?.name,
+          // class: className,
+          // totalAmount: grandTotal,
+          // section: section,
+          // academicYear: academicYear,
+          // status: "PENDING",
         }),
       });
 
