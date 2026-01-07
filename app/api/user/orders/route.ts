@@ -51,6 +51,10 @@ export const POST = Wrapper(async (req: NextRequest) => {
         return NextResponse.json({ success: false, message: "This student does not belong to you" }, { status: 403 });
     }
 
+    if (student.isActive === false) {
+        return NextResponse.json({ success: false, message: "This student is inactive" }, { status: 403 });
+    }
+
     const productIds = items.map(i => i.productId);
     const dbProducts = await prisma.product.findMany({ where: { id: { in: productIds } }});
 
