@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils"
 import { useAdmin } from "@/app/context/admin"
 import { AdminTab } from "@/app/types/admin"
 import { useToast } from "@/hooks/use-toast"
+import { useRouter, usePathname } from "next/navigation"
+import Link from "next/link"
 
 type Role = "ADMIN" | "SUB_ADMIN"
 
@@ -22,19 +24,29 @@ const navItems: {
   label: string
   icon: any
   roles: Role[]
+  href: string
 }[] = [
-    { id: "analytics", label: "Analytics", icon: BarChart3, roles: ["ADMIN"] },
-    { id: "users", label: "Users", icon: Users, roles: ["ADMIN", "SUB_ADMIN"] },
-    { id: "schools", label: "Schools", icon: GraduationCap, roles: ["ADMIN"] },
-    // { id: "bundels", label: "Bundels", icon: Book, roles: ["ADMIN", "SUB_ADMIN"] },
-    { id: "orders", label: "Orders", icon: ClipboardList, roles: ["ADMIN", "SUB_ADMIN"] },
-    // { id: "products", label: "Products", icon: SquareChartGantt, roles: ["ADMIN", "SUB_ADMIN"] },
+    { id: "analytics", label: "Analytics", icon: BarChart3, roles: ["ADMIN"], href: "/admin/analytics" },
+    { id: "users", label: "Users", icon: Users, roles: ["ADMIN", "SUB_ADMIN"], href: "/admin/users" },
+    { id: "schools", label: "Schools", icon: GraduationCap, roles: ["ADMIN"], href: "/admin/schools" },
+    { id: "orders", label: "Orders", icon: ClipboardList, roles: ["ADMIN", "SUB_ADMIN"], href: "/admin/orders" },
   ]
+
+const getNavItems = (role: Role) => {
+  const baseItems = navItems.filter(item => item.roles.includes(role))
+  
+  if (role === "SUB_ADMIN") {
+    return baseItems.map(item => ({
+      ...item,
+      href: item.href.replace('/admin/', '/subadmin/')
+    }))
+  }
+  
+  return baseItems
+}
 
 export function AdminSidebar() {
   const {
-    activeTab,
-    setActiveTab,
     sidebarOpen,
     setSidebarOpen,
     role,
@@ -42,12 +54,12 @@ export function AdminSidebar() {
   } = useAdmin()
 
   const { toast } = useToast()
+  const router = useRouter()
+  const pathname = usePathname()
 
   if (loading || !role) return null
 
-  const visibleNavItems = navItems.filter((item) =>
-    item.roles.includes(role)
-  )
+  const visibleNavItems = getNavItems(role)
 
   const handleLogout = async () => {
     try {
@@ -57,13 +69,13 @@ export function AdminSidebar() {
           title: "Success",
           description: "Logged Out successfully",
         })
-        // console.log("Logout successful");
         window.location.href = "/signin";
       }
     } catch (error) {
       console.error("Logout failed", error);
     }
   };
+  
   return (
     <>
       <aside
@@ -94,15 +106,13 @@ export function AdminSidebar() {
           <nav className="flex-1 space-y-1 p-4">
             {visibleNavItems.map((item) => {
               const Icon = item.icon
-              const isActive = activeTab === item.id
+              const isActive = pathname === item.href
 
               return (
-                <button
+                <Link
                   key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id)
-                    setSidebarOpen(false)
-                  }}
+                  href={item.href}
+                  onClick={() => setSidebarOpen(false)}
                   className={cn(
                     "flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all",
                     isActive
@@ -112,7 +122,7 @@ export function AdminSidebar() {
                 >
                   <Icon className="h-5 w-5" />
                   {item.label}
-                </button>
+                </Link>
               )
             })}
           </nav>

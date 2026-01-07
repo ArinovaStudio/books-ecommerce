@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { AdminTab } from "@/app/types/admin"
 
 type Role = "ADMIN" | "SUB_ADMIN"
 
@@ -14,8 +13,6 @@ type User = {
 }
 
 interface AdminContextType {
-  activeTab: AdminTab
-  setActiveTab: (tab: AdminTab) => void
   sidebarOpen: boolean
   setSidebarOpen: (open: boolean) => void
   role: Role
@@ -27,7 +24,6 @@ interface AdminContextType {
 const AdminContext = createContext<AdminContextType | null>(null)
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
-  const [activeTab, setActiveTab] = useState<AdminTab>("analytics")
   const [user, setUser] = useState<User | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [role, setRole] = useState<Role | null>(null)
@@ -41,7 +37,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         const res = await fetch("/api/auth/me")
 
         if (!res.ok) {
-          // throw new Error("Not authenticated")
           router.push("/")
           return
         }
@@ -55,8 +50,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         setUser(data.user)
         setSchoolId(data.user?.school?.id || "");
         setRole(data.user.role)
-
-        setActiveTab(data.user.role === "SUB_ADMIN" ? "users" : "analytics")
       } catch (error) {
         console.error("Auth check failed", error)
         setUser(null)
@@ -76,8 +69,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   return (
     <AdminContext.Provider
       value={{
-        activeTab,
-        setActiveTab,
         sidebarOpen,
         setSidebarOpen,
         role: role!,
