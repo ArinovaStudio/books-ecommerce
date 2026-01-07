@@ -34,6 +34,8 @@ interface StudentType {
     classId: string
     section: string
     parentEmail: string
+    parentName: string
+    firstLanguage: string
     password?: string
     dob?: string
     gender?: string
@@ -78,6 +80,8 @@ export default function AddUserDialog({
         classId: classId || "",
         section: sectionId || "",
         parentEmail: "",
+        parentName: "",
+        firstLanguage: "",
         password: "",
         dob: "",
         gender: "",
@@ -94,6 +98,8 @@ export default function AddUserDialog({
                 classId: student.classId || classId || "",
                 section: student.section || sectionId || "",
                 parentEmail: student.parentEmail || "",
+                parentName: student.parentName || "",
+                firstLanguage: student.firstLanguage || "",
                 password: student.password || "",
                 dob: student.dob || "",
                 gender: student.gender || "",
@@ -171,6 +177,8 @@ export default function AddUserDialog({
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.parentEmail)) {
             newErrors.parentEmail = "Invalid email format"
         }
+        if (!formData.parentName.trim()) newErrors.parentName = "Parent Name is required"
+        if (!formData.firstLanguage.trim()) newErrors.firstLanguage = "First Language is required"
         if (parentExists === false && !formData.password?.trim()) {
             newErrors.password = "Password is required"
         }
@@ -205,6 +213,8 @@ export default function AddUserDialog({
                 classId: "",
                 section: "",
                 parentEmail: "",
+                parentName: "",
+                firstLanguage: "",
                 password: "",
                 dob: "",
                 gender: "",
@@ -231,7 +241,7 @@ export default function AddUserDialog({
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{student ? "Edit Student" : "Add Student"}</DialogTitle>
                     <DialogDescription>
@@ -239,113 +249,224 @@ export default function AddUserDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4 py-2">
+                <form onSubmit={handleSubmit} className="space-y-6 py-4">
                     {/* Name & Roll No */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <Label>Student Name *</Label>
-                            <Input name="name" value={formData.name} onChange={handleChange} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="name" className="text-sm font-medium">Student Name *</Label>
+                            <Input 
+                                id="name"
+                                name="name" 
+                                value={formData.name} 
+                                onChange={handleChange}
+                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                placeholder="Enter student name"
+                            />
+                            {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                         </div>
-                        <div>
-                            <Label>Roll Number *</Label>
-                            <Input type="number" name="rollNo" value={formData.rollNo} min={0} onChange={handleChange} />
+                        <div className="space-y-2">
+                            <Label htmlFor="rollNo" className="text-sm font-medium">Roll Number *</Label>
+                            <Input 
+                                id="rollNo"
+                                type="number" 
+                                name="rollNo" 
+                                value={formData.rollNo} 
+                                min={0} 
+                                onChange={handleChange}
+                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                placeholder="Enter roll number"
+                            />
+                            {errors.rollNo && <p className="text-sm text-red-500">{errors.rollNo}</p>}
                         </div>
                     </div>
 
                     {/* Class & Section */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <Label>Class *</Label>
-                            <Input name="classId" value={classItem?.name} disabled />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="classId" className="text-sm font-medium">Class *</Label>
+                            <Input 
+                                id="classId"
+                                name="classId" 
+                                value={classItem?.name} 
+                                disabled 
+                                className="border-2 border-gray-200 bg-gray-50"
+                            />
                         </div>
-                        <div>
-                            <Label>Section *</Label>
-                            <Input name="section" value={formData.section} disabled />
+                        <div className="space-y-2">
+                            <Label htmlFor="section" className="text-sm font-medium">Section *</Label>
+                            <Input 
+                                id="section"
+                                name="section" 
+                                value={formData.section} 
+                                disabled 
+                                className="border-2 border-gray-200 bg-gray-50"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Parent Name & First Language */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="parentName" className="text-sm font-medium">Parent Name *</Label>
+                            <Input 
+                                id="parentName"
+                                name="parentName" 
+                                value={formData.parentName} 
+                                onChange={handleChange}
+                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                placeholder="Enter parent name"
+                            />
+                            {errors.parentName && <p className="text-sm text-red-500">{errors.parentName}</p>}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="firstLanguage" className="text-sm font-medium">First Language *</Label>
+                            <Select value={formData.firstLanguage} onValueChange={(value) => handleSelectChange("firstLanguage", value)}>
+                                <SelectTrigger className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+                                    <SelectValue placeholder="Select first language" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="english">English</SelectItem>
+                                    <SelectItem value="hindi">Hindi</SelectItem>
+                                    <SelectItem value="tamil">Tamil</SelectItem>
+                                    <SelectItem value="telugu">Telugu</SelectItem>
+                                    <SelectItem value="kannada">Kannada</SelectItem>
+                                    <SelectItem value="malayalam">Malayalam</SelectItem>
+                                    <SelectItem value="bengali">Bengali</SelectItem>
+                                    <SelectItem value="gujarati">Gujarati</SelectItem>
+                                    <SelectItem value="marathi">Marathi</SelectItem>
+                                    <SelectItem value="punjabi">Punjabi</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {errors.firstLanguage && <p className="text-sm text-red-500">{errors.firstLanguage}</p>}
                         </div>
                     </div>
 
                     {/* Parent Email */}
-                    <div>
-                        <Label>Parent Email *</Label>
-                        <Input
-                            name="parentEmail"
-                            type="email"
-                            value={formData.parentEmail}
-                            onChange={handleChange}
-                            onBlur={checkParentEmail}
-                        />
+                    <div className="space-y-2">
+                        <Label htmlFor="parentEmail" className="text-sm font-medium">Parent Email *</Label>
+                        <div className="flex gap-2">
+                            <Input 
+                                id="parentEmail"
+                                name="parentEmail" 
+                                type="email" 
+                                value={formData.parentEmail} 
+                                onChange={handleChange}
+                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 flex-1"
+                                placeholder="Enter parent email"
+                            />
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={checkParentEmail}
+                                disabled={checkPasswordLoading || !formData.parentEmail}
+                                className="border-2 border-gray-200"
+                            >
+                                {checkPasswordLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Check"}
+                            </Button>
+                        </div>
+                        {errors.parentEmail && <p className="text-sm text-red-500">{errors.parentEmail}</p>}
+                        {parentExists === true && (
+                            <p className="text-sm text-green-600">✓ Parent account exists</p>
+                        )}
+                        {parentExists === false && (
+                            <p className="text-sm text-orange-600">⚠ Parent account doesn't exist. Password will be required.</p>
+                        )}
                     </div>
 
-                    {/* Password – conditional */}
-                    {parentExists === false && !student && (
-                        <div>
-                            <Label>Password *</Label>
+                    {/* Password (only if parent doesn't exist) */}
+                    {parentExists === false && (
+                        <div className="space-y-2">
+                            <Label htmlFor="password" className="text-sm font-medium">Password *</Label>
                             <div className="flex gap-2">
-                                <Input
-                                    name="password"
-                                    type="text"
-                                    value={formData.password}
+                                <Input 
+                                    id="password"
+                                    name="password" 
+                                    type="text" 
+                                    value={formData.password} 
                                     onChange={handleChange}
+                                    className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 flex-1"
+                                    placeholder="Enter password"
                                 />
-                                <Button
-                                    type="button"
-                                    onClick={() => {
-                                        if (!formData.password) generatePassword()
-                                        else copyPassword()
-                                    }}
-                                >
-                                    {formData.password ? "Copy" : "Generate"}
+                                <Button type="button" variant="outline" onClick={generatePassword} className="border-2 border-gray-200">
+                                    Generate
+                                </Button>
+                                <Button type="button" variant="outline" onClick={copyPassword} disabled={!formData.password} className="border-2 border-gray-200">
+                                    Copy
                                 </Button>
                             </div>
+                            {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
                         </div>
                     )}
 
-                    {/* DOB, Gender, Blood Group */}
-                    <div className="grid grid-cols-3 gap-4">
-                        <div>
-                            <Label>Date of Birth</Label>
-                            <Input name="dob" type="date" value={formData.dob} onChange={handleChange} />
+                    {/* Optional Fields */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="dob" className="text-sm font-medium">Date of Birth</Label>
+                            <Input 
+                                id="dob"
+                                name="dob" 
+                                type="date" 
+                                value={formData.dob} 
+                                onChange={handleChange}
+                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                            />
                         </div>
-                        <div>
-                            <Label>Gender</Label>
-                            <Select value={formData.gender} onValueChange={v => handleSelectChange("gender", v)}>
-                                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                        <div className="space-y-2">
+                            <Label htmlFor="gender" className="text-sm font-medium">Gender</Label>
+                            <Select value={formData.gender} onValueChange={(value) => handleSelectChange("gender", value)}>
+                                <SelectTrigger className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+                                    <SelectValue placeholder="Select gender" />
+                                </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Male">Male</SelectItem>
-                                    <SelectItem value="Female">Female</SelectItem>
-                                    <SelectItem value="Other">Other</SelectItem>
+                                    <SelectItem value="male">Male</SelectItem>
+                                    <SelectItem value="female">Female</SelectItem>
+                                    <SelectItem value="other">Other</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div>
-                            <Label>Blood Group</Label>
-                            <Input name="bloodGroup" value={formData.bloodGroup} onChange={handleChange} placeholder="A+, O-, etc" />
+                        <div className="space-y-2">
+                            <Label htmlFor="bloodGroup" className="text-sm font-medium">Blood Group</Label>
+                            <Select value={formData.bloodGroup} onValueChange={(value) => handleSelectChange("bloodGroup", value)}>
+                                <SelectTrigger className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+                                    <SelectValue placeholder="Select blood group" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="A+">A+</SelectItem>
+                                    <SelectItem value="A-">A-</SelectItem>
+                                    <SelectItem value="B+">B+</SelectItem>
+                                    <SelectItem value="B-">B-</SelectItem>
+                                    <SelectItem value="AB+">AB+</SelectItem>
+                                    <SelectItem value="AB-">AB-</SelectItem>
+                                    <SelectItem value="O+">O+</SelectItem>
+                                    <SelectItem value="O-">O-</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
 
                     {/* Address */}
-                    <div>
-                        <Label>Address</Label>
-                        <Input name="address" value={formData.address} onChange={handleChange} />
+                    <div className="space-y-2">
+                        <Label htmlFor="address" className="text-sm font-medium">Address</Label>
+                        <Input 
+                            id="address"
+                            name="address" 
+                            value={formData.address} 
+                            onChange={handleChange}
+                            className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                            placeholder="Enter address"
+                        />
                     </div>
 
-                    <DialogFooter className="pt-4">
-                        <Button variant="ghost" type="button" onClick={() => {setOpen(false), setFormData({
-                name: "",
-                rollNo: "",
-                classId: "",
-                section: "",
-                parentEmail: "",
-                password: "",
-                dob: "",
-                gender: "",
-                bloodGroup: "",
-                address: ""
-                })}}
-                >Cancel</Button>
-                        <Button type="submit" disabled={loading}>
-                            {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{student ? "Updating..." : "Creating..."}</>
-                                : student ? "Update Student" : "Create Student"}
+                    <DialogFooter className="pt-6">
+                        <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-2 border-gray-200">
+                            Cancel
+                        </Button>
+                        <Button type="submit" disabled={loading} className="min-w-[120px]">
+                            {loading ? (
+                                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {student ? "Updating..." : "Adding..."}</>
+                            ) : (
+                                student ? "Update Student" : "Add Student"
+                            )}
                         </Button>
                     </DialogFooter>
                 </form>
