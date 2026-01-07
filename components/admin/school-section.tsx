@@ -13,6 +13,14 @@ import {
     DialogTrigger,
     DialogFooter,
 } from "../ui/dialog"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "../ui/select"
+import { Label } from "../ui/label"
 
 import { useToast } from "../ui/use-toast"
 
@@ -51,6 +59,7 @@ export default function SchoolSection({
     const [loading, setLoading] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [newSection, setNewSection] = useState("")
+    const [firstLanguage, setFirstLanguage] = useState("")
 
 
     /* ================= FETCH SECTIONS ================= */
@@ -92,7 +101,7 @@ export default function SchoolSection({
     /* ================= ADD SECTION ================= */
 
     const handleAddSection = async () => {
-        if (!newSection.trim()) return
+        if (!newSection.trim() || !firstLanguage) return
 
         setLoading(true)
         try {
@@ -101,7 +110,10 @@ export default function SchoolSection({
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ section: newSection.toUpperCase() }),
+                    body: JSON.stringify({ 
+                        section: newSection.toUpperCase(),
+                        firstLanguage 
+                    }),
                 }
             )
 
@@ -116,6 +128,7 @@ export default function SchoolSection({
             setLoading(false)
             setIsDialogOpen(false)
             setNewSection("")
+            setFirstLanguage("")
         }
     }
 
@@ -177,26 +190,64 @@ export default function SchoolSection({
                         </Button>
                     </DialogTrigger>
 
-                    <DialogContent>
+                    <DialogContent className="sm:max-w-[400px]">
                         <DialogHeader>
                             <DialogTitle>Add New Section</DialogTitle>
                         </DialogHeader>
 
-                        <Input
-                            placeholder="e.g. A, B, C"
-                            value={newSection}
-                            onChange={(e) => setNewSection(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && handleAddSection()}
-                        />
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="section">Section Name *</Label>
+                                <Input
+                                    id="section"
+                                    placeholder="e.g. A, B, C"
+                                    value={newSection}
+                                    onChange={(e) => setNewSection(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleAddSection()}
+                                    className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                />
+                            </div>
+                            
+                            <div className="space-y-2">
+                                <Label htmlFor="firstLanguage">First Language *</Label>
+                                <Select value={firstLanguage} onValueChange={setFirstLanguage}>
+                                    <SelectTrigger className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+                                        <SelectValue placeholder="Select first language" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="english">English</SelectItem>
+                                        <SelectItem value="hindi">Hindi</SelectItem>
+                                        <SelectItem value="tamil">Tamil</SelectItem>
+                                        <SelectItem value="telugu">Telugu</SelectItem>
+                                        <SelectItem value="kannada">Kannada</SelectItem>
+                                        <SelectItem value="malayalam">Malayalam</SelectItem>
+                                        <SelectItem value="bengali">Bengali</SelectItem>
+                                        <SelectItem value="gujarati">Gujarati</SelectItem>
+                                        <SelectItem value="marathi">Marathi</SelectItem>
+                                        <SelectItem value="punjabi">Punjabi</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
 
                         <DialogFooter>
                             <Button
                                 variant="outline"
-                                onClick={() => setIsDialogOpen(false)}
+                                onClick={() => {
+                                    setIsDialogOpen(false)
+                                    setNewSection("")
+                                    setFirstLanguage("")
+                                }}
+                                className="border-2 border-gray-200"
                             >
                                 Cancel
                             </Button>
-                            <Button onClick={handleAddSection}>Add</Button>
+                            <Button 
+                                onClick={handleAddSection}
+                                disabled={!newSection.trim() || !firstLanguage}
+                            >
+                                Add Section
+                            </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>

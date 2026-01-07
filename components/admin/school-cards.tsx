@@ -138,6 +138,9 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {schools.map((school) => (
                         <Card
+                            onClick={() =>
+                                onSelectSchool(school)
+                            }
                             key={school.id}
                             className="relative cursor-pointer hover:shadow-md transition-shadow"
                         >
@@ -146,9 +149,7 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
 
                                     <div
                                         className="flex gap-3 cursor-pointer"
-                                        onClick={() =>
-                                            onSelectSchool(school)
-                                        }
+
                                     >
                                         {school.image ? (
                                             <img
