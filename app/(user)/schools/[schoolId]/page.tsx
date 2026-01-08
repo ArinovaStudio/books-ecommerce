@@ -52,12 +52,36 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
   const [classes, setClasses] = useState<Class[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
 
   const { schoolId } = React.use(params)
   const router = useRouter()
 
   useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/check')
+        const data = await response.json()
+        
+        if (!data.authenticated) {
+          router.push('/signin')
+          return
+        }
+        
+        setIsAuthenticated(true)
+      } catch (error) {
+        console.error('Auth check failed:', error)
+        router.push('/signin')
+      }
+    }
+
+    checkAuth()
+  }, [])
+
+  useEffect(() => {
     const fetchSchoolData = async () => {
+      if (!isAuthenticated) return
+      
       setLoading(true)
       try {
         // Fetch school details
@@ -86,10 +110,22 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
       }
     }
 
-    if (schoolId) {
+    if (schoolId && isAuthenticated) {
       fetchSchoolData()
     }
-  }, [schoolId])
+  }, [schoolId, isAuthenticated])
+
+  // Auth loading state
+  if (isAuthenticated === null) {
+    return (
+      <section className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
+      </section>
+    )
+  }
 
   // Loading state
   if (loading) {

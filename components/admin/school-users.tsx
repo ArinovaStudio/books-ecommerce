@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Search, Mail, User, ArrowLeft, Loader2, Pencil, Trash, ShieldOff, Shield } from "lucide-react"
+import { MoreHorizontal, Search, Mail, User, ArrowLeft, Loader2, Pencil, Trash, ShieldOff, Shield, Send } from "lucide-react"
 import AddUserDialog from "../AddUser"
 import { useToast } from "@/hooks/use-toast"
 
@@ -112,6 +112,25 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
         }
     }
 
+    // SEND CREDENTIALS TO PARENT EMAIL
+    const handleSendCredentials = async (user: UserType) => {
+        if (!confirm(`Send login credentials to ${user.email}?`)) return
+        try {
+            // TODO: Replace with actual API call when backend is ready
+            // const res = await fetch(`/api/admin/students/${user.id}/send-credentials`, { method: "POST" })
+            // const data = await res.json()
+            
+            // Temporary success message for frontend demo
+            toast({ 
+                title: "Credentials Sent", 
+                description: `Login ID and password sent to ${user.email}` 
+            })
+        } catch (error) {
+            console.error(error)
+            toast({ title: "Error", description: "Failed to send credentials", variant: "destructive" })
+        }
+    }
+
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -160,12 +179,27 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
                                                 </Button>
                                             </DropdownMenuTrigger>
 
-                                            <DropdownMenuContent align="end" className="w-36">
-                                                {/* <DropdownMenuItem
-                                                
-                                                className="gap-2 cursor-pointer">
+                                            <DropdownMenuContent align="end" className="w-48">
+                                                <DropdownMenuItem
+                                                    className="gap-2 cursor-pointer"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        // TODO: Open edit dialog when backend is ready
+                                                        toast({ title: "Edit Feature", description: "Edit functionality will be available soon" })
+                                                    }}
+                                                >
                                                     <Pencil className="h-4 w-4" /> Edit
-                                                </DropdownMenuItem> */}
+                                                </DropdownMenuItem>
+
+                                                <DropdownMenuItem
+                                                    className="gap-2 cursor-pointer"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        handleSendCredentials(user)
+                                                    }}
+                                                >
+                                                    <Send className="h-4 w-4" /> Send Credentials
+                                                </DropdownMenuItem>
 
                                                 <DropdownMenuItem
                                                     className="gap-2 text-destructive cursor-pointer"

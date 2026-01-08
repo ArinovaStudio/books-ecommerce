@@ -40,7 +40,8 @@ interface StudentType {
     dob?: string
     gender?: string
     bloodGroup?: string
-    address?: string
+    landmark?: string
+    pincode?: string
 }
 
 type ClassType = {
@@ -86,7 +87,8 @@ export default function AddUserDialog({
         dob: "",
         gender: "",
         bloodGroup: "",
-        address: ""
+        landmark: "",
+        pincode: ""
     })
 
     // Prefill form when editing
@@ -104,7 +106,8 @@ export default function AddUserDialog({
                 dob: student.dob || "",
                 gender: student.gender || "",
                 bloodGroup: student.bloodGroup || "",
-                address: student.address || ""
+                landmark: student.landmark || "",
+                pincode: student.pincode || ""
             })
         } else {
             setFormData(prev => ({
@@ -179,6 +182,8 @@ export default function AddUserDialog({
         }
         if (!formData.parentName.trim()) newErrors.parentName = "Parent Name is required"
         if (!formData.firstLanguage.trim()) newErrors.firstLanguage = "First Language is required"
+        if (!formData.landmark?.trim()) newErrors.landmark = "Landmark is required"
+        if (!formData.pincode?.trim()) newErrors.pincode = "Pincode is required"
         if (parentExists === false && !formData.password?.trim()) {
             newErrors.password = "Password is required"
         }
@@ -219,7 +224,8 @@ export default function AddUserDialog({
                 dob: "",
                 gender: "",
                 bloodGroup: "",
-                address: ""
+                landmark: "",
+                pincode: ""
                 })
                 setOpen(false)
                 student ? onStudentUpdated?.() : onStudentAdded?.()
@@ -444,17 +450,39 @@ export default function AddUserDialog({
                         </div>
                     </div>
 
-                    {/* Address */}
-                    <div className="space-y-2">
-                        <Label htmlFor="address" className="text-sm font-medium">Address</Label>
-                        <Input 
-                            id="address"
-                            name="address" 
-                            value={formData.address} 
-                            onChange={handleChange}
-                            className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                            placeholder="Enter address"
-                        />
+                    {/* Landmark & Pincode */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="landmark" className="text-sm font-medium">Landmark *</Label>
+                            <Input 
+                                id="landmark"
+                                name="landmark" 
+                                value={formData.landmark} 
+                                onChange={handleChange}
+                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                placeholder="Enter landmark"
+                            />
+                            {errors.landmark && <p className="text-sm text-red-500">{errors.landmark}</p>}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="pincode" className="text-sm font-medium">Pincode *</Label>
+                            <Input 
+                                id="pincode"
+                                name="pincode" 
+                                value={formData.pincode} 
+                                onChange={handleChange}
+                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                placeholder="Enter pincode"
+                            />
+                            {errors.pincode && <p className="text-sm text-red-500">{errors.pincode}</p>}
+                        </div>
+                    </div>
+
+                    {/* Address Note */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p className="text-sm text-blue-800">
+                            <span className="font-semibold">NOTE:</span> Your order will be delivered to the address provided above. Please ensure the details are correct.
+                        </p>
                     </div>
 
                     <DialogFooter className="pt-6">
