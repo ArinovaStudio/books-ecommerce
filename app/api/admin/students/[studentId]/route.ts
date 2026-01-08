@@ -220,3 +220,30 @@ export const DELETE = Wrapper(async( req: NextRequest, { params }: { params: Pro
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
 })
+
+export const GET = Wrapper(async (
+  req: NextRequest,
+  { params }: { params: Promise<{ studentId: string }> }
+) => {
+  const auth = await verifyAdmin(req)
+  if (!auth.success) {
+    return NextResponse.json({ success: false }, { status: 403 })
+  }
+
+  const { studentId } = await params
+
+  const student = await prisma.student.findUnique({
+    where: { id: studentId },
+    include: {
+      parent: {
+        select: { name: true, email: true }
+      }
+    }
+  })
+
+  if (!student) {
+    return NextResponse.json({ success: false, message: "Student not found" }, { status: 404 })
+  }
+
+  return NextResponse.json({ success: true, student })
+})

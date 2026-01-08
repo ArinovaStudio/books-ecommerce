@@ -57,6 +57,7 @@ export default function Footer() {
             <ul className="space-y-4 text-sm text-blue-100/80">
               <li><Link href="/policy">Privacy Policy</Link></li>
               <li><Link href="/terms">Terms of Service</Link></li>
+              <li><Link href="/contact">Contact Us</Link></li>
             </ul>
           </div>
 

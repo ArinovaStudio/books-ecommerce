@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Search, Mail, User, ArrowLeft, Loader2, Pencil, Trash, ShieldOff, Shield } from "lucide-react"
+import { MoreHorizontal, Search, Mail, User, ArrowLeft, Loader2, Pencil, Trash, ShieldOff, Shield, Send } from "lucide-react"
 import AddUserDialog from "../AddUser"
 import { useToast } from "@/hooks/use-toast"
+import EditStudentDialog from "./EditStudentDialog"
 
 type UserType = {
     id: string
@@ -37,7 +38,8 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
     const { toast } = useToast()
-
+    const [editingStudent, setEditingStudent] = useState<any | null>(null)
+    const [studentData, setStudentData] = useState<any | null>(null)
     const classId = classItem?.id
 
     const fetchUsers = async () => {
@@ -112,6 +114,58 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
         }
     }
 
+    // FETCH FULL STUDENT DATA FOR EDITING
+    const fetchStudentData = async (studentId: string) => {
+        try {
+            const res = await fetch(`/api/admin/students/${studentId}`)
+            const data = await res.json()
+            if (data.success) {
+                setStudentData(data.student)
+                setEditingStudent(data.student)
+            } else {
+                toast({ title: "Error", description: "Failed to fetch student data", variant: "destructive" })
+            }
+        } catch (error) {
+            console.error(error)
+            toast({ title: "Error", description: "Failed to fetch student data", variant: "destructive" })
+        }
+    }
+    const handleSendCredentials = async (user: UserType) => {
+        if (!confirm(`Send login credentials to ${user.email}?`)) return
+        try {
+            // TODO: Replace with actual API call when backend is ready
+            // const res = await fetch(`/api/admin/students/${user.id}/send-credentials`, { method: "POST" })
+            // const data = await res.json()
+
+            // Temporary success message for frontend demo
+            toast({
+                title: "Credentials Sent",
+                description: `Login ID and password sent to ${user.email}`
+            })
+        } catch (error) {
+            console.error(error)
+            toast({ title: "Error", description: "Failed to send credentials", variant: "destructive" })
+        }
+    }
+
+    
+    const handleEdit = async (studentId: string) => {
+        try {
+            const res = await fetch(`/api/admin/students/${studentId}`)
+            const data = await res.json()
+
+            if (!data.success) throw new Error("Failed to load student")
+
+            setEditingStudent(data.student) // ✅ FULL STUDENT
+        } catch (err) {
+            toast({
+                title: "Error",
+                description: "Failed to load student details",
+                variant: "destructive"
+            })
+        }
+    }
+
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -160,12 +214,33 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
                                                 </Button>
                                             </DropdownMenuTrigger>
 
-                                            <DropdownMenuContent align="end" className="w-36">
-                                                {/* <DropdownMenuItem
-                                                
-                                                className="gap-2 cursor-pointer">
+                                            <DropdownMenuContent align="end" className="w-48">
+                                                <DropdownMenuItem
+                                                    onClick={() => handleEdit(user.id)}
+                                                    className="gap-2 cursor-pointer"
+                                                >
                                                     <Pencil className="h-4 w-4" /> Edit
-                                                </DropdownMenuItem> */}
+                                                </DropdownMenuItem>
+
+                                                {editingStudent && (
+                                                    <EditStudentDialog
+                                                        open={!!editingStudent}
+                                                        student={editingStudent}
+                                                        classId={classItem.id}
+                                                        onClose={() => setEditingStudent(null)}
+                                                        onUpdated={fetchUsers}
+                                                    />
+                                                )}
+
+                                                <DropdownMenuItem
+                                                    className="gap-2 cursor-pointer"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        handleSendCredentials(user)
+                                                    }}
+                                                >
+                                                    <Send className="h-4 w-4" /> Send Credentials
+                                                </DropdownMenuItem>
 
                                                 <DropdownMenuItem
                                                     className="gap-2 text-destructive cursor-pointer"
@@ -184,8 +259,8 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
                                                         handleDeactivate(user.id, user.status === "Active" ? true : false)
                                                     }}
                                                 >
-                                                    {user.status === "Active" 
-                                                    ? <><ShieldOff className="h-4 w-4 text-red-400" /> Deactivate</> : <><Shield className="h-4 w-4 text-blue-400" /> Activate</>}
+                                                    {user.status === "Active"
+                                                        ? <><ShieldOff className="h-4 w-4 text-red-400" /> Deactivate</> : <><Shield className="h-4 w-4 text-blue-400" /> Activate</>}
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>

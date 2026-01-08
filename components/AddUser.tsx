@@ -40,7 +40,8 @@ interface StudentType {
     dob?: string
     gender?: string
     bloodGroup?: string
-    address?: string
+    landmark?: string
+    pincode?: string
 }
 
 type ClassType = {
@@ -86,7 +87,8 @@ export default function AddUserDialog({
         dob: "",
         gender: "",
         bloodGroup: "",
-        address: ""
+        landmark: "",
+        pincode: ""
     })
 
     // Prefill form when editing
@@ -104,7 +106,8 @@ export default function AddUserDialog({
                 dob: student.dob || "",
                 gender: student.gender || "",
                 bloodGroup: student.bloodGroup || "",
-                address: student.address || ""
+                landmark: student.landmark || "",
+                pincode: student.pincode || ""
             })
         } else {
             setFormData(prev => ({
@@ -126,26 +129,26 @@ export default function AddUserDialog({
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const { name, value, type } = e.target
+        const { name, value, type } = e.target
 
-  let finalValue = value
+        let finalValue = value
 
-  if (type === "number") {
-    // allow empty input while typing
-    if (value === "") {
-      finalValue = ""
-    } else {
-      const num = Number(value)
-      finalValue = isNaN(num) || num < 0 ? "0" : value
+        if (type === "number") {
+            // allow empty input while typing
+            if (value === "") {
+                finalValue = ""
+            } else {
+                const num = Number(value)
+                finalValue = isNaN(num) || num < 0 ? "0" : value
+            }
+        }
+
+        setFormData(prev => ({ ...prev, [name]: finalValue }))
+
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: "" }))
+        }
     }
-  }
-
-  setFormData(prev => ({ ...prev, [name]: finalValue }))
-
-  if (errors[name]) {
-    setErrors(prev => ({ ...prev, [name]: "" }))
-  }
-}
 
 
     const handleSelectChange = (name: string, value: string) => {
@@ -179,6 +182,8 @@ export default function AddUserDialog({
         }
         if (!formData.parentName.trim()) newErrors.parentName = "Parent Name is required"
         if (!formData.firstLanguage.trim()) newErrors.firstLanguage = "First Language is required"
+        if (!formData.landmark?.trim()) newErrors.landmark = "Landmark is required"
+        if (!formData.pincode?.trim()) newErrors.pincode = "Pincode is required"
         if (parentExists === false && !formData.password?.trim()) {
             newErrors.password = "Password is required"
         }
@@ -192,45 +197,69 @@ export default function AddUserDialog({
         if (!validateForm()) return
 
         setLoading(true)
-        try {
-            const method = student ? "PATCH" : "POST"
-            const url = student
-                ? `/api/admin/students/${student.id}`
-                : `/api/admin/students?classId=${classId}&section=${sectionId}`
 
-            const res = await fetch(url, {
-                method,
+        try {
+            // 🔥 Convert section name → sectionId
+            const resolvedSectionId = await getSectionIdByName(
+                classId!,
+                formData.section
+            )
+
+            const payload = {
+                ...formData,
+                classId,
+                sectionId: resolvedSectionId, // ✅ UUID
+            }
+
+            delete (payload as any).section // optional cleanup
+
+            const res = await fetch("/api/admin/students", {
+                method: student ? "PATCH" : "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(payload),
             })
+
             const data = await res.json()
 
             if (data.success) {
-                toast({ title: "Success", description: student ? "Student updated successfully" : "Student created successfully" })
-                setFormData({
-                name: "",
-                rollNo: "",
-                classId: "",
-                section: "",
-                parentEmail: "",
-                parentName: "",
-                firstLanguage: "",
-                password: "",
-                dob: "",
-                gender: "",
-                bloodGroup: "",
-                address: ""
+                toast({
+                    title: "Success",
+                    description: student
+                        ? "Student updated successfully"
+                        : "Student created successfully",
                 })
+
                 setOpen(false)
                 student ? onStudentUpdated?.() : onStudentAdded?.()
             } else {
-                toast({ title: "Error", description: data.message || "Something went wrong", variant: "destructive" })
+                toast({
+                    title: "Error",
+                    description: data.message || "Something went wrong",
+                    variant: "destructive",
+                })
             }
-        } catch {
-            toast({ title: "Error", description: "Something went wrong", variant: "destructive" })
+        } catch (err: any) {
+            toast({
+                title: "Error",
+                description: err.message || "Failed to create student",
+                variant: "destructive",
+            })
         } finally {
             setLoading(false)
         }
+    }
+
+
+    const getSectionIdByName = async (classId: string, sectionName: string) => {
+        const res = await fetch(
+            `/api/admin/sections?classId=${classId}&name=${sectionName}`
+        )
+        const data = await res.json()
+        if (!data.success || !data.section) {
+            throw new Error("Section not found")
+        }
+
+        return data.section.id
     }
 
     return (
@@ -253,27 +282,27 @@ export default function AddUserDialog({
                     {/* Name & Roll No */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="name" className="text-sm font-medium">Student Name *</Label>
-                            <Input 
+                            <Label htmlFor="name" className="text-sm font-medium text-foreground">Student Name *</Label>
+                            <Input
                                 id="name"
-                                name="name" 
-                                value={formData.name} 
+                                name="name"
+                                value={formData.name}
                                 onChange={handleChange}
-                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                className="text-foreground"
                                 placeholder="Enter student name"
                             />
                             {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="rollNo" className="text-sm font-medium">Roll Number *</Label>
-                            <Input 
+                            <Label htmlFor="rollNo" className="text-sm font-medium text-foreground">Roll Number *</Label>
+                            <Input
                                 id="rollNo"
-                                type="number" 
-                                name="rollNo" 
-                                value={formData.rollNo} 
-                                min={0} 
+                                type="number"
+                                name="rollNo"
+                                value={formData.rollNo}
+                                min={0}
                                 onChange={handleChange}
-                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                className="text-foreground"
                                 placeholder="Enter roll number"
                             />
                             {errors.rollNo && <p className="text-sm text-red-500">{errors.rollNo}</p>}
@@ -283,23 +312,23 @@ export default function AddUserDialog({
                     {/* Class & Section */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="classId" className="text-sm font-medium">Class *</Label>
-                            <Input 
+                            <Label htmlFor="classId" className="text-sm font-medium text-foreground">Class *</Label>
+                            <Input
                                 id="classId"
-                                name="classId" 
-                                value={classItem?.name} 
-                                disabled 
-                                className="border-2 border-gray-200 bg-gray-50"
+                                name="classId"
+                                value={classItem?.name}
+                                disabled
+                                className="text-foreground"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="section" className="text-sm font-medium">Section *</Label>
-                            <Input 
+                            <Label htmlFor="section" className="text-sm font-medium text-foreground">Section *</Label>
+                            <Input
                                 id="section"
-                                name="section" 
-                                value={formData.section} 
-                                disabled 
-                                className="border-2 border-gray-200 bg-gray-50"
+                                name="section"
+                                value={formData.section}
+                                disabled
+                                className="text-foreground"
                             />
                         </div>
                     </div>
@@ -307,36 +336,27 @@ export default function AddUserDialog({
                     {/* Parent Name & First Language */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="parentName" className="text-sm font-medium">Parent Name *</Label>
-                            <Input 
+                            <Label htmlFor="parentName" className="text-sm font-medium text-foreground">Parent Name *</Label>
+                            <Input
                                 id="parentName"
-                                name="parentName" 
-                                value={formData.parentName} 
+                                name="parentName"
+                                value={formData.parentName}
                                 onChange={handleChange}
-                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                className="text-foreground"
                                 placeholder="Enter parent name"
                             />
                             {errors.parentName && <p className="text-sm text-red-500">{errors.parentName}</p>}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="firstLanguage" className="text-sm font-medium">First Language *</Label>
-                            <Select value={formData.firstLanguage} onValueChange={(value) => handleSelectChange("firstLanguage", value)}>
-                                <SelectTrigger className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
-                                    <SelectValue placeholder="Select first language" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="english">English</SelectItem>
-                                    <SelectItem value="hindi">Hindi</SelectItem>
-                                    <SelectItem value="tamil">Tamil</SelectItem>
-                                    <SelectItem value="telugu">Telugu</SelectItem>
-                                    <SelectItem value="kannada">Kannada</SelectItem>
-                                    <SelectItem value="malayalam">Malayalam</SelectItem>
-                                    <SelectItem value="bengali">Bengali</SelectItem>
-                                    <SelectItem value="gujarati">Gujarati</SelectItem>
-                                    <SelectItem value="marathi">Marathi</SelectItem>
-                                    <SelectItem value="punjabi">Punjabi</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <Label htmlFor="firstLanguage" className="text-sm font-medium text-foreground">First Language *</Label>
+                            <Input
+                                id="firstLanguage"
+                                name="firstLanguage"
+                                value={formData.firstLanguage}
+                                onChange={handleChange}
+                                className="text-foreground"
+                                placeholder="Enter first language"
+                            />
                             {errors.firstLanguage && <p className="text-sm text-red-500">{errors.firstLanguage}</p>}
                         </div>
                     </div>
@@ -345,18 +365,18 @@ export default function AddUserDialog({
                     <div className="space-y-2">
                         <Label htmlFor="parentEmail" className="text-sm font-medium">Parent Email *</Label>
                         <div className="flex gap-2">
-                            <Input 
+                            <Input
                                 id="parentEmail"
-                                name="parentEmail" 
-                                type="email" 
-                                value={formData.parentEmail} 
+                                name="parentEmail"
+                                type="email"
+                                value={formData.parentEmail}
                                 onChange={handleChange}
                                 className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 flex-1"
                                 placeholder="Enter parent email"
                             />
-                            <Button 
-                                type="button" 
-                                variant="outline" 
+                            <Button
+                                type="button"
+                                variant="outline"
                                 onClick={checkParentEmail}
                                 disabled={checkPasswordLoading || !formData.parentEmail}
                                 className="border-2 border-gray-200"
@@ -378,11 +398,11 @@ export default function AddUserDialog({
                         <div className="space-y-2">
                             <Label htmlFor="password" className="text-sm font-medium">Password *</Label>
                             <div className="flex gap-2">
-                                <Input 
+                                <Input
                                     id="password"
-                                    name="password" 
-                                    type="text" 
-                                    value={formData.password} 
+                                    name="password"
+                                    type="text"
+                                    value={formData.password}
                                     onChange={handleChange}
                                     className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 flex-1"
                                     placeholder="Enter password"
@@ -402,11 +422,11 @@ export default function AddUserDialog({
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="dob" className="text-sm font-medium">Date of Birth</Label>
-                            <Input 
+                            <Input
                                 id="dob"
-                                name="dob" 
-                                type="date" 
-                                value={formData.dob} 
+                                name="dob"
+                                type="date"
+                                value={formData.dob}
                                 onChange={handleChange}
                                 className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                             />
@@ -444,17 +464,39 @@ export default function AddUserDialog({
                         </div>
                     </div>
 
-                    {/* Address */}
-                    <div className="space-y-2">
-                        <Label htmlFor="address" className="text-sm font-medium">Address</Label>
-                        <Input 
-                            id="address"
-                            name="address" 
-                            value={formData.address} 
-                            onChange={handleChange}
-                            className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                            placeholder="Enter address"
-                        />
+                    {/* Landmark & Pincode */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="landmark" className="text-sm font-medium">Landmark *</Label>
+                            <Input
+                                id="landmark"
+                                name="landmark"
+                                value={formData.landmark}
+                                onChange={handleChange}
+                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                placeholder="Enter landmark"
+                            />
+                            {errors.landmark && <p className="text-sm text-red-500">{errors.landmark}</p>}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="pincode" className="text-sm font-medium">Pincode *</Label>
+                            <Input
+                                id="pincode"
+                                name="pincode"
+                                value={formData.pincode}
+                                onChange={handleChange}
+                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                placeholder="Enter pincode"
+                            />
+                            {errors.pincode && <p className="text-sm text-red-500">{errors.pincode}</p>}
+                        </div>
+                    </div>
+
+                    {/* Address Note */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p className="text-sm text-blue-800">
+                            <span className="font-semibold">NOTE:</span> Your order will be delivered to the address provided above. Please ensure the details are correct.
+                        </p>
                     </div>
 
                     <DialogFooter className="pt-6">
