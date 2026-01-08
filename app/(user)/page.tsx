@@ -13,6 +13,7 @@ import Learning from "@/components/landing/learning-path"
 import Cta from "@/components/landing/cta"
 import Testimonial from "@/components/landing/testimonial"
 import Event from "@/components/landing/event"
+import Advartisement from "@/components/landing/advertisement"
 
 export default function Home() {
   useEffect(() => {
@@ -25,6 +26,7 @@ export default function Home() {
   return (
     <main>
       <Hero />
+      <Advartisement />
       {/* <AboutUs/> */}
       <PartnerSchools />
       <Courses/>

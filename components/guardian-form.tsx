@@ -358,7 +358,7 @@ export function GuardianForm() {
             <form onSubmit={sendOrder} className="space-y-4 sm:space-y-5">
               {/* Parent / Guardian Name */}
               <div className="space-y-2">
-                <Label htmlFor="guardianName" className="text-sm sm:text-base font-medium">
+                <Label htmlFor="guardianName" className="text-sm font-medium">
                   Parent / Guardian Name <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
@@ -371,7 +371,7 @@ export function GuardianForm() {
                     value={formData.guardianName || ""}
                     onChange={(e) => handleInputChange("guardianName", e.target.value)}
                     className={cn(
-                      "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base text-black disabled:text-black",
+                      "pl-10 sm:pl-11 h-11 sm:h-12 text-sm border-0 bg-transparent",
                       errors.guardianName && "border-destructive focus-visible:ring-destructive",
                     )}
                   />
@@ -393,7 +393,7 @@ export function GuardianForm() {
                     value={formData.guardianPhone || ""}
                     onChange={(e) => handleInputChange("guardianPhone", e.target.value.replace(/\D/g, "").slice(0, 10))}
                     className={cn(
-                      "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base text-black disabled:text-black",
+                      "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base border-0 bg-transparent",
                       errors.guardianPhone && "border-destructive focus-visible:ring-destructive",
                     )}
                     maxLength={10}
@@ -417,7 +417,7 @@ export function GuardianForm() {
                       value={formData.guardianEmail || ""}
                       onChange={(e) => handleInputChange("guardianEmail", e.target.value)}
                       className={cn(
-                        "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base text-black disabled:text-black",
+                        "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base border-0 bg-transparent",
                         errors.guardianEmail && "border-destructive focus-visible:ring-destructive",
                       )}
                       disabled
@@ -495,7 +495,7 @@ export function GuardianForm() {
                     value={formData.address || ""}
                     onChange={(e) => handleInputChange("address", e.target.value)}
                     className={cn(
-                      "pl-10 sm:pl-11 pt-3 min-h-[100px] sm:min-h-[120px] resize-none text-sm sm:text-base",
+                      "pl-10 sm:pl-11 pt-3 min-h-[100px] sm:min-h-[120px] resize-none text-sm sm:text-base border-0 bg-transparent",
                       errors.address && "border-destructive focus-visible:ring-destructive",
                     )}
                     rows={4}
@@ -527,7 +527,7 @@ export function GuardianForm() {
                     {items.map((product) => (
                       <div
                         key={product.id}
-                        className="flex justify-between text-sm text-black pl-3"
+                        className="flex justify-between text-sm pl-3"
                       >
                         <span>
                           {product.name} × {product.stock}

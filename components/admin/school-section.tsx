@@ -210,23 +210,13 @@ export default function SchoolSection({
                             
                             <div className="space-y-2">
                                 <Label htmlFor="firstLanguage">First Language *</Label>
-                                <Select value={firstLanguage} onValueChange={setFirstLanguage}>
-                                    <SelectTrigger className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
-                                        <SelectValue placeholder="Select first language" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="english">English</SelectItem>
-                                        <SelectItem value="hindi">Hindi</SelectItem>
-                                        <SelectItem value="tamil">Tamil</SelectItem>
-                                        <SelectItem value="telugu">Telugu</SelectItem>
-                                        <SelectItem value="kannada">Kannada</SelectItem>
-                                        <SelectItem value="malayalam">Malayalam</SelectItem>
-                                        <SelectItem value="bengali">Bengali</SelectItem>
-                                        <SelectItem value="gujarati">Gujarati</SelectItem>
-                                        <SelectItem value="marathi">Marathi</SelectItem>
-                                        <SelectItem value="punjabi">Punjabi</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <Input
+                                    id="firstLanguage"
+                                    placeholder="Enter first language"
+                                    value={firstLanguage}
+                                    onChange={(e) => setFirstLanguage(e.target.value)}
+                                    className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                />
                             </div>
                         </div>
 

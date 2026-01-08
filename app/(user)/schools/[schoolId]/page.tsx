@@ -22,6 +22,10 @@ type Class = {
   academicYear: string
 }
 
+type SectionData = {
+  [classId: string]: string[]
+}
+
 type ClassItem = { name: string }
 
 const CLASS_ORDER = [
@@ -50,12 +54,49 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
   const [expandedClassId, setExpandedClassId] = useState<string | null>(null)
   const [school, setSchool] = useState<School | null>(null)
   const [classes, setClasses] = useState<Class[]>([])
+  const [sectionsData, setSectionsData] = useState<SectionData>({})
+  const [loadingSections, setLoadingSections] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
 
   const { schoolId } = React.use(params)
   const router = useRouter()
+
+  // Fetch sections for a specific class
+  const fetchSections = async (classId: string) => {
+    if (sectionsData[classId]) return
+    
+    setLoadingSections(classId)
+    try {
+      const response = await fetch(`/api/admin/classes/${classId}/sections`)
+      const data = await response.json()
+      
+      if (data.success) {
+        setSectionsData(prev => ({
+          ...prev,
+          [classId]: data.sections || ['A']
+        }))
+      }
+    } catch (error) {
+      console.error('Error fetching sections:', error)
+      setSectionsData(prev => ({
+        ...prev,
+        [classId]: ['A']
+      }))
+    } finally {
+      setLoadingSections(null)
+    }
+  }
+
+  const handleClassExpand = (classId: string) => {
+    const isCurrentlyOpen = expandedClassId === classId
+    setExpandedClassId(isCurrentlyOpen ? null : classId)
+    
+    if (!isCurrentlyOpen) {
+      fetchSections(classId)
+    }
+  }
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -212,7 +253,7 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
           <div className="mb-6 sm:mb-8">
             <h2 className="text-xl sm:text-2xl font-bold text-blue-950 mb-2">Select Class</h2>
             <p className="text-sm sm:text-base text-gray-600">
-              Choose a class to view available language options
+              Choose a class to view available sections
               {school.classRange && (
                 <span className="ml-2 text-blue-600 font-medium">({school.classRange})</span>
               )}
@@ -228,7 +269,7 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
               {classes.map((classData) => {
                 const isOpen = expandedClassId === classData.id
-                const availableLanguages = school.languages || ['English']
+                const availableSections = sectionsData[classData.id] || ['A']
 
                 return (
                   <div
@@ -247,7 +288,7 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
                       `}
                     >
                       <button
-                        onClick={() => setExpandedClassId(isOpen ? null : classData.id)}
+                        onClick={() => handleClassExpand(classData.id)}
                         className="w-full p-4 sm:p-5 flex items-center justify-between gap-2 group cursor-pointer"
                       >
                         <div className="flex-1 text-center">
@@ -272,23 +313,28 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
                       >
                         <div className="border-t border-gray-100 px-3 sm:px-4 py-3 bg-linear-to-b from-gray-50 to-white">
                           <p className="text-xs font-medium text-gray-500 mb-2 text-center">
-                            Select Language
+                            {loadingSections === classData.id ? 'Loading sections...' : 'Select Section'}
                           </p>
 
-                          {/* Scrollable container */}
                           <div className="flex flex-col gap-2 max-h-40 overflow-y-auto pb-3 no-scrollbar">
-                            {availableLanguages.map((lang) => (
-                              <Link
-                                key={lang}
-                                href={`/schools/${schoolId}/${classData.id}?language=${lang.toLowerCase()}`}
-                                className="border border-blue-200 rounded-lg py-2.5 px-3 text-sm font-medium 
+                            {loadingSections === classData.id ? (
+                              <div className="text-center py-2">
+                                <div className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-r-transparent"></div>
+                              </div>
+                            ) : (
+                              availableSections.map((section) => (
+                                <Link
+                                  key={section}
+                                  href={`/schools/${schoolId}/${classData.id}?section=${section}`}
+                                  className="border border-blue-200 rounded-lg py-2.5 px-3 text-sm font-medium 
           text-blue-900 text-center bg-white
           hover:bg-blue-50 hover:border-blue-400 hover:shadow-sm
           transition-all duration-200 active:scale-95"
-                              >
-                                {lang}
-                              </Link>
-                            ))}
+                                >
+                                  Section {section}
+                                </Link>
+                              ))
+                            )}
                           </div>
                         </div>
                       </div>
