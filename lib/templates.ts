@@ -21,7 +21,72 @@ export const studentAddedTemplate = (studentName: string, parentName: string, em
                 <p>Dear ${parentName},</p>
                 <p><strong>${studentName}</strong> has been successfully added to our school database.</p>
                 ${accountDetails}
-                <p>You can now login to view details, pay fees, and track progress.</p>
+                <p>You can now login to view details.</p>
+            </div>
+        `
+    };
+};
+
+export const schoolAdminCreatedTemplate = (name: string, email: string, password: string) => ({
+    subject: "School Admin Account Created - Glow Nest",
+    html: `
+        <div style="font-family: sans-serif; padding: 20px;">
+            <h2>Welcome to Glow Nest</h2>
+            <p>Dear ${name},</p>
+            <p>Your school has been registered successfully. Here are your login credentials:</p>
+            <ul>
+                <li><strong>Email:</strong> ${email}</li>
+                <li><strong>Password:</strong> ${password}</li>
+            </ul>
+            <p>Please login and change your password immediately.</p>
+        </div>
+    `
+});
+
+
+export const orderReceiptTemplate = (
+    userName: string, 
+    orderId: string, 
+    studentName: string, 
+    totalAmount: number, 
+    items: { name: string, quantity: number, price: number }[]
+) => {
+    
+    const itemsList = items.map(item => 
+        `<tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 10px;">${item.name}</td>
+            <td style="padding: 10px; text-align: center;">${item.quantity}</td>
+            <td style="padding: 10px; text-align: right;">₹${item.price}</td>
+        </tr>`
+    ).join('');
+
+    return {
+        subject: `Order Receipt - #${orderId.substring(0, 8).toUpperCase()}`,
+        html: `
+            <div style="font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
+                <h2 style="color: #333;">Order Confirmation</h2>
+                <p>Hi ${userName},</p>
+                <p>Thank you for your order! Here is the receipt for the items purchased for <strong>${studentName}</strong>.</p>
+                
+                <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                    <p style="margin: 0;"><strong>Order ID:</strong> ${orderId}</p>
+                    <p style="margin: 5px 0 0;"><strong>Total Amount:</strong> <span style="color: green; font-size: 1.2em;">₹${totalAmount}</span></p>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background-color: #eee;">
+                            <th style="padding: 10px; text-align: left;">Item</th>
+                            <th style="padding: 10px; text-align: center;">Qty</th>
+                            <th style="padding: 10px; text-align: right;">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsList}
+                    </tbody>
+                </table>
+
+                <p style="margin-top: 30px; font-size: 0.9em; color: #666;">If you have any questions, please contact our support team.</p>
             </div>
         `
     };

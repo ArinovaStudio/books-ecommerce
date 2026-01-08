@@ -41,7 +41,8 @@ export const PUT = Wrapper(async(req: NextRequest, { params }: { params: Promise
     const languagesRaw = formData.get("languages") as string;
     const board = formData.get("board") as string;
     const imageFile = formData.get("image") as File | null;
-    const password = formData.get("password") as string
+    const password = formData.get("password") as string;
+    
     let imageUrl = existingSchool[0].image;
     if (imageFile && imageFile.size > 0) {
       const newImageUrl = await saveImage(imageFile);
@@ -51,6 +52,8 @@ export const PUT = Wrapper(async(req: NextRequest, { params }: { params: Promise
 
     const updatedSchool = await prisma.$transaction(async (tx) => {
         let newNumberOfClasses = existingSchool[0].numberOfClasses;
+        const currentLanguages = languagesRaw ? JSON.parse(languagesRaw) : existingSchool[0].languages;
+        const defaultLanguage = currentLanguages.length > 0 ? currentLanguages[0] : "English";
 
         if (classRange && classRange !== existingSchool[0].classRange) {
             const expectedClasses = getClassNames(classRange);
@@ -69,14 +72,26 @@ export const PUT = Wrapper(async(req: NextRequest, { params }: { params: Promise
             const academicYear = `${currentYear}-${parseInt(currentYear) + 1}`;
 
             if (classesToAdd.length > 0) {
-                await tx.class.createMany({
-                    data: classesToAdd.map(className => ({
-                        name: className,
-                        schoolId: schoolId,
-                        academicYear: academicYear,
-                        sections: ["A"] 
-                    }))
-                });
+                await Promise.all(classesToAdd.map(async (className) => {
+                    // Create Class
+                    const newClass = await tx.class.create({
+                        data: {
+                            name: className,
+                            schoolId: schoolId,
+                            academicYear: academicYear,
+                            sections: ["A"] 
+                        }
+                    });
+
+                    // Create Default Section
+                    await tx.section.create({
+                        data: {
+                            name: "A",
+                            language: defaultLanguage,
+                            classId: newClass.id
+                        }
+                    });
+                }));
             }
 
             if (classesToDelete.length > 0) {

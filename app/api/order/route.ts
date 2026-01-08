@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyUser } from "@/lib/verify";
 import { Wrapper } from "@/lib/api-handler";
+import { orderReceiptTemplate } from "@/lib/templates";
+import sendEmail from "@/lib/email";
 
 const createOrderValidation = z.object({
   studentId: z.string().uuid("Invalid Student ID"),
@@ -23,6 +25,9 @@ export const POST = Wrapper(async (req: NextRequest) => {
     }
 
     const userId = auth.user.id;
+    const userName = auth.user.name;
+    const userEmail = auth.user.email;
+
     const body = await req.json();
     
     const validation = createOrderValidation.safeParse(body);
@@ -61,6 +66,8 @@ export const POST = Wrapper(async (req: NextRequest) => {
     const productMap = new Map(dbProducts.map(p => [p.id, p]));
     const validOrderItems: { productId: string, quantity: number, price: number }[] = [];
 
+    const emailItems: { name: string, quantity: number, price: number }[] = [];
+
     for (const item of items) {
       const product = productMap.get(item.productId);
       
@@ -75,6 +82,12 @@ export const POST = Wrapper(async (req: NextRequest) => {
           productId: item.productId, 
           quantity: item.quantity, 
           price: product.price 
+      });
+
+      emailItems.push({
+          name: product.name,
+          quantity: item.quantity,
+          price: product.price
       });
     }
 
@@ -118,6 +131,9 @@ export const POST = Wrapper(async (req: NextRequest) => {
 
       return order.id;
     });
+
+    const emailData = orderReceiptTemplate(userName, orderId, student.name, totalAmount, emailItems);
+    await sendEmail(userEmail, emailData.subject, emailData.html);
     
     return NextResponse.json({ success: true, message: "Order placed successfully", orderId }, { status: 201 });
 

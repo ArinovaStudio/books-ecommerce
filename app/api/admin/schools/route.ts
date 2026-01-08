@@ -4,6 +4,8 @@ import { saveImage } from '@/lib/upload';
 import prisma from '@/lib/prisma';
 import { Wrapper } from '@/lib/api-handler';
 import bcrypt from "bcryptjs";
+import { schoolAdminCreatedTemplate } from '@/lib/templates';
+import sendEmail from '@/lib/email';
 
 function getClassNames(range: string): string[] {
     const basics = ["Nursery", "PP I", "PP II"];
@@ -61,41 +63,62 @@ export const POST = Wrapper(async (req: NextRequest) => {
         const currentYear = new Date().getFullYear().toString();
         const academicYear = `${currentYear}-${parseInt(currentYear) + 1}`;
 
-        const result = await prisma.$transaction(async (tx) => {
-            
-            const school = await tx.school.create({ 
-                data: { name, email, image: imageUrl, address, classRange, board,
-                    languages: languagesRaw ? JSON.parse(languagesRaw) : [], 
-                    numberOfClasses: classesToCreate.length,
-                    status: "ACTIVE"
-                }
-            });
+        let languages: string[] = [];
+        try {
+            languages = languagesRaw ? JSON.parse(languagesRaw) : [];
+        } catch (e) {
+            languages = [];
+        }
 
-            if (classesToCreate.length > 0) {
-                await tx.class.createMany({
-                    data: classesToCreate.map(className => ({
+        const defaultLanguage = languages.length > 0 ? languages[0] : "English";
+
+            
+        const school = await prisma.school.create({ 
+            data: { name, email, image: imageUrl, address, classRange, board,
+                languages: languagesRaw ? JSON.parse(languagesRaw) : [], 
+                numberOfClasses: classesToCreate.length,
+                status: "ACTIVE"
+            }
+        });
+
+        if (classesToCreate.length > 0) {
+            await Promise.all(classesToCreate.map(async (className) => {
+                // Create Class Record
+                const newClass = await prisma.class.create({
+                    data: {
                         name: className,
                         schoolId: school.id,
                         academicYear: academicYear,
-                        sections: ["A"] 
-                    }))
+                        sections: ["A"]
+                    }
                 });
+
+                // Create Default Section "A"
+                await prisma.section.create({
+                    data: {
+                        name: "A",
+                        language: defaultLanguage,
+                        classId: newClass.id
+                    }
+                });
+            }));
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+        await prisma.user.create({
+            data: {
+                name: `${name} Admin`,
+                email,
+                password: hashedPassword,
+                role: "SUB_ADMIN",
+                schoolId: school.id,
+                status: "ACTIVE"
             }
-
-            const hashedPassword = await bcrypt.hash(password, 12);
-            await tx.user.create({
-                data: {
-                    name: `${name} Admin`,
-                    email,
-                    password: hashedPassword,
-                    role: "SUB_ADMIN",
-                    schoolId: school.id,
-                    status: "ACTIVE"
-                }
-            });
-
-            return school;
         });
+
+
+        const emailData = schoolAdminCreatedTemplate(`${name} Admin`, email, password);
+        await sendEmail(email, emailData.subject, emailData.html);
 
         return NextResponse.json({ success: true, message: "School and Classes created successfully" }, { status: 201 });
 
