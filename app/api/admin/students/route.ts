@@ -1,5 +1,7 @@
 import { Wrapper } from "@/lib/api-handler";
+import sendEmail from "@/lib/email";
 import prisma from "@/lib/prisma";
+import { studentAddedTemplate } from "@/lib/templates";
 import { verifyAdmin } from '@/lib/verify';
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
@@ -67,31 +69,28 @@ export const GET = Wrapper(async (req: NextRequest) => {
 })
 
 const createStudentValidation = z.object({
-    name: z.string().min(1, "Name is required"),
+    name: z.string().min(1, "Student Name is required"),
     rollNo: z.string().min(1, "Roll Number is required"),
-    classId: z.string().min(1, "Invalid Class ID"),
-    section: z.string().min(1, "Section is required"),
+    classId: z.string().uuid("Invalid Class ID"),
+    sectionId: z.string().uuid("Invalid Section ID"),
+    firstLanguage: z.string().min(1, "First Language is required"),
+    
+    parentName: z.string().min(1, "Parent Name is required"),
     parentEmail: z.string().email("Invalid Parent Email"),
-
+    password: z.string().optional(),
     dob: z.string().optional(),
     gender: z.string().optional(),
     bloodGroup: z.string().optional(),
-    address: z.string().optional(),
-    password: z.string().optional(),
+    landmark: z.string().optional(),
+    pincode: z.string().optional(),
 });
 
-// Add new student
 export const POST = Wrapper(async (req: NextRequest) => {
     try {
         const auth = await verifyAdmin(req);
         if (!auth.success) {
             return NextResponse.json({ success: false, message: auth.message || "Admin access required", status: 403 });
         }
-
-        const user = auth.user;
-        // if (user.role !== "SUB_ADMIN" || !user.schoolId) {
-        //     return NextResponse.json({ success: false, message: "Only Sub Admins can add students" }, { status: 403 });
-        // }
 
         const body = await req.json();
         const validation = createStudentValidation.safeParse(body);
@@ -101,57 +100,112 @@ export const POST = Wrapper(async (req: NextRequest) => {
             return NextResponse.json({ success: false, message: "Validation error", errors }, { status: 400 });
         }
 
-        const { name, rollNo, classId, section, parentEmail, dob, gender, bloodGroup, address, password } = validation.data;
+        const { 
+            name, rollNo, classId, sectionId, firstLanguage,
+            parentName, parentEmail, password,
+            dob, gender, bloodGroup, 
+            landmark, pincode 
+        } = validation.data;
 
-        const classExists = await prisma.class.findFirst({ where: { id: classId } });
-        if (!classExists) {
-            return NextResponse.json({ success: false, message: "Invalid Class ID for this school" }, { status: 400 });
+        const section = await prisma.section.findUnique({
+            where: { id: sectionId },
+            include: { class: true }
+        });
+
+        if (!section) {
+            return NextResponse.json({ success: false, message: "Invalid Section ID" }, { status: 404 });
         }
 
-        if (!classExists.sections.includes(section)) {
-            return NextResponse.json({ success: false, message: `Section '${section}' does not exist in Class '${classExists.name}'` }, { status: 400 });
+        if (section.classId !== classId) {
+            return NextResponse.json({ success: false, message: "Selected section does not belong to this class" }, { status: 400 });
         }
 
-        const schoolId = classExists.schoolId;
+        
+        if (section.language.toLowerCase() !== firstLanguage.toLowerCase()) {
+            return NextResponse.json({ 
+                success: false, 
+                message: `Language Mismatch: Section '${section.name}' is for '${section.language}' students, but you selected '${firstLanguage}'.` 
+            }, { status: 400 });
+        }
 
-        const existingStudent = await prisma.student.findFirst({ where: { schoolId, classId, section, rollNo } });
+        const schoolId = section.class.schoolId;
+
+        // Check for Duplicate Student
+        const existingStudent = await prisma.student.findFirst({
+            where: {
+                schoolId,
+                classId,
+                sectionId,
+                rollNo
+            }
+        });
 
         if (existingStudent) {
-            return NextResponse.json({ success: false, message: `Student with Roll No ${rollNo} already exists in ${classExists.name} ${section}` }, { status: 409 });
+            return NextResponse.json({ success: false, message: `Student with Roll No ${rollNo} already exists in this class` }, { status: 409 });
         }
 
+        // Handle Parent (Link or Create)
         const existingParent = await prisma.user.findUnique({ where: { email: parentEmail } });
         let parentId: string;
+        let isNewParent = false;
 
         if (existingParent) {
             parentId = existingParent.id;
         } else {
+            // Validate Password availability for new account
+            if (!password || password.length < 6) {
+                return NextResponse.json({ success: false, message: "Password is required (min 6 chars) for new parent registration" }, { status: 400 });
+            }
+
             const hashedPassword = await bcrypt.hash(password, 12);
 
+            // Create New Parent
             const newParent = await prisma.user.create({
                 data: {
-                    name: `Parent of ${name}`,
+                    name: parentName,
                     email: parentEmail,
                     password: hashedPassword,
                     role: "USER",
                     status: "ACTIVE",
-                    address: address || ""
+                    landmark: landmark || "",
+                    pincode: pincode || "",
+                    schoolId: schoolId 
                 }
             });
             parentId = newParent.id;
+            isNewParent = true;
         }
 
+        // Create Student
         const newStudent = await prisma.student.create({
             data: {
-                name, rollNo, section, parentEmail, schoolId, classId, parentId,
-                dob: dob ? new Date(dob) : null, gender, bloodGroup, address, isActive: false
+                name,
+                rollNo,
+                firstLanguage,
+                schoolId,
+                classId,
+                sectionId, 
+                section: section.name,
+                parentId,
+                parentEmail,
+                dob: dob ? new Date(dob) : null,
+                gender,
+                bloodGroup,
+                landmark,
+                pincode,
+                address: `${landmark}, ${pincode}`,
+                isActive: true 
             }
         });
 
-        return NextResponse.json({ success: true, message: "Student created successfully", student: newStudent }, { status: 201 });
+        // Send Welcome Email
+        const emailData = studentAddedTemplate(name, parentName, parentEmail, isNewParent ? password : undefined);
+        await sendEmail(parentEmail, emailData.subject, emailData.html);
+
+        return NextResponse.json({ success: true, message: "Student added successfully", student: newStudent }, { status: 201 });
 
     } catch (error) {
         console.error("Create Student Error:", error);
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
     }
-})
+});
