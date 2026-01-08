@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { ProductCategory, KitType } from "@prisma/client";
+import { ProductCategory } from "@prisma/client";
 
 export const maxDuration = 300; 
 export const dynamic = 'force-dynamic';
@@ -20,9 +20,8 @@ function getRandomName(type: 'parent' | 'student') {
 
 export async function GET(req: NextRequest) {
     try {
-        // console.log("--- Starting Seeding Process ---");
+        console.log("--- Starting Seeding Process ---");
 
-        // Hash passwords ONCE to save time
         const commonAdminPass = await bcrypt.hash("admin123", 10);
         const commonSchoolPass = await bcrypt.hash("school123", 10);
         const commonUserPass = await bcrypt.hash("user123", 10);
@@ -39,7 +38,9 @@ export async function GET(req: NextRequest) {
                 role: "ADMIN",
                 status: "ACTIVE",
                 phone: "9999999988",
-                address: "Headquarters"
+                address: "Headquarters",
+                landmark: "City Center",
+                pincode: "500001"
             }
         });
 
@@ -63,16 +64,15 @@ export async function GET(req: NextRequest) {
         ];
 
         const createdSchools = [];
+
         for (const [index, s] of schoolsList.entries()) {
-            // console.log(`Processing School ${index + 1}/${schoolsList.length}: ${s.name}`);
-            
-            const cleanName = s.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+            const cleanName = s.name.toLowerCase().replace(/[^a-z0-9]/g, "").substring(0, 15);
             const schoolEmail = `admin.${cleanName}${index}@globe.com`;
 
             let school = await prisma.school.findUnique({ where: { email: schoolEmail } });
 
             if (!school) {
-                // Create School
+                // A. Create School
                 const classesList = getClassNames("upto-10");
                 const currentYear = new Date().getFullYear().toString();
                 const academicYear = `${currentYear}-${parseInt(currentYear) + 1}`;
@@ -82,16 +82,20 @@ export async function GET(req: NextRequest) {
                         name: s.name,
                         email: schoolEmail,
                         address: s.address,
+                        landmark: "Near Main Road", // New Field
+                        pincode: "500001",         // New Field
+                        // Removed phone/whatsapp as they are not in your provided schema
+                        
                         classRange: "upto-10",
                         languages: ["English", "Telugu", "Hindi"],
                         board: s.board,
                         numberOfClasses: classesList.length,
                         status: "ACTIVE",
-                        image: "" 
+                        image: ""
                     }
                 });
 
-                // Create School Sub-Admin
+                // B. Create School Sub-Admin
                 await prisma.user.create({
                     data: {
                         name: `${s.name} Admin`,
@@ -100,63 +104,55 @@ export async function GET(req: NextRequest) {
                         role: "SUB_ADMIN",
                         schoolId: school.id,
                         status: "ACTIVE",
-                        phone: Math.floor(1000000000 + Math.random() * 9000000000).toString()
+                        phone: Math.floor(1000000000 + Math.random() * 9000000000).toString(),
+                        address: s.address,
+                        landmark: "School Campus",
+                        pincode: "500001"
                     }
                 });
 
-                // Create Classes
-                await prisma.class.createMany({
-                    data: classesList.map(name => ({
-                        name,
-                        schoolId: school!.id,
-                        academicYear,
-                        sections: ["A", "B"]
-                    }))
-                });
+                // C. Create Classes & Sections
+                for (const className of classesList) {
+                    const newClass = await prisma.class.create({
+                        data: {
+                            name: className,
+                            schoolId: school.id,
+                            academicYear,
+                            sections: ["A", "B"] // Legacy string array
+                        }
+                    });
 
-                const fetchedClasses = await prisma.class.findMany({ where: { schoolId: school.id } });
-                const firstClassId = fetchedClasses[0].id;
+                    // Create Actual Section Records
+                    const sectionA = await prisma.section.create({
+                        data: { name: "A", language: "English", classId: newClass.id }
+                    });
 
-                // Create Products
-                const productData = [
-                    { name: "Mathematics Textbook", description: "NCERT Math Book", price: 250, category: ProductCategory.TEXTBOOK, stock: 500, brand: "NCERT", type: null, classId: firstClassId },
-                    { name: "Science Textbook", description: "NCERT Science Book", price: 300, category: ProductCategory.TEXTBOOK, stock: 500, brand: "NCERT", type: null, classId: firstClassId },
-                    { name: "Single Line Notebook", description: "140 Pages", price: 50, category: ProductCategory.NOTEBOOK, stock: 1000, brand: "Classmate", type: "Ruled", classId: firstClassId },
-                    { name: "Geometry Box", description: "Standard Set", price: 150, category: ProductCategory.STATIONARY, stock: 300, brand: "Camlin", type: null, classId: firstClassId },
-                    { name: "School Bag", description: "Waterproof", price: 800, category: ProductCategory.OTHER, stock: 100, brand: "Skybags", type: null, classId: firstClassId }
-                ];
+                    const sectionB = await prisma.section.create({
+                        data: { name: "B", language: "Hindi", classId: newClass.id }
+                    });
 
-                const createdProducts = [];
-                for (const p of productData) {
-                    const product = await prisma.product.create({ data: p });
-                    createdProducts.push(product);
-                }
-                const findProd = (namePart: string) => createdProducts.find(p => p.name.includes(namePart))?.id;
+                    // D. Create Products (Linked to Class & School)
+                    const productData = [
+                        { name: "Mathematics Textbook", description: "NCERT Math Book", price: 250, category: ProductCategory.TEXTBOOK, stock: 500, brand: "NCERT", type: null, minQuantity: 1 },
+                        { name: "Science Textbook", description: "NCERT Science Book", price: 300, category: ProductCategory.TEXTBOOK, stock: 500, brand: "NCERT", type: null, minQuantity: 1 },
+                        { name: "Single Line Notebook", description: "140 Pages", price: 50, category: ProductCategory.NOTEBOOK, stock: 1000, brand: "Classmate", type: "Ruled", minQuantity: 6 },
+                        { name: "Geometry Box", description: "Standard Set", price: 150, category: ProductCategory.STATIONARY, stock: 300, brand: "Camlin", type: null, minQuantity: 1 },
+                        { name: "School Bag", description: "Waterproof", price: 800, category: ProductCategory.OTHER, stock: 100, brand: "Skybags", type: null, minQuantity: 1 }
+                    ];
 
-                // Create Kits & Students
-                for (const cls of fetchedClasses) {
-                    // Create Kit
-                    if (findProd("Math") && findProd("Notebook")) {
-                        await prisma.kit.create({
-                            data: {
-                                type: KitType.BASIC,
-                                classId: cls.id,
-                                totalPrice: 500,
-                                language: "English",
-                                items: {
-                                    create: [
-                                        { productId: findProd("Math")!, quantity: 1 },
-                                        { productId: findProd("Notebook")!, quantity: 2 }
-                                    ]
-                                }
-                            }
-                        });
-                    }
+                    await prisma.product.createMany({
+                        data: productData.map(p => ({
+                            ...p,
+                            classId: newClass.id,
+                        }))
+                    });
 
-                    // Create 2 Students per class
-                    const studentPromises = Array.from({ length: 2 }).map(async (_, i) => {
-                        const iVal = i + 1;
-                        const parentEmail = `p${iVal}.${cls.id.substring(0,4)}${index}@test.com`; 
+                    // E. Create Students (One for each section)
+                    const sections = [sectionA, sectionB];
+
+                    for (let i = 0; i < sections.length; i++) {
+                        const currentSection = sections[i];
+                        const parentEmail = `p${i + 1}.${newClass.id.substring(0,4)}${index}@test.com`; 
                         
                         const parent = await prisma.user.create({
                             data: {
@@ -166,30 +162,36 @@ export async function GET(req: NextRequest) {
                                 role: "USER",
                                 status: "ACTIVE",
                                 phone: Math.floor(1000000000 + Math.random() * 9000000000).toString(),
-                                address: "123 Parent St"
+                                address: "123 Parent St",
+                                landmark: "Near Park",
+                                pincode: "500001",
+                                schoolId: school.id
                             }
                         });
 
-                        return prisma.student.create({
+                        await prisma.student.create({
                             data: {
                                 name: getRandomName('student'),
-                                schoolId: school!.id,
-                                classId: cls.id,
+                                schoolId: school.id,
+                                classId: newClass.id,
+                                sectionId: currentSection.id, // Link to Section ID
                                 parentId: parent.id,
                                 rollNo: `R-${Math.floor(Math.random() * 1000)}`,
                                 dob: new Date("2015-01-01"),
-                                gender: iVal % 2 === 0 ? "Male" : "Female",
-                                section: "A",
+                                gender: i % 2 === 0 ? "Male" : "Female",
+                                
+                                section: currentSection.name, // Legacy String
+                                firstLanguage: currentSection.language, // New Field
+                                landmark: "Near Park",
+                                pincode: "500001",
+                                address: "123 Parent St",
+                                
                                 parentEmail: parent.email,
-                                address: "Same as parent",
                                 isActive: true
                             }
                         });
-                    });
-                    await Promise.all(studentPromises);
+                    }
                 }
-            } else {
-                // console.log(`Skipping ${s.name} - Already exists`);
             }
             createdSchools.push(school);
         }

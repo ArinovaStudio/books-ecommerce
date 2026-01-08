@@ -18,12 +18,19 @@ function getCurrentAcademicYear() {
 
 const createClassValidation = z.object({
   name: z.string().min(1, "Class name is required"), 
-  sections: z.array(z.string()).min(1, "At least one section is required"), 
+  
+  sections: z.array(
+    z.object({
+        name: z.string().min(1, "Section Name is required"),
+        language: z.string().min(1, "Language is required")
+    })
+  ).min(1, "At least one section is required"), 
+  
   academicYear: z.string().optional(), 
   schoolId: z.string().uuid().optional() 
 });
 
-export const POST = Wrapper( async (req: NextRequest) => {
+export const POST = Wrapper(async (req: NextRequest) => {
   try {
     const auth = await verifyAdmin(req);
     if (!auth.success) {
@@ -61,21 +68,42 @@ export const POST = Wrapper( async (req: NextRequest) => {
       return NextResponse.json({ success: false, message: "School not found" }, { status: 404 });
     }
 
-    const existingClass = await prisma.class.findFirst({ where: { schoolId: targetSchoolId, name: { equals: name, mode: "insensitive" }, academicYear }  });
+    const existingClass = await prisma.class.findFirst({ 
+        where: { 
+            schoolId: targetSchoolId, 
+            name: { equals: name, mode: "insensitive" }, 
+            academicYear 
+        }  
+    });
 
     if (existingClass) {
-      return NextResponse.json( { success: false, message: `Class '${name}' already exists for session ${academicYear}` }, { status: 409 });
+      return NextResponse.json({ success: false, message: `Class '${name}' already exists for session ${academicYear}` }, { status: 409 });
     }
 
     const newClass = await prisma.$transaction(async (tx) => {
-        const createdClass = await tx.class.create({ data: { name, schoolId: targetSchoolId, sections, academicYear }});
+        const createdClass = await tx.class.create({ 
+            data: { 
+                name, 
+                schoolId: targetSchoolId, 
+                sections: sections.map(s => s.name), 
+                academicYear 
+            }
+        });
+
+        await tx.section.createMany({
+            data: sections.map(s => ({
+                name: s.name,
+                language: s.language,
+                classId: createdClass.id
+            }))
+        });
 
         await tx.school.update({ where: { id: targetSchoolId }, data: { numberOfClasses: { increment: 1 } }});
 
         return createdClass;
     });
 
-    return NextResponse.json( { success: true, message: "Class created successfully", class: newClass }, { status: 201 } );
+    return NextResponse.json({ success: true, message: "Class created successfully", class: newClass }, { status: 201 });
 
   } catch (error) {
     console.error("Create Class Error:", error);

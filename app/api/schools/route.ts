@@ -2,16 +2,17 @@ import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { getFullImageUrl } from "@/lib/upload";
 import { NextRequest, NextResponse } from "next/server";
+import { verifyUser } from "@/lib/verify";
 
 export const GET = Wrapper(async (req: NextRequest) => {
   try {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search");
 
-    let query = {};
-
+    let whereClause: any = {};
+    
     if (search) {
-      query = {
+      whereClause = {
         OR: [
           { name: { contains: search, mode: "insensitive" } },
           { board: { contains: search, mode: "insensitive" } },
@@ -19,10 +20,30 @@ export const GET = Wrapper(async (req: NextRequest) => {
       };
     }
 
-    // const schools = await prisma.school.findMany({ where: query, orderBy: { createdAt: "desc" } });
+    const auth = await verifyUser(req);
+
+    if (auth.success && auth.user) {
+        
+        if (auth.user.role === 'USER') {
+            const students = await prisma.student.findMany({
+                where: {
+                    parentId: auth.user.id,
+                    isActive: true
+                },
+                select: { schoolId: true }
+            });
+
+            const schoolIds = students.map(s => s.schoolId);
+
+            if (schoolIds.length > 0) {
+                whereClause.id = { in: schoolIds };
+            }
+        }
+        
+    }
 
     const schools = await prisma.school.findMany({
-      where: query,
+      where: whereClause,
       orderBy: { createdAt: "desc" },
       include: {
         _count: {
@@ -31,10 +52,12 @@ export const GET = Wrapper(async (req: NextRequest) => {
           },
         },
       },
-    })
-
+    });
 
     if (!schools || schools.length === 0) {
+      if (auth.success && auth.user?.role === 'USER' && Object.keys(whereClause).includes('id')) {
+          return NextResponse.json({ success: true, message: "No schools found linked to your children", schools: [] }, { status: 200 });
+      }
       return NextResponse.json({ success: false, message: "Schools not found" }, { status: 404 });
     }
 
@@ -50,4 +73,4 @@ export const GET = Wrapper(async (req: NextRequest) => {
     console.error("Fetch Schools Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-})
+});

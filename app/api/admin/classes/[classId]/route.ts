@@ -6,7 +6,14 @@ import z from "zod";
 
 const updateClassValidation = z.object({
   name: z.string().optional(),
-  sections: z.array(z.string()).optional(),
+  
+  sections: z.array(
+    z.object({
+        name: z.string().min(1, "Section Name is required"),
+        language: z.string().min(1, "Language is required")
+    })
+  ).optional(),
+  
   academicYear: z.string().optional()
 });
 
@@ -23,7 +30,7 @@ export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promis
         const validation = updateClassValidation.safeParse(body);
         if (!validation.success) {
             const errors = validation.error.errors.map((error) => ({ field: error.path[0], message: error.message }));;
-            return NextResponse.json({ success: false, message: "Vlidation error", errors }, { status: 400 });
+            return NextResponse.json({ success: false, message: "Validation error", errors }, { status: 400 });
         }
 
         const { name, sections, academicYear } = validation.data;
@@ -58,7 +65,55 @@ export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promis
             }
         }
 
-        const updatedClass = await prisma.class.update({ where: { id: classId }, data: { name, sections, academicYear }});
+        const updatedClass = await prisma.$transaction(async (tx) => {
+            
+            const updateData: any = {};
+            if (name) updateData.name = name;
+            if (academicYear) updateData.academicYear = academicYear;
+            
+            if (sections) {
+                updateData.sections = sections.map(s => s.name);
+            }
+
+            // Update the Class Record
+            const updated = await tx.class.update({ 
+                where: { id: classId }, 
+                data: updateData 
+            });
+
+            if (sections && sections.length > 0) {
+                for (const sectionData of sections) {
+                    // Check if section exists by Name in this Class
+                    const existingSection = await tx.section.findFirst({
+                        where: {
+                            classId: classId,
+                            name: { equals: sectionData.name, mode: "insensitive" }
+                        }
+                    });
+
+                    if (existingSection) {
+                        // Update Language if changed
+                        if (existingSection.language !== sectionData.language) {
+                            await tx.section.update({
+                                where: { id: existingSection.id },
+                                data: { language: sectionData.language }
+                            });
+                        }
+                    } else {
+                        // Create New Section
+                        await tx.section.create({
+                            data: {
+                                name: sectionData.name,
+                                language: sectionData.language,
+                                classId: classId
+                            }
+                        });
+                    }
+                }
+            }
+
+            return updated;
+        });
 
         return NextResponse.json( { success: true, message: "Class updated successfully", class: updatedClass }, { status: 200 });
 
@@ -88,7 +143,6 @@ export const DELETE = Wrapper(async (req: NextRequest, { params }: { params: Pro
             return NextResponse.json({ success: false, message: "Class not found" }, { status: 404 });
         }
 
-        // Sub admin check
         if (auth.user.role === "SUB_ADMIN") {
             if (!auth.user.schoolId || auth.user.schoolId !== existingClass.schoolId) {
                 return NextResponse.json({ success: false, message: "You can only edit classes in your own school" }, { status: 403 });
