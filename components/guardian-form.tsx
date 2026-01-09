@@ -201,8 +201,9 @@ export function GuardianForm() {
       const data = await res.json();
       if (data.success) {
         toast.success("Order Placed Successfully");
-        window.alert("Order Placed Successfully")
-        window.location.replace("/")
+        setTimeout(() => {
+          window.location.replace("/")
+        }, 2000)
       } else {
         toast.error(data.message || "Failed to place order")
       }
@@ -268,12 +269,10 @@ export function GuardianForm() {
                     value={formData.guardianName || ""}
                     onChange={(e) => handleInputChange("guardianName", e.target.value)}
                     className={cn(
-                      "pl-10 sm:pl-11 h-11 sm:h-12 border-2 border-gray-200 bg-transparent",
-                      "disabled:text-black disabled:opacity-100 disabled:cursor-not-allowed",
-                      errors.guardianName && "border-destructive focus-visible:ring-destructive"
+                      "pl-10 sm:pl-11 h-11 sm:h-12 text-sm border-0 bg-transparent",
+                      errors.guardianName && "border-destructive focus-visible:ring-destructive",
                     )}
                   />
-
                 </div>
                 {errors.guardianName && <p className="text-sm text-destructive">{errors.guardianName}</p>}
               </div>
@@ -292,7 +291,7 @@ export function GuardianForm() {
                     value={formData.guardianPhone || ""}
                     onChange={(e) => handleInputChange("guardianPhone", e.target.value.replace(/\D/g, "").slice(0, 10))}
                     className={cn(
-                      "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base border-2 border-gray-200 bg-transparent",
+                      "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base border-0 bg-transparent",
                       errors.guardianPhone && "border-destructive focus-visible:ring-destructive",
                     )}
                     maxLength={10}
@@ -315,7 +314,7 @@ export function GuardianForm() {
                       placeholder="Enter guardian's email"
                       value={formData.guardianEmail || ""}
                       onChange={(e) => handleInputChange("guardianEmail", e.target.value)}
-                      className="pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base border-0 bg-transparent disabled:text-black disabled:opacity-100 disabled:cursor-not-allowed"
+                      className="pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base border-0 bg-transparent"
                       disabled
                     />
                   </div>
@@ -421,7 +420,7 @@ export function GuardianForm() {
                   <span>₹{grandTotal}</span>
                 </div>
               </div>
-
+              
               {/* Submit Button */}
               {user?.children?.length > 0 ? (
                 <div className="pt-2 sm:pt-4">
