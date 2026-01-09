@@ -71,6 +71,7 @@ export default function SubAdminUsersPage() {
 
           {selectedClass && !selectedSection && (
             <SchoolSection
+              schoolId={schoolId}
               school={schoolId}
               classes={selectedClass}
               onSelectSection={setSelectedSection}

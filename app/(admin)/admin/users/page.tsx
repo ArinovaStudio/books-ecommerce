@@ -108,6 +108,7 @@ export default function UsersPage() {
 
           {selectedSchool && selectedClass && !selectedSection && (
             <SchoolSection
+              schoolId={selectedSchool.id}
               school={selectedSchool.name}
               classes={selectedClass}
               onSelectSection={setSelectedSection}

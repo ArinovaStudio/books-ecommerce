@@ -13,10 +13,16 @@ import {
     DialogTrigger,
     DialogFooter,
 } from "../ui/dialog"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "../ui/select"
 import { Label } from "../ui/label"
 import { useToast } from "../ui/use-toast"
 
-/* ================= TYPES ================= */
 
 type Section = {
     id: string
@@ -25,43 +31,43 @@ type Section = {
 }
 
 type Props = {
-    school: string
+    schoolId: string
+    school: string 
     classes: { id: string, name: string }
     onSelectSection?: (section: string) => void
     onBack?: () => void
 }
 
-/* ================= HELPERS ================= */
 
 const sortSections = (a: Section, b: Section) => {
     const order = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
     const aIndex = order.indexOf(a.name.toUpperCase())
     const bIndex = order.indexOf(b.name.toUpperCase())
     
-    // Fallback for non-standard names
     if (aIndex === -1 || bIndex === -1) {
         return a.name.localeCompare(b.name)
     }
     return aIndex - bIndex
 }
 
-/* ================= COMPONENT ================= */
 
 export default function SchoolSection({
+    schoolId,
     onSelectSection,
     onBack,
     school,
-    classes,
+    classes
 }: Props) {
     const { toast } = useToast();
-    // State now stores Section objects, not just strings
+    
     const [sections, setSections] = useState<Section[]>([])
+    const [availableLanguages, setAvailableLanguages] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    
     const [newSection, setNewSection] = useState("")
     const [firstLanguage, setFirstLanguage] = useState("")
 
-    /* ================= FETCH SECTIONS ================= */
 
     const fetchSection = async () => {
         setLoading(true)
@@ -72,7 +78,6 @@ export default function SchoolSection({
             const data = await res.json()
 
             if (data.success) {
-                // Ensure data.sections is treated as Section[] and sort it
                 setSections((data.sections as Section[]).sort(sortSections))
             }
         } catch (error) {
@@ -87,11 +92,25 @@ export default function SchoolSection({
         }
     }
 
+    const fetchLanguages = async () => {
+        try {
+            const res = await fetch(`/api/admin/schools/${schoolId}/languages`)
+            const data = await res.json()
+            if (data.success && Array.isArray(data.languages)) {
+                setAvailableLanguages(data.languages)
+            }
+        } catch (error) {
+            console.error("Failed to fetch languages", error)
+        }
+    }
+
     useEffect(() => {
-        fetchSection()
+        if (school && classes.id) {
+            fetchSection()
+            fetchLanguages()
+        }
     }, [school, classes])
 
-    /* ================= ADD SECTION ================= */
 
     const handleAddSection = async () => {
         if (!newSection.trim() || !firstLanguage) return
@@ -103,7 +122,6 @@ export default function SchoolSection({
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    // Payload updated to match new API Schema: { section, language }
                     body: JSON.stringify({ 
                         section: newSection.toUpperCase(),
                         language: firstLanguage 
@@ -138,11 +156,9 @@ export default function SchoolSection({
         }
     }
 
-    /* ================= DELETE SECTION ================= */
-
     const deleteSection = async (
         e: React.MouseEvent,
-        sectionId: string // Now takes ID instead of Name
+        sectionId: string 
     ) => {
         e.stopPropagation()
 
@@ -152,7 +168,6 @@ export default function SchoolSection({
                 {
                     method: "DELETE",
                     headers: { "Content-Type": "application/json" },
-                    // Payload updated to match new API Schema: { sectionId }
                     body: JSON.stringify({ sectionId }),
                 }
             )
@@ -181,7 +196,6 @@ export default function SchoolSection({
         }
     }
 
-    /* ================= UI ================= */
 
     return (
         <div className="space-y-4">
@@ -220,15 +234,30 @@ export default function SchoolSection({
                                 />
                             </div>
                             
+                            {/* Select Dropdown */}
                             <div className="space-y-2">
                                 <Label htmlFor="firstLanguage">First Language *</Label>
-                                <Input
-                                    id="firstLanguage"
-                                    placeholder="Enter first language"
+                                <Select
                                     value={firstLanguage}
-                                    onChange={(e) => setFirstLanguage(e.target.value)}
-                                    className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                                />
+                                    onValueChange={setFirstLanguage}
+                                >
+                                    <SelectTrigger className="w-full border-2 border-gray-200 focus:ring-2 focus:ring-blue-200">
+                                        <SelectValue placeholder="Select language" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableLanguages.length > 0 ? (
+                                            availableLanguages.map((lang) => (
+                                                <SelectItem key={lang} value={lang}>
+                                                    {lang}
+                                                </SelectItem>
+                                            ))
+                                        ) : (
+                                            <div className="p-2 text-sm text-muted-foreground text-center">
+                                                No languages found
+                                            </div>
+                                        )}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
 
@@ -268,16 +297,16 @@ export default function SchoolSection({
                 <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                     {sections.map((sec) => (
                         <Card
-                            key={sec.id} // Use ID as key
+                            key={sec.id} 
                             onClick={
                                 onSelectSection
-                                    ? () => onSelectSection(sec.name) // Pass name for backward compatibility if parent expects string
+                                    ? () => onSelectSection(sec.name) 
                                     : undefined
                             }
                             className="group relative cursor-pointer hover:shadow-md transition-all"
                         >
                             <button
-                                onClick={(e) => deleteSection(e, sec.id)} // Pass ID to delete
+                                onClick={(e) => deleteSection(e, sec.id)} 
                                 className="absolute top-2 right-2 cursor-pointer p-1.5 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                             >
                                 <Trash2 className="h-4 w-4" />
@@ -285,7 +314,6 @@ export default function SchoolSection({
 
                             <CardHeader className="flex flex-col items-center justify-center space-y-1 py-6">
                                 <CardTitle className="text-center text-xl">{sec.name}</CardTitle>
-                                {/* Language displayed beneath section name */}
                                 <span className="text-sm text-muted-foreground font-medium">
                                     {sec.language}
                                 </span>
