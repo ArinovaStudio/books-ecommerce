@@ -61,12 +61,45 @@ const ContactPage = () => {
 
     setLoading(true)
     try {
-      // TODO: Replace with actual API call when backend is ready
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast({ title: 'Success', description: 'Your message has been sent successfully!' })
-      setFormData({ name: '', email: '', phone: '', address: '', message: '' })
-    } catch (error) {
-      toast({ title: 'Error', description: 'Failed to send message. Please try again.', variant: 'destructive' })
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        toast({ 
+          title: 'Success', 
+          description: data.message || 'Your message has been sent successfully!' 
+        })
+        setFormData({ name: '', email: '', phone: '', address: '', message: '' })
+        setErrors({})
+      } else {
+        if (data.errors && Array.isArray(data.errors)) {
+          const apiErrors: FormErrors = {}
+          data.errors.forEach((err: any) => {
+            if (err.field) apiErrors[err.field] = err.message
+          })
+          setErrors(apiErrors)
+          toast({ 
+            title: 'Validation Error', 
+            description: 'Please fix the errors in the form.', 
+            variant: 'destructive' 
+          })
+        } else {
+          throw new Error(data.message || 'Something went wrong')
+        }
+      }
+    } catch (error: any) {
+      toast({ 
+        title: 'Error', 
+        description: error.message || 'Failed to send message. Please try again.', 
+        variant: 'destructive' 
+      })
     } finally {
       setLoading(false)
     }
