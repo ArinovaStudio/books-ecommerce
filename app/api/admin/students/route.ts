@@ -81,8 +81,7 @@ const createStudentValidation = z.object({
     dob: z.string().optional(),
     gender: z.string().optional(),
     bloodGroup: z.string().optional(),
-    landmark: z.string().optional(),
-    pincode: z.string().optional(),
+    address: z.string().optional(),
 });
 
 export const POST = Wrapper(async (req: NextRequest) => {
@@ -104,7 +103,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
             name, rollNo, classId, sectionId, firstLanguage,
             parentName, parentEmail, password,
             dob, gender, bloodGroup, 
-            landmark, pincode 
+            address
         } = validation.data;
 
         const section = await prisma.section.findUnique({
@@ -167,8 +166,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
                     password: hashedPassword,
                     role: "USER",
                     status: "ACTIVE",
-                    landmark: landmark || "",
-                    pincode: pincode || "",
+                    address,
                     schoolId: schoolId 
                 }
             });
@@ -191,9 +189,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
                 dob: dob ? new Date(dob) : null,
                 gender,
                 bloodGroup,
-                landmark,
-                pincode,
-                address: `${landmark}, ${pincode}`,
+                address,
                 isActive: true 
             }
         });

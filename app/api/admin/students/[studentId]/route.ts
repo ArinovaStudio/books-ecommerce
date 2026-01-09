@@ -19,8 +19,7 @@ const updateStudentValidation = z.object({
   dob: z.string().optional(),
   gender: z.string().optional(),
   bloodGroup: z.string().optional(),
-  landmark: z.string().optional(),
-  pincode: z.string().optional(),
+  address: z.string().optional(),
   isActive: z.boolean().optional(),
 });
 
@@ -60,7 +59,7 @@ export const PUT = Wrapper(async( req: NextRequest, { params }: { params: Promis
         name, rollNo, classId, sectionId, firstLanguage, 
         parentEmail, parentName, password, 
         dob, gender, bloodGroup, 
-        landmark, pincode, isActive 
+        address, isActive 
     } = validation.data;
 
     let newSectionName = existingStudent.section;
@@ -140,8 +139,7 @@ export const PUT = Wrapper(async( req: NextRequest, { params }: { params: Promis
                     password: hashedPassword,
                     role: "USER",
                     status: "ACTIVE",
-                    landmark: landmark || "",
-                    pincode: pincode || "",
+                    address,
                     schoolId: existingStudent.schoolId
                 }
             });
@@ -166,9 +164,7 @@ export const PUT = Wrapper(async( req: NextRequest, { params }: { params: Promis
             dob: dob ? new Date(dob) : undefined, 
             gender, 
             bloodGroup, 
-            landmark,
-            pincode,
-            address: (landmark || pincode) ? `${landmark || existingStudent.landmark || ''}, ${pincode || existingStudent.pincode || ''}` : undefined,
+            address,
             isActive 
         }
     });

@@ -3,18 +3,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyUser } from "@/lib/verify";
 import { Wrapper } from "@/lib/api-handler";
-import { orderReceiptTemplate } from "@/lib/templates";
+import { orderReceiptTemplate, newOrderAlertTemplate } from "@/lib/templates"; 
 import sendEmail from "@/lib/email";
 
 const createOrderValidation = z.object({
   studentId: z.string().uuid("Invalid Student ID"),
   paymentMethod: z.string().min(1, "Payment method is required"),
+  
+  phone: z.string().min(10, "Valid phone number is required"),
+  landmark: z.string().min(1, "Landmark is required"),
+  pincode: z.string().min(6, "Valid pincode is required"),
+
   items: z.array(
     z.object({
       productId: z.string().uuid("Invalid Product ID"),
       quantity: z.number().min(1, "Quantity must be at least 1")
     })
-  ).min(1, "Order must contain at least one item")  
+  ).min(1, "Order must contain at least one item") 
 });
 
 export const POST = Wrapper(async (req: NextRequest) => {
@@ -37,13 +42,21 @@ export const POST = Wrapper(async (req: NextRequest) => {
         return NextResponse.json({ success: false, message: "Validation error", errors }, { status: 400 });
     }
 
-    const { studentId, items, paymentMethod } = validation.data;
+    const { studentId, items, paymentMethod, phone, landmark, pincode } = validation.data;
 
+    
     const student = await prisma.student.findUnique({ 
         where: { id: studentId },
         include: { 
             class: true,
-            school: true
+            school: {
+                include: {
+                    subAdmins: {
+                        where: { role: "SUB_ADMIN", status: "ACTIVE" },
+                        select: { email: true, name: true }
+                    }
+                }
+            }
         }
     });
 
@@ -59,13 +72,13 @@ export const POST = Wrapper(async (req: NextRequest) => {
         return NextResponse.json({ success: false, message: "This student is inactive" }, { status: 403 });
     }
 
+    // Validate Products & Calculate Total
     const productIds = items.map(i => i.productId);
     const dbProducts = await prisma.product.findMany({ where: { id: { in: productIds } }});
 
     let totalAmount = 0;
     const productMap = new Map(dbProducts.map(p => [p.id, p]));
     const validOrderItems: { productId: string, quantity: number, price: number }[] = [];
-
     const emailItems: { name: string, quantity: number, price: number }[] = [];
 
     for (const item of items) {
@@ -91,9 +104,9 @@ export const POST = Wrapper(async (req: NextRequest) => {
       });
     }
 
+    // Transaction
     const orderId = await prisma.$transaction(async (tx) => {
       
-      // Create Order
       const order = await tx.order.create({
           data: {
               userId, 
@@ -103,11 +116,13 @@ export const POST = Wrapper(async (req: NextRequest) => {
               section: student.section,
               academicYear: student.class.academicYear,       
               status: "Ordered",
-              totalAmount: totalAmount                
+              totalAmount: totalAmount,
+              phone,
+              landmark,
+              pincode
           }
       });
 
-      // Create Order Items
       if (validOrderItems.length > 0) {
           await tx.orderItem.createMany({
               data: validOrderItems.map(item => ({
@@ -119,7 +134,6 @@ export const POST = Wrapper(async (req: NextRequest) => {
           });
       }
 
-      // Create Payment Record
       await tx.payment.create({
           data: {
               orderId: order.id,
@@ -132,8 +146,16 @@ export const POST = Wrapper(async (req: NextRequest) => {
       return order.id;
     });
 
-    const emailData = orderReceiptTemplate(userName, orderId, student.name, totalAmount, emailItems);
-    await sendEmail(userEmail, emailData.subject, emailData.html);
+    
+    const userEmailData = orderReceiptTemplate(userName, orderId, student.name, totalAmount, emailItems);
+    sendEmail(userEmail, userEmailData.subject, userEmailData.html).catch(err => console.error("User email failed", err));
+
+    if (student.school.subAdmins.length > 0) {
+        student.school.subAdmins.forEach(admin => {
+            const adminEmailData = newOrderAlertTemplate( admin.name, orderId, student.name, `${student.class.name} - ${student.section}`, totalAmount);
+            sendEmail(admin.email, adminEmailData.subject, adminEmailData.html).catch(err => console.error("Admin notification failed", err));
+        });
+    }
     
     return NextResponse.json({ success: true, message: "Order placed successfully", orderId }, { status: 201 });
 

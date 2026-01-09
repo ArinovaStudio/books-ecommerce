@@ -25,8 +25,6 @@ model User {
   name String
   password String
   address String?
-  landmark String?
-  pincode String?
   role UserRole @default(USER)
   status UserStatus @default(ACTIVE)
   schoolId String?
@@ -55,8 +53,6 @@ model School {
   name String
   email String @unique
   address String?
-  landmark String?
-  pincode String?
   languages String[]
   classRange String
   image String
@@ -108,9 +104,7 @@ model Student {
   gender String?
   bloodGroup String?
   address String?
-  firstLanguage String? 
-  landmark String?
-  pincode String?
+  firstLanguage String?
   parentEmail String
   isActive Boolean @default(false) 
 
@@ -208,6 +202,9 @@ model Order {
   class String
   section String
   academicYear String
+  phone String
+  landmark String
+  pincode String
   status String
   totalAmount Float
   createdAt DateTime @default(now())
@@ -237,8 +234,6 @@ model ContactQuery {
   email String
   phone String?
   address String?
-  landmark String?
-  pincode String?
   message String
   createdAt DateTime @default(now())
 }

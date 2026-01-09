@@ -91,3 +91,30 @@ export const orderReceiptTemplate = (
         `
     };
 };
+
+
+export const newOrderAlertTemplate = (
+    adminName: string,
+    orderId: string,
+    studentName: string,
+    className: string,
+    totalAmount: number
+) => ({
+    subject: `New Order Received - #${orderId.substring(0, 8).toUpperCase()}`,
+    html: `
+        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2 style="color: #333;">New Order Alert</h2>
+            <p>Hello ${adminName},</p>
+            <p>A new order has been placed in your school.</p>
+            
+            <div style="background-color: #f0f8ff; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                <p><strong>Student:</strong> ${studentName}</p>
+                <p><strong>Class:</strong> ${className}</p>
+                <p><strong>Order ID:</strong> ${orderId}</p>
+                <p><strong>Total Amount:</strong> ₹${totalAmount}</p>
+            </div>
+
+            <p>Please login to your dashboard to view the full details and manage the order.</p>
+        </div>
+    `
+});
