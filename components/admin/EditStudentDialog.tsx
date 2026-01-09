@@ -28,8 +28,8 @@ type Student = {
     section: string
     parentEmail: string
     parent: {
-      name: string,
-      email: string
+        name: string,
+        email: string
     },
     firstLanguage?: string
     dob?: string
@@ -188,6 +188,7 @@ export default function EditStudentDialog({
                             <Label>Name *</Label>
                             <Input
                                 value={form.name}
+                                className="border-2 border-gray-200 mt-2"
                                 onChange={e => setForm({ ...form, name: e.target.value })}
                                 required
                             />
@@ -197,6 +198,7 @@ export default function EditStudentDialog({
                             <Label>Roll No *</Label>
                             <Input
                                 value={form.rollNo}
+                                className="border-2 border-gray-200 mt-2"
                                 onChange={e => setForm({ ...form, rollNo: e.target.value })}
                                 required
                             />
@@ -206,16 +208,16 @@ export default function EditStudentDialog({
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label>Section</Label>
-                            <Input value={form.section} disabled className="bg-gray-100" />
+                            <Input value={form.section} disabled className="bg-gray-100 mt-2" />
                         </div>
 
                         <div>
                             <Label>First Language</Label>
-                            <Select 
-                                value={form.firstLanguage} 
+                            <Select
+                                value={form.firstLanguage}
                                 onValueChange={(val) => setForm({ ...form, firstLanguage: val })}
                             >
-                                <SelectTrigger>
+                                <SelectTrigger className="border-2 border-gray-200 mt-2">
                                     <SelectValue placeholder="Select language" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -232,6 +234,7 @@ export default function EditStudentDialog({
                             <Label>Parent Name</Label>
                             <Input
                                 value={form.parentName}
+                                className="border-2 border-gray-200 mt-2"
                                 onChange={e => setForm({ ...form, parentName: e.target.value })}
                             />
                         </div>
@@ -242,6 +245,7 @@ export default function EditStudentDialog({
                                 type="email"
                                 value={form.parentEmail}
                                 onChange={e => setForm({ ...form, parentEmail: e.target.value })}
+                                className="border-2 border-gray-200 mt-2"
                                 required
                             />
                         </div>
@@ -253,6 +257,8 @@ export default function EditStudentDialog({
                             <Input
                                 type="date"
                                 value={form.dob}
+                                className="border-2 border-gray-200 mt-2"
+
                                 onChange={e => setForm({ ...form, dob: e.target.value })}
                             />
                         </div>
@@ -260,7 +266,7 @@ export default function EditStudentDialog({
                         <div>
                             <Label>Gender</Label>
                             <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
-                                <SelectTrigger>
+                                <SelectTrigger className="border-2 border-gray-200 mt-2">
                                     <SelectValue placeholder="Select gender" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -276,7 +282,7 @@ export default function EditStudentDialog({
                         <div>
                             <Label>Blood Group</Label>
                             <Select value={form.bloodGroup} onValueChange={(v) => setForm({ ...form, bloodGroup: v })}>
-                                <SelectTrigger>
+                                <SelectTrigger className="border-2 border-gray-200 mt-2">
                                     <SelectValue placeholder="Select blood group" />
                                 </SelectTrigger>
                                 <SelectContent>

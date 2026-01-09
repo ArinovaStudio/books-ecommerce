@@ -39,7 +39,6 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
     const [search, setSearch] = useState("")
     const { toast } = useToast()
     const [editingStudent, setEditingStudent] = useState<any | null>(null)
-    const [studentData, setStudentData] = useState<any | null>(null)
     const classId = classItem?.id
 
     const fetchUsers = async () => {
@@ -115,40 +114,6 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
     }
 
     // FETCH FULL STUDENT DATA FOR EDITING
-    const fetchStudentData = async (studentId: string) => {
-        try {
-            const res = await fetch(`/api/admin/students/${studentId}`)
-            const data = await res.json()
-            if (data.success) {
-                setStudentData(data.student)
-                setEditingStudent(data.student)
-            } else {
-                toast({ title: "Error", description: "Failed to fetch student data", variant: "destructive" })
-            }
-        } catch (error) {
-            console.error(error)
-            toast({ title: "Error", description: "Failed to fetch student data", variant: "destructive" })
-        }
-    }
-    // const handleSendCredentials = async (user: UserType) => {
-    //     if (!confirm(`Send login credentials to ${user.email}?`)) return
-    //     try {
-    //         // TODO: Replace with actual API call when backend is ready
-    //         // const res = await fetch(`/api/admin/students/${user.id}/send-credentials`, { method: "POST" })
-    //         // const data = await res.json()
-
-    //         // Temporary success message for frontend demo
-    //         toast({
-    //             title: "Credentials Sent",
-    //             description: `Login ID and password sent to ${user.email}`
-    //         })
-    //     } catch (error) {
-    //         console.error(error)
-    //         toast({ title: "Error", description: "Failed to send credentials", variant: "destructive" })
-    //     }
-    // }
-
-    
     const handleEdit = async (studentId: string) => {
         try {
             const res = await fetch(`/api/admin/students/${studentId}`)
@@ -222,27 +187,6 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
                                                     <Pencil className="h-4 w-4" /> Edit
                                                 </DropdownMenuItem>
 
-                                                {editingStudent && (
-                                                    <EditStudentDialog
-                                                        open={!!editingStudent}
-                                                        student={editingStudent}
-                                                        classId={classItem.id}
-                                                        schoolId={schoolId}
-                                                        onClose={() => setEditingStudent(null)}
-                                                        onUpdated={fetchUsers}
-                                                    />
-                                                )}
-
-                                                {/* <DropdownMenuItem
-                                                    className="gap-2 cursor-pointer"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        handleSendCredentials(user)
-                                                    }}
-                                                >
-                                                    <Send className="h-4 w-4" /> Send Credentials
-                                                </DropdownMenuItem> */}
-
                                                 <DropdownMenuItem
                                                     className="gap-2 text-destructive cursor-pointer"
                                                     onClick={(e) => {
@@ -297,6 +241,18 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
                         </Card>
                     ))}
                 </div>
+            )}
+
+            {/*  EDIT DIALOG */}
+            {editingStudent && (
+                <EditStudentDialog
+                    open={!!editingStudent}
+                    student={editingStudent}
+                    classId={classItem.id}
+                    schoolId={schoolId}
+                    onClose={() => setEditingStudent(null)}
+                    onUpdated={fetchUsers}
+                />
             )}
         </div>
     )
