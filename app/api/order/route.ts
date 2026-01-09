@@ -5,6 +5,9 @@ import { verifyUser } from "@/lib/verify";
 import { Wrapper } from "@/lib/api-handler";
 import { orderReceiptTemplate, newOrderAlertTemplate } from "@/lib/templates"; 
 import sendEmail from "@/lib/email";
+import { customAlphabet } from "nanoid";
+
+const generateOrderId = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 12);
 
 const createOrderValidation = z.object({
   studentId: z.string().uuid("Invalid Student ID"),
@@ -106,9 +109,12 @@ export const POST = Wrapper(async (req: NextRequest) => {
 
     // Transaction
     const orderId = await prisma.$transaction(async (tx) => {
+
+      const newOrderId = generateOrderId();
       
       const order = await tx.order.create({
           data: {
+              id: newOrderId,
               userId, 
               studentId, 
               school: student.school.name, 
@@ -146,17 +152,38 @@ export const POST = Wrapper(async (req: NextRequest) => {
       return order.id;
     });
 
-    
+    // send mails to parent
     const userEmailData = orderReceiptTemplate(userName, orderId, student.name, totalAmount, emailItems);
     sendEmail(userEmail, userEmailData.subject, userEmailData.html).catch(err => console.error("User email failed", err));
 
+    // send mail to sub admins
     if (student.school.subAdmins.length > 0) {
         student.school.subAdmins.forEach(admin => {
             const adminEmailData = newOrderAlertTemplate( admin.name, orderId, student.name, `${student.class.name} - ${student.section}`, totalAmount);
             sendEmail(admin.email, adminEmailData.subject, adminEmailData.html).catch(err => console.error("Admin notification failed", err));
         });
     }
-    
+
+    // send mail to all admins
+    const systemAdmins = await prisma.user.findMany({
+        where: { role: "ADMIN", status: "ACTIVE" },
+        select: { email: true, name: true }
+    });
+
+    if (systemAdmins.length > 0) {
+        systemAdmins.forEach(admin => {
+            const systemAdminEmailData = newOrderAlertTemplate(
+                admin.name,
+                orderId,
+                student.name,
+                `${student.class.name} - ${student.section} (${student.school.name})`,
+                totalAmount
+            );
+
+            sendEmail(admin.email, systemAdminEmailData.subject, systemAdminEmailData.html).catch(err => console.error("System Admin notification failed", err));
+        });
+    }
+
     return NextResponse.json({ success: true, message: "Order placed successfully", orderId }, { status: 201 });
 
   } catch (error) {

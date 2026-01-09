@@ -195,7 +195,7 @@ model Payment {
 }
 
 model Order {
-  id String @id @default(uuid())
+  id String @id
   userId String
   studentId String
   school String

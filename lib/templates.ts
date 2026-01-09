@@ -61,7 +61,7 @@ export const orderReceiptTemplate = (
     ).join('');
 
     return {
-        subject: `Order Receipt - #${orderId.substring(0, 8).toUpperCase()}`,
+        subject: `Order Receipt - #${orderId.toUpperCase()}`,
         html: `
             <div style="font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
                 <h2 style="color: #333;">Order Confirmation</h2>
@@ -100,7 +100,7 @@ export const newOrderAlertTemplate = (
     className: string,
     totalAmount: number
 ) => ({
-    subject: `New Order Received - #${orderId.substring(0, 8).toUpperCase()}`,
+    subject: `New Order Received - #${orderId.toUpperCase()}`,
     html: `
         <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
             <h2 style="color: #333;">New Order Alert</h2>
