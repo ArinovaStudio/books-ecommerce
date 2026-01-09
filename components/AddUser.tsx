@@ -288,7 +288,7 @@ export default function AddUserDialog({
                                 name="name"
                                 value={formData.name}
                                 onChange={handleChange}
-                                className="text-foreground"
+                                className="text-foreground border-2 border-gray-200 "
                                 placeholder="Enter student name"
                             />
                             {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
@@ -302,7 +302,7 @@ export default function AddUserDialog({
                                 value={formData.rollNo}
                                 min={0}
                                 onChange={handleChange}
-                                className="text-foreground"
+                                className="text-foreground border-2 border-gray-200 "
                                 placeholder="Enter roll number"
                             />
                             {errors.rollNo && <p className="text-sm text-red-500">{errors.rollNo}</p>}
@@ -318,7 +318,7 @@ export default function AddUserDialog({
                                 name="classId"
                                 value={classItem?.name}
                                 disabled
-                                className="text-foreground"
+                                className="text-black border-2 border-gray-200 "
                             />
                         </div>
                         <div className="space-y-2">
@@ -328,7 +328,7 @@ export default function AddUserDialog({
                                 name="section"
                                 value={formData.section}
                                 disabled
-                                className="text-foreground"
+                                className="text-foreground border-2 border-gray-200 "
                             />
                         </div>
                     </div>
@@ -342,7 +342,7 @@ export default function AddUserDialog({
                                 name="parentName"
                                 value={formData.parentName}
                                 onChange={handleChange}
-                                className="text-foreground"
+                                className="text-foreground border-2 border-gray-200 "
                                 placeholder="Enter parent name"
                             />
                             {errors.parentName && <p className="text-sm text-red-500">{errors.parentName}</p>}
@@ -354,7 +354,7 @@ export default function AddUserDialog({
                                 name="firstLanguage"
                                 value={formData.firstLanguage}
                                 onChange={handleChange}
-                                className="text-foreground"
+                                className="text-foreground border-2 border-gray-200 "
                                 placeholder="Enter first language"
                             />
                             {errors.firstLanguage && <p className="text-sm text-red-500">{errors.firstLanguage}</p>}
@@ -371,7 +371,7 @@ export default function AddUserDialog({
                                 type="email"
                                 value={formData.parentEmail}
                                 onChange={handleChange}
-                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 flex-1"
+                                className="border-2 border-gray-200  flex-1"
                                 placeholder="Enter parent email"
                             />
                             <Button
@@ -404,7 +404,7 @@ export default function AddUserDialog({
                                     type="text"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 flex-1"
+                                    className="border-2 border-gray-200  flex-1"
                                     placeholder="Enter password"
                                 />
                                 <Button type="button" variant="outline" onClick={generatePassword} className="border-2 border-gray-200">
@@ -428,13 +428,13 @@ export default function AddUserDialog({
                                 type="date"
                                 value={formData.dob}
                                 onChange={handleChange}
-                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                className="border-2 border-gray-200 "
                             />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="gender" className="text-sm font-medium">Gender</Label>
                             <Select value={formData.gender} onValueChange={(value) => handleSelectChange("gender", value)}>
-                                <SelectTrigger className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+                                <SelectTrigger className="border-2 border-gray-200 ">
                                     <SelectValue placeholder="Select gender" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -447,7 +447,7 @@ export default function AddUserDialog({
                         <div className="space-y-2">
                             <Label htmlFor="bloodGroup" className="text-sm font-medium">Blood Group</Label>
                             <Select value={formData.bloodGroup} onValueChange={(value) => handleSelectChange("bloodGroup", value)}>
-                                <SelectTrigger className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+                                <SelectTrigger className="border-2 border-gray-200 ">
                                     <SelectValue placeholder="Select blood group" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -473,7 +473,7 @@ export default function AddUserDialog({
                                 name="landmark"
                                 value={formData.landmark}
                                 onChange={handleChange}
-                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                className="border-2 border-gray-200 "
                                 placeholder="Enter landmark"
                             />
                             {errors.landmark && <p className="text-sm text-red-500">{errors.landmark}</p>}
@@ -485,7 +485,7 @@ export default function AddUserDialog({
                                 name="pincode"
                                 value={formData.pincode}
                                 onChange={handleChange}
-                                className="border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                className="border-2 border-gray-200 "
                                 placeholder="Enter pincode"
                             />
                             {errors.pincode && <p className="text-sm text-red-500">{errors.pincode}</p>}

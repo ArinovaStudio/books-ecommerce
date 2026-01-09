@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { ArrowLeft, MapPin, ChevronDown, Loader2 } from "lucide-react"
+import { ArrowLeft, MapPin, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -51,52 +51,15 @@ const sortClasses = (a: ClassItem, b: ClassItem): number => {
 
 
 export default function SchoolClassesPage({ params }: { params: Promise<{ schoolId: string }> }) {
-  const [expandedClassId, setExpandedClassId] = useState<string | null>(null)
   const [school, setSchool] = useState<School | null>(null)
   const [classes, setClasses] = useState<Class[]>([])
-  const [sectionsData, setSectionsData] = useState<SectionData>({})
-  const [loadingSections, setLoadingSections] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const [showLoginPopup, setShowLoginPopup] = useState(false)
 
   const { schoolId } = React.use(params)
   const router = useRouter()
-
-  // Fetch sections for a specific class
-  const fetchSections = async (classId: string) => {
-    if (sectionsData[classId]) return
-    
-    setLoadingSections(classId)
-    try {
-      const response = await fetch(`/api/admin/classes/${classId}/sections`)
-      const data = await response.json()
-      
-      if (data.success) {
-        setSectionsData(prev => ({
-          ...prev,
-          [classId]: data.sections || ['A']
-        }))
-      }
-    } catch (error) {
-      console.error('Error fetching sections:', error)
-      setSectionsData(prev => ({
-        ...prev,
-        [classId]: ['A']
-      }))
-    } finally {
-      setLoadingSections(null)
-    }
-  }
-
-  const handleClassExpand = (classId: string) => {
-    const isCurrentlyOpen = expandedClassId === classId
-    setExpandedClassId(isCurrentlyOpen ? null : classId)
-    
-    if (!isCurrentlyOpen) {
-      fetchSections(classId)
-    }
-  }
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -105,14 +68,14 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
         const data = await response.json()
         
         if (!data.authenticated) {
-          router.push('/signin')
+          setIsAuthenticated(false)
           return
         }
         
         setIsAuthenticated(true)
       } catch (error) {
         console.error('Auth check failed:', error)
-        router.push('/signin')
+        setIsAuthenticated(false)
       }
     }
 
@@ -121,8 +84,6 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
 
   useEffect(() => {
     const fetchSchoolData = async () => {
-      if (!isAuthenticated) return
-      
       setLoading(true)
       try {
         // Fetch school details
@@ -136,12 +97,14 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
 
         setSchool(schoolData.school)
 
-        // Fetch school classes
-        const classesResponse = await fetch(`/api/admin/schools/${schoolId}/classes`)
-        const classesData = await classesResponse.json()
+        // Only fetch classes if authenticated
+        if (isAuthenticated) {
+          const classesResponse = await fetch(`/api/admin/schools/${schoolId}/classes`)
+          const classesData = await classesResponse.json()
 
-        if (classesData.success) {
-          setClasses(classesData.classes.sort(sortClasses))
+          if (classesData.success) {
+            setClasses(classesData.classes.sort(sortClasses))
+          }
         }
       } catch (error) {
         setError('Failed to load school data')
@@ -151,7 +114,7 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
       }
     }
 
-    if (schoolId && isAuthenticated) {
+    if (schoolId) {
       fetchSchoolData()
     }
   }, [schoolId, isAuthenticated])
@@ -199,11 +162,28 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
 
   return (
     <section className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100 relative">
-      {expandedClassId && (
-        <div
-          onClick={() => setExpandedClassId(null)}
-          className="fixed inset-0 z-20 bg-black/10 backdrop-blur-[1px] transition-all duration-300"
-        />
+      {/* Login Popup */}
+      {showLoginPopup && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">Login Required</h3>
+            <p className="text-gray-600 mb-6 text-center">Please sign in to view classes and access books.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLoginPopup(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => router.push('/signin')}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <div className="relative py-8 sm:py-10 lg:py-12 px-4 sm:px-6 relative z-50 shadow-lg bg-center bg-contain bg-size-[100%_auto]" style={{ backgroundImage: `url(${school.image || "/school.jpg"})` }}>
@@ -260,88 +240,59 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
             </p>
           </div>
 
-          {classes.length === 0 ? (
+          {classes.length === 0 && isAuthenticated === false ? (
+            <div className="text-center py-20">
+              <p className="text-gray-500 text-lg mb-2">Please sign in to view classes</p>
+              <button
+                onClick={() => setShowLoginPopup(true)}
+                className="text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Sign In
+              </button>
+            </div>
+          ) : classes.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-gray-500 text-lg mb-2">No classes available for this school</p>
               <p className="text-gray-400 text-sm">Classes will be added soon</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
-              {classes.map((classData) => {
-                const isOpen = expandedClassId === classData.id
-                const availableSections = sectionsData[classData.id] || ['A']
-
-                return (
-                  <div
-                    key={classData.id}
-                    className={`relative self-start transition-all duration-300 
-                      ${isOpen ? "z-30" : "z-10"}
-                    `}
-                  >
-                    <div
-                      className={`
-                        border rounded-xl bg-white shadow-sm transition-all duration-300 overflow-hidden
-                        ${isOpen
-                          ? "ring-2 ring-blue-500 border-blue-500 shadow-xl scale-[1.02]"
-                          : "hover:shadow-md hover:border-blue-200 hover:-translate-y-0.5"
-                        }
-                      `}
+              {classes.map((classData) => (
+                <div
+                  key={classData.id}
+                  className="border rounded-xl bg-white shadow-sm hover:shadow-md hover:border-blue-200 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
+                >
+                  {isAuthenticated ? (
+                    <Link
+                      href={`/schools/${schoolId}/${classData.id}`}
+                      className="w-full p-4 sm:p-5 flex items-center justify-center gap-2 group cursor-pointer hover:bg-gray-50 transition-colors"
                     >
-                      <button
-                        onClick={() => handleClassExpand(classData.id)}
-                        className="w-full p-4 sm:p-5 flex items-center justify-between gap-2 group cursor-pointer"
-                      >
-                        <div className="flex-1 text-center">
-                          <h3 className="text-sm sm:text-base font-semibold text-gray-900">
-                            {classData.name}
-                          </h3>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {classData.academicYear}
-                          </p>
-                        </div>
-                        <ChevronDown
-                          size={18}
-                          className={`text-gray-400 group-hover:text-blue-600 transition-all duration-300 shrink-0
-                            ${isOpen ? "rotate-180" : ""}
-                          `}
-                        />
-                      </button>
-                      <div
-                        className={`transition-all duration-300 ease-in-out
-                          ${isOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"}
-                        `}
-                      >
-                        <div className="border-t border-gray-100 px-3 sm:px-4 py-3 bg-linear-to-b from-gray-50 to-white">
-                          <p className="text-xs font-medium text-gray-500 mb-2 text-center">
-                            {loadingSections === classData.id ? 'Loading sections...' : 'Select Section'}
-                          </p>
-
-                          <div className="flex flex-col gap-2 max-h-40 overflow-y-auto pb-3 no-scrollbar">
-                            {loadingSections === classData.id ? (
-                              <div className="text-center py-2">
-                                <div className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-r-transparent"></div>
-                              </div>
-                            ) : (
-                              availableSections.map((section) => (
-                                <Link
-                                  key={section}
-                                  href={`/schools/${schoolId}/${classData.id}?section=${section}`}
-                                  className="border border-blue-200 rounded-lg py-2.5 px-3 text-sm font-medium 
-          text-blue-900 text-center bg-white
-          hover:bg-blue-50 hover:border-blue-400 hover:shadow-sm
-          transition-all duration-200 active:scale-95"
-                                >
-                                  Section {section}
-                                </Link>
-                              ))
-                            )}
-                          </div>
-                        </div>
+                      <div className="flex-1 text-center">
+                        <h3 className="text-sm sm:text-base font-semibold text-gray-900">
+                          {classData.name}
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {classData.academicYear}
+                        </p>
                       </div>
-                    </div>
-                  </div>
-                )
-              })}
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => setShowLoginPopup(true)}
+                      className="w-full p-4 sm:p-5 flex items-center justify-center gap-2 group cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex-1 text-center">
+                        <h3 className="text-sm sm:text-base font-semibold text-gray-900">
+                          {classData.name}
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {classData.academicYear}
+                        </p>
+                      </div>
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>

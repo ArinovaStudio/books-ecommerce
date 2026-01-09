@@ -144,9 +144,9 @@ export default function EditStudentDialog({
       const data = await res.json()
       if (!data.success) throw new Error(data.message || "Failed to update student")
 
-      toast({ 
+      toast({
         title: "Success",
-        description: "Student updated successfully" 
+        description: "Student updated successfully"
       })
       onUpdated()
       onClose()
@@ -172,18 +172,20 @@ export default function EditStudentDialog({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Name *</Label>
-              <Input 
-                value={form.name} 
-                onChange={e => setForm({ ...form, name: e.target.value })} 
+              <Input
+                value={form.name}
+                onChange={e => setForm({ ...form, name: e.target.value })}
+                className="border-2 border-gray-200"
                 required
               />
             </div>
 
             <div>
               <Label>Roll No *</Label>
-              <Input 
-                value={form.rollNo} 
-                onChange={e => setForm({ ...form, rollNo: e.target.value })} 
+              <Input
+                value={form.rollNo}
+                onChange={e => setForm({ ...form, rollNo: e.target.value })}
+                className="border-2 border-gray-200"
                 required
               />
             </div>
@@ -197,9 +199,10 @@ export default function EditStudentDialog({
 
             <div>
               <Label>First Language</Label>
-              <Input 
-                value={form.firstLanguage} 
-                onChange={e => setForm({ ...form, firstLanguage: e.target.value })} 
+              <Input
+                value={form.firstLanguage}
+                onChange={e => setForm({ ...form, firstLanguage: e.target.value })}
+                className="border-2 border-gray-200"
                 placeholder="Enter first language"
               />
             </div>
@@ -207,19 +210,12 @@ export default function EditStudentDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Parent Name</Label>
-              <Input 
-                value={form.parentName} 
-                onChange={e => setForm({ ...form, parentName: e.target.value })} 
-              />
-            </div>
-
-            <div>
               <Label>Parent Email *</Label>
-              <Input 
+              <Input
                 type="email"
-                value={form.parentEmail} 
-                onChange={e => setForm({ ...form, parentEmail: e.target.value })} 
+                value={form.parentEmail}
+                onChange={e => setForm({ ...form, parentEmail: e.target.value })}
+                className="border-2 border-gray-200"
                 required
               />
             </div>
@@ -228,17 +224,18 @@ export default function EditStudentDialog({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Date of Birth</Label>
-              <Input 
+              <Input
                 type="date"
-                value={form.dob} 
-                onChange={e => setForm({ ...form, dob: e.target.value })} 
+                value={form.dob}
+                className="border-2 border-gray-200"
+                onChange={e => setForm({ ...form, dob: e.target.value })}
               />
             </div>
 
-            <div>
+            <div >
               <Label>Gender</Label>
               <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
-                <SelectTrigger>
+                <SelectTrigger className="border-2 border-gray-200">
                   <SelectValue placeholder="Select gender" />
                 </SelectTrigger>
                 <SelectContent>
@@ -254,7 +251,7 @@ export default function EditStudentDialog({
             <div>
               <Label>Blood Group</Label>
               <Select value={form.bloodGroup} onValueChange={(v) => setForm({ ...form, bloodGroup: v })}>
-                <SelectTrigger>
+                <SelectTrigger className="border-2 border-gray-200">
                   <SelectValue placeholder="Select blood group" />
                 </SelectTrigger>
                 <SelectContent>
@@ -269,25 +266,6 @@ export default function EditStudentDialog({
                 </SelectContent>
               </Select>
             </div>
-
-            <div>
-              <Label>Pincode</Label>
-              <Input 
-                value={form.pincode} 
-                onChange={e => setForm({ ...form, pincode: e.target.value })} 
-                pattern="[0-9]{6}"
-                maxLength={6}
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label>Landmark</Label>
-            <Input 
-              value={form.landmark} 
-              onChange={e => setForm({ ...form, landmark: e.target.value })} 
-              placeholder="Enter landmark or address"
-            />
           </div>
         </div>
 

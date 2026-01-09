@@ -371,10 +371,12 @@ export function GuardianForm() {
                     value={formData.guardianName || ""}
                     onChange={(e) => handleInputChange("guardianName", e.target.value)}
                     className={cn(
-                      "pl-10 sm:pl-11 h-11 sm:h-12 text-sm border-0 bg-transparent",
-                      errors.guardianName && "border-destructive focus-visible:ring-destructive",
+                      "pl-10 sm:pl-11 h-11 sm:h-12 border-2 border-gray-200 bg-transparent",
+                      "disabled:text-black disabled:opacity-100 disabled:cursor-not-allowed",
+                      errors.guardianName && "border-destructive focus-visible:ring-destructive"
                     )}
                   />
+
                 </div>
                 {errors.guardianName && <p className="text-sm text-destructive">{errors.guardianName}</p>}
               </div>
@@ -393,7 +395,7 @@ export function GuardianForm() {
                     value={formData.guardianPhone || ""}
                     onChange={(e) => handleInputChange("guardianPhone", e.target.value.replace(/\D/g, "").slice(0, 10))}
                     className={cn(
-                      "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base border-0 bg-transparent",
+                      "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base border-2 border-gray-200 bg-transparent",
                       errors.guardianPhone && "border-destructive focus-visible:ring-destructive",
                     )}
                     maxLength={10}
@@ -417,7 +419,8 @@ export function GuardianForm() {
                       value={formData.guardianEmail || ""}
                       onChange={(e) => handleInputChange("guardianEmail", e.target.value)}
                       className={cn(
-                        "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base border-0 bg-transparent",
+                        "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base border-2 border-gray-200bg-transparent",
+                              "disabled:text-black disabled:opacity-100 disabled:cursor-not-allowed",
                         errors.guardianEmail && "border-destructive focus-visible:ring-destructive",
                       )}
                       disabled
@@ -495,7 +498,7 @@ export function GuardianForm() {
                     value={formData.address || ""}
                     onChange={(e) => handleInputChange("address", e.target.value)}
                     className={cn(
-                      "pl-10 sm:pl-11 pt-3 min-h-[100px] sm:min-h-[120px] resize-none text-sm sm:text-base border-0 bg-transparent",
+                      "pl-10 sm:pl-11 pt-3 min-h-[100px] sm:min-h-[120px] resize-none text-sm sm:text-base border-2 border-gray-200 bg-transparent",
                       errors.address && "border-destructive focus-visible:ring-destructive",
                     )}
                     rows={4}
@@ -504,7 +507,7 @@ export function GuardianForm() {
                 {errors.address && <p className="text-sm text-destructive">{errors.address}</p>}
               </div>
               <Label htmlFor="address" className="text-sm sm:text-base font-medium">
-                  Child Info
+                Child Info
               </Label>
               {
                 user?.children?.length > 0 && user.children.map((items: any, index: number) => (
@@ -513,7 +516,7 @@ export function GuardianForm() {
                     <p className="py-2 bg-gray-200 text-gray-700 px-4 w-1/3 rounded-lg">ROLL NO: {items.rollNo}</p>
                     <p className="py-2 bg-gray-200 text-gray-700 px-4 w-1/3 rounded-lg">SECTION: {items.section}</p>
 
-                  </div> 
+                  </div>
                 ))
               }
 
@@ -549,7 +552,7 @@ export function GuardianForm() {
                   <span>₹{grandTotal}</span>
                 </div>
               </div>
-              
+
               {/* Submit Button */}
               {user?.children?.length > 0 ? (
                 <div className="pt-2 sm:pt-4">
@@ -558,7 +561,7 @@ export function GuardianForm() {
                     className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium cursor-pointer flex justify-center items-center bg-amber-400 hover:bg-amber-300 text-black"
                     size="lg"
                   >
-                    {loading ? <LucideLoader2 className="text-white animate-spin" size={20}/> : "Place Order"}
+                    {loading ? <LucideLoader2 className="text-white animate-spin" size={20} /> : "Place Order"}
                   </Button>
                 </div>
               ) : (
