@@ -13,37 +13,36 @@ import {
     DialogTrigger,
     DialogFooter,
 } from "../ui/dialog"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue
-} from "../ui/select"
 import { Label } from "../ui/label"
-
 import { useToast } from "../ui/use-toast"
-
-const sortSections = (a: string, b: string) => {
-    const order = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
-    const aIndex = order.indexOf(a.toUpperCase())
-    const bIndex = order.indexOf(b.toUpperCase())
-    return aIndex - bIndex
-}
-
 
 /* ================= TYPES ================= */
 
-type SectionType = {
+type Section = {
     id: string
     name: string
+    language: string
 }
 
 type Props = {
     school: string
-    classes: {id: string, name: string}
+    classes: { id: string, name: string }
     onSelectSection?: (section: string) => void
     onBack?: () => void
+}
+
+/* ================= HELPERS ================= */
+
+const sortSections = (a: Section, b: Section) => {
+    const order = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
+    const aIndex = order.indexOf(a.name.toUpperCase())
+    const bIndex = order.indexOf(b.name.toUpperCase())
+    
+    // Fallback for non-standard names
+    if (aIndex === -1 || bIndex === -1) {
+        return a.name.localeCompare(b.name)
+    }
+    return aIndex - bIndex
 }
 
 /* ================= COMPONENT ================= */
@@ -55,37 +54,31 @@ export default function SchoolSection({
     classes,
 }: Props) {
     const { toast } = useToast();
-    const [sections, setSections] = useState<string[]>([])
+    // State now stores Section objects, not just strings
+    const [sections, setSections] = useState<Section[]>([])
     const [loading, setLoading] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [newSection, setNewSection] = useState("")
     const [firstLanguage, setFirstLanguage] = useState("")
 
-
     /* ================= FETCH SECTIONS ================= */
 
     const fetchSection = async () => {
-        // if (!school || !classes) return
         setLoading(true)
         try {
             const res = await fetch(
                 `/api/admin/classes/${classes.id}/sections`
             )
             const data = await res.json()
-            // console.log("data = ", data.sections)
 
             if (data.success) {
-                setSections(data.sections.sort(sortSections))
-                toast({
-                    title: "Success",
-                    description: "Section added successfully",
-                    variant: "default"
-                })
+                // Ensure data.sections is treated as Section[] and sort it
+                setSections((data.sections as Section[]).sort(sortSections))
             }
         } catch (error) {
             toast({
                 title: "Error",
-                description: "Failed to add section",
+                description: "Failed to fetch sections",
                 variant: "destructive"
             })
             setSections([])
@@ -110,9 +103,10 @@ export default function SchoolSection({
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
+                    // Payload updated to match new API Schema: { section, language }
                     body: JSON.stringify({ 
                         section: newSection.toUpperCase(),
-                        firstLanguage 
+                        language: firstLanguage 
                     }),
                 }
             )
@@ -120,15 +114,27 @@ export default function SchoolSection({
             const data = await res.json()
 
             if (data.success) {
+                toast({
+                    title: "Success",
+                    description: "Section added successfully",
+                    variant: "default"
+                })
                 fetchSection()
+                setIsDialogOpen(false)
+                setNewSection("")
+                setFirstLanguage("")
+            } else {
+                 throw new Error(data.message)
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Add section error:", error)
+            toast({
+                title: "Error",
+                description: error.message || "Failed to add section",
+                variant: "destructive"
+            })
         } finally {
             setLoading(false)
-            setIsDialogOpen(false)
-            setNewSection("")
-            setFirstLanguage("")
         }
     }
 
@@ -136,7 +142,7 @@ export default function SchoolSection({
 
     const deleteSection = async (
         e: React.MouseEvent,
-        sectionToDelete: string
+        sectionId: string // Now takes ID instead of Name
     ) => {
         e.stopPropagation()
 
@@ -146,7 +152,8 @@ export default function SchoolSection({
                 {
                     method: "DELETE",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ section: sectionToDelete }),
+                    // Payload updated to match new API Schema: { sectionId }
+                    body: JSON.stringify({ sectionId }),
                 }
             )
 
@@ -164,8 +171,13 @@ export default function SchoolSection({
                 })
                 fetchSection()
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Delete section error:", error)
+            toast({
+                title: "Error",
+                description: error.message || "Failed to delete section",
+                variant: "destructive"
+            })
         }
     }
 
@@ -256,23 +268,27 @@ export default function SchoolSection({
                 <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                     {sections.map((sec) => (
                         <Card
-                            key={sec}
+                            key={sec.id} // Use ID as key
                             onClick={
                                 onSelectSection
-                                    ? () => onSelectSection(sec)
+                                    ? () => onSelectSection(sec.name) // Pass name for backward compatibility if parent expects string
                                     : undefined
                             }
-                            className="group relative cursor-pointer hover:shadow-md"
+                            className="group relative cursor-pointer hover:shadow-md transition-all"
                         >
                             <button
-                                onClick={(e) => deleteSection(e, sec)}
-                                className="absolute top-2 right-2 cursor-pointer p-1.5 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100"
+                                onClick={(e) => deleteSection(e, sec.id)} // Pass ID to delete
+                                className="absolute top-2 right-2 cursor-pointer p-1.5 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                             >
                                 <Trash2 className="h-4 w-4" />
                             </button>
 
-                            <CardHeader>
-                                <CardTitle className="text-center">{sec}</CardTitle>
+                            <CardHeader className="flex flex-col items-center justify-center space-y-1 py-6">
+                                <CardTitle className="text-center text-xl">{sec.name}</CardTitle>
+                                {/* Language displayed beneath section name */}
+                                <span className="text-sm text-muted-foreground font-medium">
+                                    {sec.language}
+                                </span>
                             </CardHeader>
                         </Card>
                     ))}

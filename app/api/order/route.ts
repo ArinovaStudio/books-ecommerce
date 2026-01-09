@@ -14,7 +14,7 @@ const createOrderValidation = z.object({
       productId: z.string().uuid("Invalid Product ID"),
       quantity: z.number().min(1, "Quantity must be at least 1")
     })
-  ).min(1, "Order must contain at least one item") 
+  ).min(1, "Order must contain at least one item")  
 });
 
 export const POST = Wrapper(async (req: NextRequest) => {
