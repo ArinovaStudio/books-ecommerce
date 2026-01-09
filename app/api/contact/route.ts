@@ -1,5 +1,7 @@
 import { Wrapper } from "@/lib/api-handler";
+import sendEmail from "@/lib/email";
 import prisma from "@/lib/prisma";
+import { newContactQueryTemplate } from "@/lib/templates";
 import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -34,6 +36,20 @@ export const POST = Wrapper(async (req: NextRequest) => {
         message,
       },
     });
+
+    const systemAdmins = await prisma.user.findMany({
+        where: { role: "ADMIN", status: "ACTIVE" },
+        select: { email: true, name: true }
+    });
+
+    // Send email notification to Admins
+    if (systemAdmins.length > 0) {
+        const emailData = newContactQueryTemplate(name, email, phone, message);
+        
+        systemAdmins.forEach(admin => {
+            sendEmail(admin.email, emailData.subject, emailData.html).catch(err => console.error(`Failed to send contact email to ${admin.email}`, err));
+        });
+    }
 
     return NextResponse.json({ success: true, message: "Your message has been sent successfully.", data: newQuery }, { status: 201 });
   } catch (error) {

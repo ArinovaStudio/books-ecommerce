@@ -118,3 +118,29 @@ export const newOrderAlertTemplate = (
         </div>
     `
 });
+
+export const newContactQueryTemplate = (
+    name: string,
+    email: string,
+    phone: string | null | undefined,
+    message: string
+) => ({
+    subject: `New Contact Inquiry from ${name}`,
+    html: `
+        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2 style="color: #333;">New Contact Form Submission</h2>
+            <p>You have received a new message via the contact form.</p>
+            
+            <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                <p><strong>Name:</strong> ${name}</p>
+                <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+                <p><strong>Phone:</strong> ${phone || "N/A"}</p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                <p><strong>Message:</strong></p>
+                <p style="white-space: pre-wrap; color: #555;">${message}</p>
+            </div>
+
+            <p style="font-size: 0.9em; color: #888;">This is an automated notification from your website.</p>
+        </div>
+    `
+});
