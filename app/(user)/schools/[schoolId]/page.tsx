@@ -164,8 +164,8 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
     <section className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100 relative">
       {/* Login Popup */}
       {showLoginPopup && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+        <div className="fixed inset-0 z-100 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl z-100">
             <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">Login Required</h3>
             <p className="text-gray-600 mb-6 text-center">Please sign in to view classes and access books.</p>
             <div className="flex gap-3">
