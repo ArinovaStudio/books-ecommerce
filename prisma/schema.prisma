@@ -133,7 +133,7 @@ model Product {
   price Float
   category ProductCategory
   stock Int
-  minQuantity Int
+  // minQuantity Int
   brand String?
   type String?
   image String?

@@ -8,5 +8,5 @@ export function trackRequest() {
         where: { hour: now },
         update: { count: { increment: 1 } }, 
         create: { hour: now, count: 1 }      
-    }).catch(err => console.error("Tracking Error:", err));
+    }).catch((err: Error) => console.error("Tracking Error:", err));
 }

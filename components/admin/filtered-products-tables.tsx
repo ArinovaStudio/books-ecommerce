@@ -226,7 +226,7 @@ export default function FilteredProductTable({
             selectedSchool={selectedSchool}
             selectedClass={selectedClass}
             onSuccess={fetchProducts}
-            // setProducts={}
+            setProducts={setProducts}
           />
         </div>
       </CardHeader>

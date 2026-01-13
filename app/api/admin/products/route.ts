@@ -48,7 +48,8 @@ export const POST = Wrapper(async (req: NextRequest) => {
                 category: category as "TEXTBOOK" | "NOTEBOOK" | "STATIONARY" | "OTHER",
                 stock: parseInt(stock),
                 image: imageUrl,
-                classId: classId
+                classId: classId,
+                
             }
         });
 
