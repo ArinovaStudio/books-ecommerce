@@ -9,6 +9,7 @@ import { MoreHorizontal, Search, Mail, User, ArrowLeft, Loader2, Pencil, Trash, 
 import AddUserDialog from "../AddUser"
 import { useToast } from "@/hooks/use-toast"
 import EditStudentDialog from "./EditStudentDialog"
+import BulkUploadDialog from "./BulkUploadDialog"
 
 type UserType = {
     id: string
@@ -28,23 +29,25 @@ type Props = {
     schoolId: string
     activeTab: string
     classItem: ClassType
-    sectionId: string
+    sectionItem: ClassType
     className?: string
     onBack: () => void
 }
 
-export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, className, onBack }: Props) {
+export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionItem, className, onBack }: Props) {
     const [users, setUsers] = useState<UserType[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
     const { toast } = useToast()
     const [editingStudent, setEditingStudent] = useState<any | null>(null)
     const classId = classItem?.id
+    const sectionId = sectionItem?.id
+    const sectionName = sectionItem?.name
 
     const fetchUsers = async () => {
         setLoading(true)
         try {
-            const res = await fetch(`/api/admin/students?schoolId=${schoolId}&classId=${classId}&section=${sectionId}`)
+            const res = await fetch(`/api/admin/students?schoolId=${schoolId}&classId=${classId}&section=${sectionItem.name}`)
             const data = await res.json()
 
             if (data.success) {
@@ -69,8 +72,8 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
     }
 
     useEffect(() => {
-        if (classId && sectionId) fetchUsers()
-    }, [classId, sectionId])
+        if (classId && sectionName) fetchUsers()
+    }, [classId, sectionName])
 
     const filteredUsers = users.filter(user =>
         user.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -138,12 +141,20 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionId, cl
                     <ArrowLeft className="h-4 w-4" />
                     <p className="hidden md:block">Back to Section</p>
                 </Button>
-                <AddUserDialog
-                    schoolId={schoolId}
-                    classItem={classItem}
-                    sectionId={sectionId}
-                    onStudentAdded={fetchUsers}
-                />
+                <div className="flex gap-2">
+                    <BulkUploadDialog 
+                        classId={classItem.id} 
+                        sectionId={sectionId} 
+                        onSuccess={fetchUsers} 
+                    />
+
+                    <AddUserDialog
+                        schoolId={schoolId}
+                        classItem={classItem}
+                        sectionId={sectionId}
+                        onStudentAdded={fetchUsers}
+                    />
+                </div>
             </div>
 
             {/* Search */}

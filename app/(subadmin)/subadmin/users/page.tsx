@@ -15,10 +15,15 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
+type Section = {
+  id: string
+  name: string
+}
+
 export default function SubAdminUsersPage() {
   const { user, schoolId } = useAdmin()
   const [selectedClass, setSelectedClass] = useState<any | null>(null)
-  const [selectedSection, setSelectedSection] = useState<string | null>(null)
+  const [selectedSection, setSelectedSection] = useState<Section | null>(null)
 
   return (
     <>
@@ -51,7 +56,7 @@ export default function SubAdminUsersPage() {
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbPage>
-                    {selectedSection || 'Section'}
+                    {selectedSection?.name || 'Section'}
                   </BreadcrumbPage>
                 </BreadcrumbItem>
               </>
@@ -84,7 +89,7 @@ export default function SubAdminUsersPage() {
               activeTab="users"
               schoolId={schoolId}
               classItem={selectedClass}
-              sectionId={selectedSection}
+              sectionId={selectedSection.id}
               onBack={() => setSelectedSection(null)}
             />
           )}

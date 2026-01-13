@@ -194,9 +194,11 @@ export const POST = Wrapper(async (req: NextRequest) => {
             }
         });
 
-        // Send Welcome Email
-        const emailData = studentAddedTemplate(name, parentName, parentEmail, isNewParent ? password : undefined);
-        await sendEmail(parentEmail, emailData.subject, emailData.html);
+        if (isNewParent){
+            // Send Welcome Email
+            const emailData = studentAddedTemplate(name, parentName, parentEmail, isNewParent ? password : undefined);
+            await sendEmail(parentEmail, emailData.subject, emailData.html);
+        }
 
         return NextResponse.json({ success: true, message: "Student added successfully", student: newStudent }, { status: 201 });
 
