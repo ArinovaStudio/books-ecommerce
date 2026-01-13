@@ -81,11 +81,6 @@ export default function Header() {
 
           {/* DESKTOP ACTIONS */}
           <div className="hidden lg:flex items-center gap-6">
-            <a href="tel:+919391779949" className="flex items-center gap-2 text-white/70 text-sm border-r border-white/10 pr-6">
-              <Phone size={14} className="text-cyan-400" />
-              <span>+91 939-177-9949</span>
-            </a>
-
             <div className="flex items-center gap-5">
               {!loading && (
                 user ? (
