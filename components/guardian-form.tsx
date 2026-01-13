@@ -151,13 +151,13 @@ export function GuardianForm() {
   )
 
   const sendOrder = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); 
+    e.preventDefault();
 
     // --- Frontend Validation ---
     const newErrors: Record<string, string> = {}
 
     if (!formData.guardianName.trim()) newErrors.guardianName = "Parent name is required"
-    
+
     if (!formData.guardianPhone) {
       newErrors.guardianPhone = "Phone number is required"
     } else if (!validatePhone(formData.guardianPhone)) {
@@ -165,7 +165,7 @@ export function GuardianForm() {
     }
 
     if (!formData.landmark.trim()) newErrors.landmark = "Landmark is required"
-    
+
     if (!formData.pincode.trim()) {
       newErrors.pincode = "Pincode is required"
     } else if (!validatePincode(formData.pincode)) {
@@ -177,40 +177,13 @@ export function GuardianForm() {
       return
     }
 
+    // Start Razorpay payment process
     setLoading(true);
     try {
-      const res = await fetch("/api/order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          studentId: user?.children[0].id,
-          paymentMethod: "Cash",
-          // New Fields
-          phone: formData.guardianPhone,
-          landmark: formData.landmark,
-          pincode: formData.pincode,
-          items: products.map((product) => ({
-            productId: product.id,
-            quantity: product.stock
-          }))
-        }),
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        toast.success("Order Placed Successfully");
-        setTimeout(() => {
-          window.location.replace("/")
-        }, 2000)
-      } else {
-        toast.error(data.message || "Failed to place order")
-      }
+      await startRazorpayPayment();
     } catch (err) {
-      console.error("Failed to create order", err);
-      toast.error("Something went wrong")
-    } finally {
+      console.error("Payment failed", err);
+      toast.error("Payment failed")
       setLoading(false);
     }
   };
@@ -238,10 +211,100 @@ export function GuardianForm() {
     fetchSchool(schoolId as string)
   }, []);
 
+  //razorpay integration
+  const startRazorpayPayment = async () => {
+    const res = await fetch("/api/razorpay/order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: grandTotal }),
+    })
+
+    const data = await res.json()
+    if (!data.success) throw new Error("Order creation failed")
+
+    const isLoaded = await import("@/lib/loadRazorpay").then(m => m.loadRazorpay())
+    if (!isLoaded) {
+      toast.error("Razorpay SDK failed")
+      return
+    }
+
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount: data.order.amount,
+      currency: "INR",
+      name: "School Stationery",
+      description: "Stationery Order",
+      order_id: data.order.id,
+      handler: async function (response: any) {
+        await verifyAndPlaceOrder(response)
+      },
+      prefill: {
+        name: formData.guardianName,
+        email: formData.guardianEmail,
+        contact: formData.guardianPhone,
+      },
+      theme: { color: "#fbbf24" },
+    }
+
+    // @ts-ignore
+    const rzp = new window.Razorpay(options)
+    rzp.open()
+  }
+
+  const verifyAndPlaceOrder = async (payment: any) => {
+    const verifyRes = await fetch("/api/razorpay/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payment),
+    })
+
+    const verifyData = await verifyRes.json()
+    if (!verifyData.success) {
+      toast.error("Payment verification failed")
+      setLoading(false);
+      return
+    }
+
+    // ✅ Payment verified → create DB order
+    await sendFinalOrder(payment)
+  }
+
+  const sendFinalOrder = async (payment: any) => {
+    const res = await fetch("/api/order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        studentId: user?.children[0].id,
+        paymentMethod: "Razorpay",
+        phone: formData.guardianPhone,
+        landmark: formData.landmark,
+        pincode: formData.pincode,
+        razorpayOrderId: payment.razorpay_order_id,
+        razorpayPaymentId: payment.razorpay_payment_id,
+        razorpaySignature: payment.razorpay_signature,
+        items: products.map(p => ({
+          productId: p.id,
+          quantity: p.stock,
+        })),
+      }),
+    })
+
+    const data = await res.json()
+    if (data.success) {
+      toast.success("Order placed successfully 🎉")
+      setTimeout(() => {
+        window.location.replace("/")
+      }, 2000)
+    } else {
+      toast.error("Order failed")
+    }
+    setLoading(false);
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-        
+
         <Card className="border-border shadow-lg">
           <CardHeader className="space-y-1 pb-4 sm:pb-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
@@ -376,7 +439,7 @@ export function GuardianForm() {
               </Card>
 
               <Label className="text-sm sm:text-base font-medium mt-4 block">
-                  Child Info
+                Child Info
               </Label>
               {
                 user?.children?.length > 0 && user.children.map((items: any, index: number) => (
@@ -384,7 +447,7 @@ export function GuardianForm() {
                     <p className="py-2 bg-gray-200 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">NAME: {items.name}</p>
                     <p className="py-2 bg-gray-200 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">ROLL NO: {items.rollNo}</p>
                     <p className="py-2 bg-gray-200 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">SECTION: {items.section}</p>
-                  </div> 
+                  </div>
                 ))
               }
 
@@ -420,7 +483,7 @@ export function GuardianForm() {
                   <span>₹{grandTotal}</span>
                 </div>
               </div>
-              
+
               {/* Submit Button */}
               {user?.children?.length > 0 ? (
                 <div className="pt-2 sm:pt-4">
@@ -430,7 +493,7 @@ export function GuardianForm() {
                     size="lg"
                     disabled={loading}
                   >
-                    {loading ? <LucideLoader2 className="text-black animate-spin" size={20}/> : "Place Order"}
+                    {loading ? <LucideLoader2 className="text-black animate-spin" size={20} /> : "Place Order"}
                   </Button>
                 </div>
               ) : (
