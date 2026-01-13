@@ -11,6 +11,7 @@ import { EditSchoolModal } from "../EditSchool"
 import { AddSchoolModal } from "../addSchoolModal"
 import { PromoteUserDialog } from "../PromoteUser"
 import { useToast } from "@/hooks/use-toast"
+import BulkUploadSchoolDialog from "@/components/admin/BulkUploadSchoolDialog"
 
 type School = {
     id: string
@@ -48,6 +49,10 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
     const [open, setOpen] = useState(false)
     const [localRefresh, setLocalRefresh] = useState(0)
 
+    // Delete confirmation dialog state
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [schoolToDelete, setSchoolToDelete] = useState<string | null>(null)
+
     useEffect(() => {
         const fetchSchools = async () => {
             setLoading(true)
@@ -62,7 +67,6 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                     setSchools(data.schools)
                 } else {
                     setSchools([])
-
                 }
             } catch (error) {
                 console.error("Failed to fetch schools", error)
@@ -78,19 +82,22 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
         return () => clearTimeout(timeoutId)
     }, [search, refreshTrigger, localRefresh])
 
-    const handleDelete = async (schoolId: string) => {
+    const handleDelete = async () => {
+        if (!schoolToDelete) return;
+        
         setDeleteLoading(true);
         try {
-            const res = await fetch(`/api/admin/schools/${schoolId}`, { method: "DELETE" });
+            const res = await fetch(`/api/admin/schools/${schoolToDelete}`, { method: "DELETE" });
             const json = await res.json();
 
             if (json.success) {
-                setSchools(prev => prev.filter(s => s.id !== schoolId));
+                setSchools(prev => prev.filter(s => s.id !== schoolToDelete));
                 toast({
                     title: "Success",
                     description: "School deleted successfully",
                     variant: "default"
                 })
+                setDeleteDialogOpen(false);
             } else {
                 toast({
                     title: "Error",
@@ -107,12 +114,13 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
             })
         } finally {
             setDeleteLoading(false);
+            setSchoolToDelete(null);
         }
     }
 
     return (
         <div className="space-y-4">
-            {/* Search */}
+            {/* Search and Action Buttons */}
             <div className="flex items-center gap-2">
                 <div className="relative flex-1">
                     <Input
@@ -122,7 +130,15 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
-                {activeTab === "schools" ? <AddSchoolModal onSchoolAdded={() => setLocalRefresh(prev => prev + 1)} /> : <PromoteUserDialog />}
+                
+                {activeTab === "schools" ? (
+                    <div className="flex gap-2">
+                        <BulkUploadSchoolDialog onSuccess={() => setLocalRefresh(prev => prev + 1)} />
+                        <AddSchoolModal onSchoolAdded={() => setLocalRefresh(prev => prev + 1)} />
+                    </div>
+                ) : (
+                    <PromoteUserDialog />
+                )}
             </div>
 
             {/* Loading State */}
@@ -138,19 +154,13 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {schools.map((school) => (
                         <Card
-                            onClick={() =>
-                                onSelectSchool(school)
-                            }
+                            onClick={() => onSelectSchool(school)}
                             key={school.id}
                             className="relative cursor-pointer hover:shadow-md transition-shadow"
                         >
                             <CardHeader className="pb-2">
                                 <div className="flex items-start justify-between">
-
-                                    <div
-                                        className="flex gap-3 cursor-pointer"
-
-                                    >
+                                    <div className="flex gap-3 cursor-pointer">
                                         {school.image ? (
                                             <img
                                                 src={school.image}
@@ -197,51 +207,22 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                                                     <Pencil className="h-4 w-4" /> Edit
                                                 </DropdownMenuItem>
 
-                                                <DropdownMenuItem className="cursor-pointer" onSelect={(e) => e.preventDefault()}>
-                                                    <Dialog>
-                                                        <DialogTrigger asChild>
-                                                            <div className="flex gap-2 items-center">
-                                                                <Trash className="h-4 w-4" /> Delete
-                                                            </div>
-                                                        </DialogTrigger>
-
-                                                        <DialogContent>
-                                                            <DialogHeader>
-                                                                <DialogTitle>
-                                                                    Are you sure you want to delete this School?
-                                                                </DialogTitle>
-                                                                <DialogDescription>
-                                                                    This action cannot be undone.
-                                                                </DialogDescription>
-                                                            </DialogHeader>
-
-                                                            <DialogFooter>
-                                                                <DialogClose asChild>
-                                                                    <Button variant="outline">Cancel</Button>
-                                                                </DialogClose>
-
-                                                                <Button
-                                                                    variant="destructive"
-                                                                    className="cursor-pointer"
-                                                                    onClick={() => handleDelete(school.id)}
-                                                                >
-                                                                    {deleteLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : "Delete"}
-                                                                </Button>
-                                                            </DialogFooter>
-                                                        </DialogContent>
-                                                    </Dialog>
+                                                <DropdownMenuItem 
+                                                    className="gap-2 text-destructive cursor-pointer"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        setSchoolToDelete(school.id)
+                                                        setDeleteDialogOpen(true)
+                                                    }}
+                                                >
+                                                    <Trash className="h-4 w-4 text-destructive" /> Delete
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     )}
                                 </div>
 
-                                <div
-                                    className="flex items-center gap-2 text-sm text-muted-foreground mt-2 cursor-pointer"
-                                    onClick={() =>
-                                        onSelectSchool(school)
-                                    }
-                                >
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2 cursor-pointer">
                                     <MapPin className="h-4 w-4" />
                                     <span className="truncate max-w-[200px]">
                                         {typeof school.address === "string"
@@ -273,8 +254,8 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                                 <div className="flex items-center justify-between mt-2">
                                     <span
                                         className={`px-2 py-1 rounded-full text-xs font-medium ${school.status === "ACTIVE"
-                                            ? "bg-green-100 text-green-800"
-                                            : "bg-gray-100 text-gray-800"
+                                                ? "bg-green-100 text-green-800"
+                                                : "bg-gray-100 text-gray-800"
                                             }`}
                                     >
                                         {school.status}
@@ -286,26 +267,46 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                                 </div>
                             </CardContent>
                         </Card>
-
                     ))}
                 </div>
-            )
-            }
+            )}
 
             {/* Edit School Modal */}
-            {
-                editingSchool && (
-                    <EditSchoolModal
-                        school={editingSchool}
-                        open={open}
-                        onOpenChange={(val) => {
-                            setOpen(val)
-                            if (!val) setEditingSchool(null)
-                        }}
-                        onUpdate={() => setLocalRefresh(prev => prev + 1)}
-                    />
-                )
-            }
+            {editingSchool && (
+                <EditSchoolModal
+                    school={editingSchool}
+                    open={open}
+                    onOpenChange={(val) => {
+                        setOpen(val)
+                        if (!val) setEditingSchool(null)
+                    }}
+                    onUpdate={() => setLocalRefresh(prev => prev + 1)}
+                />
+            )}
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Are you sure you want to delete this School?</DialogTitle>
+                        <DialogDescription>
+                            This action cannot be undone. This will permanently delete the school and all associated data.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={handleDelete}
+                            disabled={deleteLoading}
+                        >
+                            {deleteLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : "Delete"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div >
     )
 }

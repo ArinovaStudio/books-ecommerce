@@ -17,8 +17,6 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 type Props = {
-    classId: string
-    sectionId: string
     onSuccess: () => void
 }
 
@@ -28,7 +26,7 @@ type LogEntry = {
     row?: number
 }
 
-export default function BulkUploadDialog({ classId, sectionId, onSuccess }: Props) {
+export default function BulkUploadSchoolDialog({ onSuccess }: Props) {
     const [open, setOpen] = useState(false)
     const [file, setFile] = useState<File | null>(null)
     const [uploading, setUploading] = useState(false)
@@ -62,16 +60,6 @@ export default function BulkUploadDialog({ classId, sectionId, onSuccess }: Prop
 
     const handleUpload = async () => {
         if (!file) return
-        
-        // Basic Client-side validation
-        if (!classId || !sectionId) {
-            toast({ 
-                title: "Error", 
-                description: "Missing Class or Section ID. Please refresh page.", 
-                variant: "destructive" 
-            })
-            return
-        }
 
         setUploading(true)
         setLogs([])
@@ -80,16 +68,14 @@ export default function BulkUploadDialog({ classId, sectionId, onSuccess }: Prop
 
         const formData = new FormData()
         formData.append("file", file)
-        formData.append("classId", classId)
-        formData.append("sectionId", sectionId) 
 
         try {
-            const response = await fetch("/api/admin/students/bulk", {
+            const response = await fetch("/api/admin/schools/bulk", {
                 method: "POST",
                 body: formData,
             })
 
-            // Handle HTTP Errors
+            // 1. Handle HTTP Errors (Non-200 responses)
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ message: response.statusText }))
                 throw new Error(errorData.message || "Upload failed")
@@ -97,7 +83,7 @@ export default function BulkUploadDialog({ classId, sectionId, onSuccess }: Prop
 
             if (!response.body) throw new Error("No response stream")
 
-            // Process Stream
+            // 2. Process Stream
             const reader = response.body.getReader()
             const decoder = new TextDecoder()
             let buffer = ""
@@ -120,7 +106,7 @@ export default function BulkUploadDialog({ classId, sectionId, onSuccess }: Prop
 
                         if (data.type === "START") {
                             totalRows = data.total
-                            setLogs(prev => [...prev, { type: "INFO", message: `Starting upload of ${data.total} students...` }])
+                            setLogs(prev => [...prev, { type: "INFO", message: `Starting upload of ${data.total} schools...` }])
                         } 
                         else if (data.type === "PROGRESS") {
                             processedRows++
@@ -129,7 +115,7 @@ export default function BulkUploadDialog({ classId, sectionId, onSuccess }: Prop
                             }
 
                             if (data.status === "SUCCESS") {
-                                setLogs(prev => [...prev, { type: "SUCCESS", message: `Row ${data.row}: ${data.name} added.`, row: data.row }])
+                                setLogs(prev => [...prev, { type: "SUCCESS", message: `Row ${data.row}: ${data.name} created.`, row: data.row }])
                             } else {
                                 setLogs(prev => [...prev, { type: "ERROR", message: `Row ${data.row}: ${data.message}`, row: data.row }])
                             }
@@ -139,7 +125,7 @@ export default function BulkUploadDialog({ classId, sectionId, onSuccess }: Prop
                             setUploading(false)
                             onSuccess() 
                             if (data.failed === 0) {
-                                toast({ title: "Upload Complete", description: `Successfully added ${data.added} students.` })
+                                toast({ title: "Upload Complete", description: `Successfully added ${data.added} schools.` })
                             } else {
                                 toast({ title: "Upload Finished", description: `${data.added} added, ${data.failed} failed. Check logs.`, variant: "destructive" })
                             }
@@ -163,6 +149,7 @@ export default function BulkUploadDialog({ classId, sectionId, onSuccess }: Prop
 
     return (
         <Dialog open={open} onOpenChange={(val) => {
+            // Prevent closing ONLY during active upload processing
             if (!uploading) {
                 setOpen(val)
                 if (!val) setTimeout(resetState, 300) 
@@ -175,11 +162,11 @@ export default function BulkUploadDialog({ classId, sectionId, onSuccess }: Prop
                 </Button>
             </DialogTrigger>
             
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className={cn("sm:max-w-[600px]", uploading && "[&>button]:hidden")}>
                 <DialogHeader>
-                    <DialogTitle>Bulk Upload Students</DialogTitle>
+                    <DialogTitle>Bulk Upload Schools</DialogTitle>
                     <DialogDescription>
-                        Upload a CSV file to add multiple students to this section at once.
+                        Upload a CSV file to add multiple schools and their admins at once.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -198,7 +185,7 @@ export default function BulkUploadDialog({ classId, sectionId, onSuccess }: Prop
                                 />
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Headers: name, rollNo, parentName, parentEmail, firstLanguage, password (if new parent).
+                                Headers: name, email, password, location, classRange (e.g. 8, 10, 12), board, languages.
                             </p>
                         </div>
                     )}
@@ -260,7 +247,7 @@ export default function BulkUploadDialog({ classId, sectionId, onSuccess }: Prop
 
                 {!uploading && !summary && (
                     <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => setOpen(false)} className="cursor-pointer">Cancel</Button>
+                        <Button variant="outline" className="cursor-pointer" onClick={() => setOpen(false)}>Cancel</Button>
                         <Button onClick={handleUpload} className="cursor-pointer" disabled={!file}>
                             <FileSpreadsheet className="h-4 w-4 mr-2" />
                             Start Upload

@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
                             finalPassword = data.password;
                             isNewParent = true;
                             
-                            const hashedPassword = await bcrypt.hash(finalPassword, 10);
+                            const hashedPassword = await bcrypt.hash(finalPassword, 12);
                             const newParent = await tx.user.create({
                                 data: {
                                     name: data.parentName,

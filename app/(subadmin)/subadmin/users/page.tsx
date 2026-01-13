@@ -89,7 +89,7 @@ export default function SubAdminUsersPage() {
               activeTab="users"
               schoolId={schoolId}
               classItem={selectedClass}
-              sectionId={selectedSection.id}
+              sectionItem={selectedSection}
               onBack={() => setSelectedSection(null)}
             />
           )}
