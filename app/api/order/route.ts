@@ -17,6 +17,11 @@ const createOrderValidation = z.object({
   landmark: z.string().min(1, "Landmark is required"),
   pincode: z.string().min(6, "Valid pincode is required"),
 
+  // Razorpay fields (optional for cash orders)
+  razorpayOrderId: z.string().optional(),
+  razorpayPaymentId: z.string().optional(),
+  razorpaySignature: z.string().optional(),
+
   items: z.array(
     z.object({
       productId: z.string().uuid("Invalid Product ID"),
@@ -45,7 +50,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
         return NextResponse.json({ success: false, message: "Validation error", errors }, { status: 400 });
     }
 
-    const { studentId, items, paymentMethod, phone, landmark, pincode } = validation.data;
+    const { studentId, items, paymentMethod, phone, landmark, pincode, razorpayOrderId, razorpayPaymentId, razorpaySignature } = validation.data;
 
     
     const student = await prisma.student.findUnique({ 
@@ -145,7 +150,10 @@ export const POST = Wrapper(async (req: NextRequest) => {
               orderId: order.id,
               amount: totalAmount,
               method: paymentMethod,
-              status: "PENDING"
+              status: paymentMethod === "Razorpay" ? "SUCCESS" : "PENDING",
+              razorpayOrderId,
+              razorpayPaymentId,
+              razorpaySignature
           }
       });
 

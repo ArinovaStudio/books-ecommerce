@@ -96,7 +96,7 @@ model Student {
   parentId String?
   schoolId String
   classId String
-  sectionId String
+  sectionId String?                    // ADD ? HERE
   name String
   rollNo String
   section String
@@ -111,7 +111,7 @@ model Student {
   parent User? @relation("ParentStudents", fields: [parentId], references: [id])
   school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   class Class @relation(fields: [classId], references: [id])
-  sectionDetails Section @relation(fields: [sectionId], references: [id])
+  sectionDetails Section? @relation(fields: [sectionId], references: [id])  // ADD ? HERE TOO
 
   orders Order[] @relation("StudentOrders") 
 
@@ -133,7 +133,7 @@ model Product {
   price Float
   category ProductCategory
   stock Int
-  // minQuantity Int
+  minQuantity Int @default(1)          // ADD @default(1) HERE
   brand String?
   type String?
   image String?
@@ -189,6 +189,9 @@ model Payment {
   amount Float
   status PaymentStatus @default(PENDING)
   method String
+  razorpayOrderId String?
+  razorpayPaymentId String?
+  razorpaySignature String?
   createdAt DateTime @default(now())
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
