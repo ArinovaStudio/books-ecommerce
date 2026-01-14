@@ -60,6 +60,7 @@ export function GuardianForm() {
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [products, setProducts] = useState<Product[]>([])
+  const [selectedProducts, setSelectedProducts] = useState<Record<string, { checked: boolean; quantity: number }>>({})
   const [user, setUser] = useState<any>(null)
   const [school, setSchool] = useState<any>(null)
 
@@ -116,7 +117,20 @@ export function GuardianForm() {
         }),
       });
       const data = await res.json()
-      setProducts(data.success ? data.data : [])
+      const allProducts = data.success ? data.data : []
+      
+      const storedSelection = localStorage.getItem('selectedProducts')
+      if (storedSelection) {
+        const selected = JSON.parse(storedSelection)
+        const selectionMap: Record<string, { checked: boolean; quantity: number }> = {}
+        selected.forEach((item: any) => {
+          selectionMap[item.id] = { checked: item.checked, quantity: item.quantity }
+        })
+        setSelectedProducts(selectionMap)
+        localStorage.removeItem('selectedProducts')
+      }
+      
+      setProducts(allProducts)
     } catch (err) {
       console.error("Failed to fetch products", err)
     } finally {
@@ -126,8 +140,11 @@ export function GuardianForm() {
 
   const groupedByCategory = products.reduce((acc, product) => {
     const category = product.category as "TEXTBOOK" | "NOTEBOOK" | "STATIONARY"
-    if (!acc[category]) acc[category] = []
-    acc[category].push(product)
+    const selection = selectedProducts[product.id]
+    if (selection && selection.checked) {
+      if (!acc[category]) acc[category] = []
+      acc[category].push({ ...product, stock: selection.quantity })
+    }
     return acc
   }, {} as Record<"TEXTBOOK" | "NOTEBOOK" | "STATIONARY", Product[]>)
 
@@ -270,6 +287,13 @@ export function GuardianForm() {
   }
 
   const sendFinalOrder = async (payment: any) => {
+    const orderItems = products
+      .filter(p => selectedProducts[p.id]?.checked)
+      .map(p => ({
+        productId: p.id,
+        quantity: selectedProducts[p.id]?.quantity || p.stock,
+      }))
+
     const res = await fetch("/api/order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -282,10 +306,7 @@ export function GuardianForm() {
         razorpayOrderId: payment.razorpay_order_id,
         razorpayPaymentId: payment.razorpay_payment_id,
         razorpaySignature: payment.razorpay_signature,
-        items: products.map(p => ({
-          productId: p.id,
-          quantity: p.stock,
-        })),
+        items: orderItems,
       }),
     })
 
