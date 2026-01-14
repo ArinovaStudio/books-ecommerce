@@ -123,7 +123,7 @@ export const PUT = Wrapper(async(req: NextRequest, { params }: { params: Promise
         if (email || password) {
           let hash = undefined
           if (password) {
-            hash = await bcrypt.hash(password, 10)
+            hash = await bcrypt.hash(password, 12)
           }
           await tx.user.update({
             where: {id: existingSchool[0].subAdmins[0].id},
@@ -157,6 +157,26 @@ export const DELETE = Wrapper(async (req: NextRequest, { params }: { params: Pro
 
     if (auth.user.role !== "ADMIN") {
        return NextResponse.json({ success: false, message: "Only Admin can delete schools" }, { status: 403 });
+    }
+
+    const schoolProducts = await prisma.product.findMany({
+      where: { class: { schoolId } },
+      select: { image: true }
+    });
+
+    // Delete all product images link to the school
+    if (schoolProducts.length > 0) {
+      await Promise.all(
+        schoolProducts.map(async (product) => {
+          if (product.image) {
+            try {
+              await deleteImage(product.image);
+            } catch (err) {
+              console.error("Failed to delete product image:", product.image, err);
+            }
+          }
+        })
+      );
     }
 
     if (existingSchool.image) {

@@ -17,7 +17,7 @@ export async function GET() {
 
     // Create admin if not exists
     if (!admin) {
-      const hashedPassword = await bcrypt.hash(adminPassword, 10);
+      const hashedPassword = await bcrypt.hash(adminPassword, 12);
 
       admin = await prisma.user.create({
         data: {

@@ -151,7 +151,7 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionItem, 
                     <AddUserDialog
                         schoolId={schoolId}
                         classItem={classItem}
-                        sectionId={sectionId}
+                        sectionItem={sectionItem}
                         onStudentAdded={fetchUsers}
                     />
                 </div>

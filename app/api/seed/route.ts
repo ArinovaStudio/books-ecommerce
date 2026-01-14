@@ -22,9 +22,9 @@ export async function GET(req: NextRequest) {
     try {
         console.log("--- Starting Seeding Process ---");
 
-        const commonAdminPass = await bcrypt.hash("admin123", 10);
-        const commonSchoolPass = await bcrypt.hash("school123", 10);
-        const commonUserPass = await bcrypt.hash("user123", 10);
+        const commonAdminPass = await bcrypt.hash("admin123", 12);
+        const commonSchoolPass = await bcrypt.hash("school123", 12);
+        const commonUserPass = await bcrypt.hash("user123", 12);
 
         // Create Super Admin
         const adminEmail = "admin@globe.com";

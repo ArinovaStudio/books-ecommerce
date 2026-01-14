@@ -60,7 +60,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
         if (data.authenticated) {
             const selectedData = products.map(p => {
                 const category = p.category.toUpperCase()
-                const isOptional = category === 'NOTEBOOK' || category === 'STATIONARY'
+                const isOptional = category === 'NOTEBOOK' || category === 'STATIONARY' || category === "OTHER"
                 const itemData = selectedItems[p.id]
                 return {
                     id: p.id,
@@ -149,9 +149,10 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
     }, {} as Record<string, Product[]>)
 
     const categoryTitles = {
-        TEXTBOOK: "Textbooks",
+        TEXTBOOK: "List of Books",
         NOTEBOOK: "Notebooks",
         STATIONARY: "Stationary",
+        OTHER: "Others"
     }
 
     const handleCheckboxChange = (productId: string, checked: boolean) => {
@@ -174,7 +175,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
 
     const renderRow = (product: Product) => {
         const category = product.category.toUpperCase()
-        const showCheckbox = category === 'NOTEBOOK' || category === 'STATIONARY'
+        const showCheckbox = category === 'NOTEBOOK' || category === 'STATIONARY' || category === 'OTHER'
         const isChecked = selectedItems[product.id]?.checked ?? true
         const quantity = selectedItems[product.id]?.quantity ?? product.minQuantity
         const displayPrice = product.price * quantity
@@ -331,7 +332,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                                     </h3>
                                     <div className="border rounded-lg overflow-hidden bg-card shadow-sm">
                                         <div className="grid grid-cols-12 gap-4 bg-muted/50 px-6 py-3 font-semibold text-sm border-b">
-                                            {(category === 'NOTEBOOK' || category === 'STATIONARY') && (
+                                            {(category === 'NOTEBOOK' || category === 'STATIONARY' || category === "OTHER") && (
                                                 <span className="col-span-1 text-center">Select</span>
                                             )}
                                             <span className="col-span-1 text-center">Product</span>

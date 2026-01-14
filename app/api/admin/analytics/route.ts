@@ -25,25 +25,27 @@ export const GET = Wrapper(async (req: NextRequest) => {
         usersHistory,
         schoolsHistory,
         ordersHistory,
-        trafficLogs 
+        trafficLogs,
+        activeSchoolsCount 
     ] = await Promise.all([
         prisma.user.count(),
         prisma.user.count({ where: { createdAt: { lt: new Date(now.getFullYear(), now.getMonth(), 1) } } }),
         prisma.school.count(),
         prisma.school.count({ where: { createdAt: { lt: new Date(now.getFullYear(), now.getMonth(), 1) } } }),
         prisma.order.count(),
-        prisma.order.aggregate({ _sum: { totalAmount: true }, where: { status: "SUCCESS" } }),
+        prisma.payment.aggregate({ _sum: { amount: true }, where: { status: "SUCCESS" } }), 
         prisma.user.findMany({ where: { createdAt: { gte: sixMonthsAgo } }, select: { createdAt: true } }),
         prisma.school.findMany({ where: { createdAt: { gte: sixMonthsAgo } }, select: { createdAt: true } }),
-        prisma.order.findMany({ where: { createdAt: { gte: sixMonthsAgo }, status: "SUCCESS" }, select: { createdAt: true, totalAmount: true } }),
+        prisma.payment.findMany({ where: { createdAt: { gte: sixMonthsAgo }, status: "SUCCESS" }, select: { createdAt: true, amount: true } }), 
         
         prisma.apiTraffic.findMany({
             where: { hour: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
             orderBy: { hour: 'asc' }
-        })
+        }),
+        prisma.school.count({ where: { status: "ACTIVE" } })
     ]);
 
-    const totalRevenue = totalRevenueResult._sum.totalAmount || 0;
+    const totalRevenue = totalRevenueResult._sum.amount || 0; 
 
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const analyticsMap = new Map<string, { users: number, schools: number, revenue: number }>();
@@ -68,11 +70,11 @@ export const GET = Wrapper(async (req: NextRequest) => {
     fillMap(usersHistory, 'users');
     fillMap(schoolsHistory, 'schools');
 
-    ordersHistory.forEach(order => {
-        const m = monthNames[new Date(order.createdAt).getMonth()];
+    ordersHistory.forEach(payment => {
+        const m = monthNames[new Date(payment.createdAt).getMonth()];
         if (analyticsMap.has(m)) {
             const entry = analyticsMap.get(m)!;
-            entry.revenue += order.totalAmount;
+            entry.revenue += payment.amount;
             analyticsMap.set(m, entry);
         }
     });
@@ -105,7 +107,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
       success: true,
       stats: [
         { label: "Total Users", value: totalUsers.toLocaleString(), change: "All time" },
-        { label: "Active Schools", value: totalSchools.toLocaleString(), change: "All time" },
+        { label: "Active Schools", value: activeSchoolsCount.toLocaleString(), change: "All time" }, 
         { label: "Total Revenue", value: "₹" + totalRevenue.toLocaleString(), change: "All time" },
         { label: "24h Requests", value: totalRequests24h.toLocaleString(), change: "Last 24h" },
       ],

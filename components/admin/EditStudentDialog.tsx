@@ -98,7 +98,7 @@ export default function EditStudentDialog({
                 parentEmail: student.parent.email || student.parentEmail || "",
                 parentName: student.parent.name || "",
                 dob: student.dob ? new Date(student.dob).toISOString().split('T')[0] : "",
-                gender: student.gender || "",
+                gender: student.gender ? student.gender.toLowerCase() : "",
                 bloodGroup: student.bloodGroup || "",
             })
         }

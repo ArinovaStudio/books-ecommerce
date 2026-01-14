@@ -350,8 +350,7 @@ export default function AddEditProductDialog({
               variant="outline"
               onClick={() => {
                 setOpen(false),
-                  setProducts && setProducts([]),
-                  setImagePreview(null);
+                setImagePreview(null);
               }}
             >
               Cancel
