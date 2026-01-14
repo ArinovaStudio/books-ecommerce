@@ -25,10 +25,15 @@ type Class = {
   name: string
 }
 
+type Section = {
+  id: string
+  name: string
+}
+
 export default function UsersPage() {
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null)
   const [selectedClass, setSelectedClass] = useState<Class | null>(null)
-  const [selectedSection, setSelectedSection] = useState<string | null>(null)
+  const [selectedSection, setSelectedSection] = useState<Section | null>(null)
 
   return (
     <>
@@ -79,7 +84,7 @@ export default function UsersPage() {
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbPage>
-                    {selectedSection || 'Section'}
+                    {selectedSection?.name || 'Section'}
                   </BreadcrumbPage>
                 </BreadcrumbItem>
               </>
@@ -121,7 +126,7 @@ export default function UsersPage() {
               activeTab="users"
               schoolId={selectedSchool.id}
               classItem={selectedClass}
-              sectionId={selectedSection}
+              sectionItem={selectedSection}
               onBack={() => setSelectedSection(null)}
             />
           )}

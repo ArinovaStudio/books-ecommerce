@@ -202,6 +202,12 @@ export const DELETE = Wrapper(async (req: NextRequest, { params }: { params: Pro
     }
 
     await prisma.$transaction(async (tx) => {
+
+        // Delete students associated with section
+        await tx.student.deleteMany({
+            where: { sectionId }
+        });
+
         await tx.section.delete({ where: { id: sectionId } });
 
         const allSections = await tx.section.findMany({

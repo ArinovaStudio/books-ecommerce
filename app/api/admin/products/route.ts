@@ -22,12 +22,13 @@ export const POST = Wrapper(async (req: NextRequest) => {
         const brand = formData.get("brand") as string;
         const price = formData.get("price") as string;
         const category = formData.get("category") as string;
+        const minQuantity = formData.get("minQuantity") as string;
         const stock = formData.get("stock") as string;
         const imageFile = formData.get("image") as File | null;
         const classId = formData.get("classId") as string;
-        const schoolId = formData.get("schoolId") as string;
-        if (!name || !description || !price || !category || !stock) {
-            return NextResponse.json({ success: false, message: "All fields are required" }, { status: 400 });
+        
+        if (!name || !description || !price || !category) {
+            return NextResponse.json({ success: false, message: "All required fields must be filled" }, { status: 400 });
         }
 
         let imageUrl = null;
@@ -44,11 +45,12 @@ export const POST = Wrapper(async (req: NextRequest) => {
                 name,
                 description,
                 price: parseFloat(price),
-                brand,
+                brand: brand || null,
                 category: category as "TEXTBOOK" | "NOTEBOOK" | "STATIONARY" | "OTHER",
-                stock: parseInt(stock),
+                stock: stock ? parseInt(stock) : 100, 
+                minQuantity: minQuantity ? parseInt(minQuantity) : 1,
                 image: imageUrl,
-                classId: classId
+                classId: classId,
             }
         });
 

@@ -34,7 +34,7 @@ type Props = {
     schoolId: string
     school: string 
     classes: { id: string, name: string }
-    onSelectSection?: (section: string) => void
+    onSelectSection?: (section: { id: string, name: string }) => void
     onBack?: () => void
 }
 
@@ -300,7 +300,7 @@ export default function SchoolSection({
                             key={sec.id} 
                             onClick={
                                 onSelectSection
-                                    ? () => onSelectSection(sec.name) 
+                                    ? () => onSelectSection({ id: sec.id, name: sec.name }) 
                                     : undefined
                             }
                             className="group relative cursor-pointer hover:shadow-md transition-all"

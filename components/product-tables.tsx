@@ -27,6 +27,7 @@ type Product = {
     category: string
     class?: string
     stock: number
+    minQuantity: number
     brand: string
     price: number
     image: string
