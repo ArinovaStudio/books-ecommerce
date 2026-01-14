@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { z } from "zod";
 import { verifyAdmin } from "@/lib/verify";
 import { parse } from "csv-parse/sync";
+import { Wrapper } from "@/lib/api-handler";
 
 const bulkProductRowSchema = z.object({
     name: z.string({ required_error: "Product Name is required" }).min(1),
@@ -16,7 +17,7 @@ const bulkProductRowSchema = z.object({
 
 const ALLOWED_CATEGORIES = ["TEXTBOOK", "NOTEBOOK", "STATIONARY", "OTHER"];
 
-export async function POST(req: NextRequest) {
+export const POST = Wrapper(async (req: NextRequest) => {
     const auth = await verifyAdmin(req);
     if (!auth.success) {
         return NextResponse.json({ success: false, message: auth.message || "Unauthorized" }, { status: 403 });
@@ -116,4 +117,4 @@ export async function POST(req: NextRequest) {
             "Connection": "keep-alive",
         },
     });
-}
+})
