@@ -68,7 +68,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                     quantity: itemData?.quantity ?? p.stock
                 }
             }).filter(item => item.checked)
-            
+
             localStorage.setItem('selectedProducts', JSON.stringify(selectedData))
             const query = new URLSearchParams({
                 schoolId: params.schoolId,
@@ -178,119 +178,120 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
         const quantity = selectedItems[product.id]?.quantity ?? product.stock
 
         return (
-        <div
-            key={product.id}
-            className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center px-6 py-4 hover:bg-muted/30 transition border-b last:border-0"
-        >
-            {showCheckbox && (
+            <div
+                key={product.id}
+                className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center px-6 py-4 hover:bg-muted/30 transition border-b last:border-0"
+            >
+                {showCheckbox && (
+                    <div className="md:col-span-1 flex justify-center">
+                        <Checkbox
+                            className="border border-2 border-muted"
+                            checked={isChecked}
+                            onCheckedChange={(checked) => handleCheckboxChange(product.id, checked as boolean)}
+                        />
+                    </div>
+                )}
+
                 <div className="md:col-span-1 flex justify-center">
-                    <Checkbox
-                        checked={isChecked}
-                        onCheckedChange={(checked) => handleCheckboxChange(product.id, checked as boolean)}
+                    <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-14 h-14 rounded-md object-cover border bg-white"
                     />
                 </div>
-            )}
 
-            <div className="md:col-span-1 flex justify-center">
-                <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-14 h-14 rounded-md object-cover border bg-white"
-                />
-            </div>
-
-            <div className="md:col-span-3 flex flex-col min-w-0">
-                <span className="font-semibold text-sm truncate">
-                    {product.name}
-                </span>
-                <div className="md:hidden mt-2 flex gap-2 text-xs">
-                    <Badge variant="secondary" className="text-xs">{product.brand}</Badge>
-                    <span className="text-muted-foreground">Stock: {product.stock}</span>
+                <div className="md:col-span-3 flex flex-col min-w-0">
+                    <span className="font-semibold text-sm truncate">
+                        {product.name}
+                    </span>
+                    <div className="md:hidden mt-2 flex gap-2 text-xs">
+                        <Badge variant="secondary" className="text-xs">{product.brand}</Badge>
+                        <span className="text-muted-foreground">Stock: {product.stock}</span>
+                    </div>
                 </div>
-            </div>
 
-            <div className="hidden md:flex md:col-span-2 justify-center">
-                <Badge variant="secondary" className="text-xs uppercase">
-                    {product.brand}
-                </Badge>
-            </div>
-
-            <div className="hidden md:flex md:col-span-1 justify-center font-semibold text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                    <Button
-                        size="icon"
-                        variant="outline"
-                        className="h-6 w-6"
-                        onClick={() => handleQuantityChange(product.id, -1, product.stock)}
-                        disabled={showCheckbox && !isChecked}
-                    >
-                        <Minus className="w-3 h-3" />
-                    </Button>
-                    <span className="w-8 text-center">{quantity}</span>
-                    <Button
-                        size="icon"
-                        variant="outline"
-                        className="h-6 w-6"
-                        onClick={() => handleQuantityChange(product.id, 1, product.stock)}
-                        disabled={showCheckbox && !isChecked}
-                    >
-                        <Plus className="w-3 h-3" />
-                    </Button>
+                <div className="hidden md:flex md:col-span-2 justify-center">
+                    <Badge variant="secondary" className="text-xs uppercase">
+                        {product.brand}
+                    </Badge>
                 </div>
-            </div>
 
-            <div className="hidden md:flex md:col-span-2 justify-center text-muted-foreground text-sm">
-                {product.description}
-            </div>
-
-            <div className="md:col-span-2 flex justify-center md:justify-end">
-                <span className="font-bold text-base">₹{product.price}</span>
-            </div>
-
-            {isAdmin && (
-                <div className="md:col-span-1 flex items-center justify-end gap-2">
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button size="icon" variant="ghost" className="h-8 w-8">
-                                <Trash2 className="w-4 h-4" />
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Delete this product?</DialogTitle>
-                                <DialogDescription>
-                                    This action cannot be undone.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <DialogFooter>
-                                <DialogClose asChild>
-                                    <Button variant="outline">Cancel</Button>
-                                </DialogClose>
-                                <DialogClose asChild>
-                                    <Button
-                                        variant="destructive"
-                                        onClick={() => handleDelete(product.id)}
-                                    >
-                                        Delete
-                                    </Button>
-                                </DialogClose>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-
-                    <AddEditProductDialog
-                        product={product}
-                        onSuccess={fetchProducts}
-                        setProducts={setProducts}
-                        trigger={
-                            <Button size="icon" variant="ghost" className="h-8 w-8">
-                                <Pencil className="w-4 h-4" />
-                            </Button>
-                        }
-                    />
+                <div className="hidden md:flex md:col-span-1 justify-center font-semibold text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                        <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-6 w-6"
+                            onClick={() => handleQuantityChange(product.id, -1, product.stock)}
+                            disabled={showCheckbox && !isChecked}
+                        >
+                            <Minus className="w-3 h-3" />
+                        </Button>
+                        <span className="w-8 text-center">{quantity}</span>
+                        <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-6 w-6"
+                            onClick={() => handleQuantityChange(product.id, 1, product.stock)}
+                            disabled={showCheckbox && !isChecked}
+                        >
+                            <Plus className="w-3 h-3" />
+                        </Button>
+                    </div>
                 </div>
-            )}
-        </div>
+
+                <div className="hidden md:flex md:col-span-2 justify-center text-muted-foreground text-sm">
+                    {product.description}
+                </div>
+
+                <div className="md:col-span-2 flex justify-center md:justify-end">
+                    <span className="font-bold text-base">₹{product.price}</span>
+                </div>
+
+                {isAdmin && (
+                    <div className="md:col-span-1 flex items-center justify-end gap-2">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button size="icon" variant="ghost" className="h-8 w-8">
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Delete this product?</DialogTitle>
+                                    <DialogDescription>
+                                        This action cannot be undone.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <DialogClose asChild>
+                                        <Button variant="outline">Cancel</Button>
+                                    </DialogClose>
+                                    <DialogClose asChild>
+                                        <Button
+                                            variant="destructive"
+                                            onClick={() => handleDelete(product.id)}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </DialogClose>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+
+                        <AddEditProductDialog
+                            product={product}
+                            onSuccess={fetchProducts}
+                            setProducts={setProducts}
+                            trigger={
+                                <Button size="icon" variant="ghost" className="h-8 w-8">
+                                    <Pencil className="w-4 h-4" />
+                                </Button>
+                            }
+                        />
+                    </div>
+                )}
+            </div>
         )
     }
 
@@ -305,13 +306,13 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                 <div className="flex justify-end mb-6">
                     {
                         products.length > 0 && (
-                    <button
-                        type="button"
-                        onClick={handleNextClick}
-                        className="bg-blue-600 text-white rounded-lg px-8 py-2.5 hover:bg-blue-700 transition-colors font-medium"
-                    >
-                        Next
-                    </button>
+                            <button
+                                type="button"
+                                onClick={handleNextClick}
+                                className="bg-blue-600 text-white rounded-lg px-8 py-2.5 hover:bg-blue-700 transition-colors font-medium"
+                            >
+                                Next
+                            </button>
                         )
                     }
                 </div>
@@ -320,32 +321,32 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                     <div className="text-center py-12 text-muted-foreground">Loading...</div>
                 ) : (
                     products.length > 0 ? (
-                    <div className="space-y-8">
-                        {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
-                            <div key={category}>
-                                <h3 className="text-lg font-semibold mb-4 px-2">
-                                    {categoryTitles[category as keyof typeof categoryTitles]}
-                                </h3>
-                                <div className="border rounded-lg overflow-hidden bg-card shadow-sm">
-                                    <div className="grid grid-cols-12 gap-4 bg-muted/50 px-6 py-3 font-semibold text-sm border-b">
-                                        {(category === 'NOTEBOOK' || category === 'STATIONARY') && (
-                                            <span className="col-span-1 text-center">Select</span>
-                                        )}
-                                        <span className="col-span-1 text-center">Product</span>
-                                        <span className="col-span-3">Name</span>
-                                        <span className="col-span-2 text-center">Brand</span>
-                                        <span className="col-span-1 text-center">Quantity</span>
-                                        <span className="col-span-2 text-center">Description</span>
-                                        <span className="col-span-2 text-center md:text-right">Price</span>
-                                        {isAdmin && <span className="col-span-1 text-right">Actions</span>}
+                        <div className="space-y-8">
+                            {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
+                                <div key={category}>
+                                    <h3 className="text-lg font-semibold mb-4 px-2">
+                                        {categoryTitles[category as keyof typeof categoryTitles]}
+                                    </h3>
+                                    <div className="border rounded-lg overflow-hidden bg-card shadow-sm">
+                                        <div className="grid grid-cols-12 gap-4 bg-muted/50 px-6 py-3 font-semibold text-sm border-b">
+                                            {(category === 'NOTEBOOK' || category === 'STATIONARY') && (
+                                                <span className="col-span-1 text-center">Select</span>
+                                            )}
+                                            <span className="col-span-1 text-center">Product</span>
+                                            <span className="col-span-3">Name</span>
+                                            <span className="col-span-2 text-center">Brand</span>
+                                            <span className="col-span-1 text-center">Quantity</span>
+                                            <span className="col-span-2 text-center">Description</span>
+                                            <span className="col-span-2 text-center md:text-right">Price</span>
+                                            {isAdmin && <span className="col-span-1 text-right">Actions</span>}
+                                        </div>
+                                        {categoryProducts.map(renderRow)}
                                     </div>
-                                    {categoryProducts.map(renderRow)}
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
                     ) : (
-                    <div className="text-center py-12 text-muted-foreground">NO Products Found</div>
+                        <div className="text-center py-12 text-muted-foreground">NO Products Found</div>
                     )
 
                 )}
