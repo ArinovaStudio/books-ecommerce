@@ -26,7 +26,7 @@ type Product = {
     description: string
     category: string
     class?: string
-    stock: number
+    minQuantity: number
     minQuantity: number
     brand: string
     price: number
@@ -66,7 +66,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                 return {
                     id: p.id,
                     checked: isOptional ? (itemData?.checked ?? true) : true,
-                    quantity: itemData?.quantity ?? p.stock
+                    quantity: itemData?.quantity ?? p.minQuantity
                 }
             }).filter(item => item.checked)
 
@@ -134,7 +134,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
     useEffect(() => {
         const initialSelection: Record<string, { checked: boolean; quantity: number }> = {}
         products.forEach(product => {
-            initialSelection[product.id] = { checked: true, quantity: product.stock }
+            initialSelection[product.id] = { checked: true, quantity: product.minQuantity }
         })
         setSelectedItems(initialSelection)
         const total = products.reduce((sum, p) => sum + p.price, 0)
@@ -176,7 +176,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
         const category = product.category.toUpperCase()
         const showCheckbox = category === 'NOTEBOOK' || category === 'STATIONARY'
         const isChecked = selectedItems[product.id]?.checked ?? true
-        const quantity = selectedItems[product.id]?.quantity ?? product.stock
+        const quantity = selectedItems[product.id]?.quantity ?? product.minQuantity
 
         return (
             <div
@@ -207,7 +207,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                     </span>
                     <div className="md:hidden mt-2 flex gap-2 text-xs">
                         <Badge variant="secondary" className="text-xs">{product.brand}</Badge>
-                        <span className="text-muted-foreground">Stock: {product.stock}</span>
+                        <span className="text-muted-foreground">Stock: {product.minQuantity}</span>
                     </div>
                 </div>
 
@@ -223,7 +223,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                             size="icon"
                             variant="outline"
                             className="h-6 w-6"
-                            onClick={() => handleQuantityChange(product.id, -1, product.stock)}
+                            onClick={() => handleQuantityChange(product.id, -1, product.minQuantity)}
                             disabled={showCheckbox && !isChecked}
                         >
                             <Minus className="w-3 h-3" />
@@ -233,7 +233,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                             size="icon"
                             variant="outline"
                             className="h-6 w-6"
-                            onClick={() => handleQuantityChange(product.id, 1, product.stock)}
+                            onClick={() => handleQuantityChange(product.id, 1, product.minQuantity)}
                             disabled={showCheckbox && !isChecked}
                         >
                             <Plus className="w-3 h-3" />

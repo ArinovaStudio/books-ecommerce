@@ -32,7 +32,6 @@ type Product = {
   category: string
   class?: Class
   stock: number
-  minQuantity: number
   brand: string
   price: number
   image: string | null
@@ -152,7 +151,7 @@ export function GuardianForm() {
   const categoryTotals = Object.entries(groupedByCategory).reduce(
     (acc, [category, items]) => {
       acc[category as keyof typeof acc] = items.reduce(
-        (sum, product) => sum + product.price * product.minQuantity,
+        (sum, product) => sum + product.price * product.stock,
         0
       )
       return acc
@@ -486,10 +485,10 @@ export function GuardianForm() {
                         className="flex justify-between text-sm pl-3"
                       >
                         <span>
-                          {product.name} × {product.minQuantity}
+                          {product.name} × {product.stock}
                         </span>
                         <span>
-                          ₹{product.price * product.minQuantity}
+                          ₹{product.price * product.stock}
                         </span>
                       </div>
                     ))}
