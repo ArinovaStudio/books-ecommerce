@@ -211,7 +211,7 @@ export default function AddEditProductDialog({
             </Button>
           )}
         </DialogTrigger>
-        {!trigger && <><Input
+        {/* {!trigger && <><Input
           type="file"
           accept=".csv"
           
@@ -225,7 +225,7 @@ export default function AddEditProductDialog({
             Add Products with CSV
             {fileLoading && <Loader2 className="animate-spin"/>}
           </Label>
-        </Button></>}
+        </Button></>} */}
       </div>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

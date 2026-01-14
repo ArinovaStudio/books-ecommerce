@@ -17,6 +17,7 @@ import { Trash2, Pencil, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import AddEditProductDialog from "../AddProduct";
 import { useToast } from "@/hooks/use-toast";
+import BulkUploadProductDialog from "./BulkUploadProductDialog";
 
 type Product = {
   id: string;
@@ -223,12 +224,19 @@ export default function FilteredProductTable({
           <CardTitle className="text-xl md:text-2xl font-bold tracking-tight">
             Included Items
           </CardTitle>
-          <AddEditProductDialog
-            selectedSchool={selectedSchool}
-            selectedClass={selectedClass}
-            onSuccess={fetchProducts}
-            setProducts={setProducts}
-          />
+          <div className="flex gap-2">
+                <BulkUploadProductDialog 
+                    classId={selectedClass} 
+                    onSuccess={fetchProducts} 
+                />
+
+                <AddEditProductDialog
+                    selectedSchool={selectedSchool}
+                    selectedClass={selectedClass}
+                    onSuccess={fetchProducts}
+                    setProducts={setProducts}
+                />
+            </div>
         </div>
       </CardHeader>
 
