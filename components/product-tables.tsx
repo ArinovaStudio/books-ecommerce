@@ -13,8 +13,9 @@ import {
     DialogClose,
 } from "@/components/ui/dialog"
 import { Button } from "./ui/button"
-import { Trash2, Pencil } from "lucide-react"
+import { Trash2, Pencil, Plus, Minus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 import AddEditProductDialog from "./AddProduct"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
@@ -25,7 +26,6 @@ type Product = {
     description: string
     category: string
     class?: string
-    stock: number
     minQuantity: number
     brand: string
     price: number
@@ -50,6 +50,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
     const [loading, setLoading] = useState(false)
     const [totalPrice, setTotalPrice] = useState<number>(0)
     const [showAuthModal, setShowAuthModal] = useState(false)
+    const [selectedItems, setSelectedItems] = useState<Record<string, { checked: boolean; quantity: number }>>({})
     const router = useRouter()
 
     const handleNextClick = async () => {
@@ -57,6 +58,18 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
         const data = await res.json()
 
         if (data.authenticated) {
+            const selectedData = products.map(p => {
+                const category = p.category.toUpperCase()
+                const isOptional = category === 'NOTEBOOK' || category === 'STATIONARY'
+                const itemData = selectedItems[p.id]
+                return {
+                    id: p.id,
+                    checked: isOptional ? (itemData?.checked ?? true) : true,
+                    quantity: itemData?.quantity ?? p.minQuantity
+                }
+            }).filter(item => item.checked)
+
+            localStorage.setItem('selectedProducts', JSON.stringify(selectedData))
             const query = new URLSearchParams({
                 schoolId: params.schoolId,
                 classId: params.classId,
@@ -118,6 +131,11 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
     }, [])
 
     useEffect(() => {
+        const initialSelection: Record<string, { checked: boolean; quantity: number }> = {}
+        products.forEach(product => {
+            initialSelection[product.id] = { checked: true, quantity: product.minQuantity }
+        })
+        setSelectedItems(initialSelection)
         const total = products.reduce((sum, p) => sum + p.price, 0)
         setTotalPrice(total)
     }, [products])
@@ -135,101 +153,147 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
         STATIONARY: "Stationary",
     }
 
-    const renderRow = (product: Product) => (
-        <div
-            key={product.id}
-            className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center px-6 py-4 hover:bg-muted/30 transition border-b last:border-0"
-        >
-            {/* Image - 1 col */}
-            <div className="md:col-span-1 flex justify-center">
-                <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-14 h-14 rounded-md object-cover border bg-white"
-                />
-            </div>
+    const handleCheckboxChange = (productId: string, checked: boolean) => {
+        setSelectedItems(prev => ({
+            ...prev,
+            [productId]: { ...prev[productId], checked }
+        }))
+    }
 
-            {/* Name - 3 cols */}
-            <div className="md:col-span-3 flex flex-col min-w-0">
-                <span className="font-semibold text-sm truncate">
-                    {product.name}
-                </span>
-                <div className="md:hidden mt-2 flex gap-2 text-xs">
-                    <Badge variant="secondary" className="text-xs">{product.brand}</Badge>
-                    <span className="text-muted-foreground">Min Quantity: {product.minQuantity}</span>
-                </div>
-            </div>
+    const handleQuantityChange = (productId: string, delta: number, minBuy: number) => {
+        setSelectedItems(prev => {
+            const current = prev[productId]?.quantity || minBuy
+            const newQuantity = Math.max(minBuy, current + delta)
+            return {
+                ...prev,
+                [productId]: { ...prev[productId], quantity: newQuantity }
+            }
+        })
+    }
 
-            {/* Brand - 2 cols */}
-            <div className="hidden md:flex md:col-span-2 justify-center">
-                <Badge variant="secondary" className="text-xs uppercase">
-                    {product.brand}
-                </Badge>
-            </div>
+    const renderRow = (product: Product) => {
+        const category = product.category.toUpperCase()
+        const showCheckbox = category === 'NOTEBOOK' || category === 'STATIONARY'
+        const isChecked = selectedItems[product.id]?.checked ?? true
+        const quantity = selectedItems[product.id]?.quantity ?? product.minQuantity
 
-            {/* Min Quantity - 1 col */}
-            <div className="hidden md:flex md:col-span-1 justify-center font-semibold text-sm text-muted-foreground">
-                {product.minQuantity}
-            </div>
+        return (
+            <div
+                key={product.id}
+                className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center px-6 py-4 hover:bg-muted/30 transition border-b last:border-0"
+            >
+                {showCheckbox && (
+                    <div className="md:col-span-1 flex justify-center">
+                        <Checkbox
+                            className="border border-2 border-muted"
+                            checked={isChecked}
+                            onCheckedChange={(checked) => handleCheckboxChange(product.id, checked as boolean)}
+                        />
+                    </div>
+                )}
 
-            {/* Description - 2 cols */}
-            <div className="hidden md:flex md:col-span-2 justify-center text-muted-foreground text-sm">
-                {product.description}
-            </div>
-
-            {/* Price - 2 cols */}
-            <div className="md:col-span-2 flex justify-center md:justify-end">
-                <span className="font-bold text-base">₹{product.price}</span>
-            </div>
-
-            {/* Actions - 1 col */}
-            {isAdmin && (
-                <div className="md:col-span-1 flex items-center justify-end gap-2">
-                    {/* Delete */}
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button size="icon" variant="ghost" className="h-8 w-8">
-                                <Trash2 className="w-4 h-4" />
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Delete this product?</DialogTitle>
-                                <DialogDescription>
-                                    This action cannot be undone.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <DialogFooter>
-                                <DialogClose asChild>
-                                    <Button variant="outline">Cancel</Button>
-                                </DialogClose>
-                                <DialogClose asChild>
-                                    <Button
-                                        variant="destructive"
-                                        onClick={() => handleDelete(product.id)}
-                                    >
-                                        Delete
-                                    </Button>
-                                </DialogClose>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-
-                    {/* Edit */}
-                    <AddEditProductDialog
-                        product={product}
-                        onSuccess={fetchProducts}
-                        setProducts={setProducts}
-                        trigger={
-                            <Button size="icon" variant="ghost" className="h-8 w-8">
-                                <Pencil className="w-4 h-4" />
-                            </Button>
-                        }
+                <div className="md:col-span-1 flex justify-center">
+                    <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-14 h-14 rounded-md object-cover border bg-white"
                     />
                 </div>
-            )}
-        </div>
-    )
+
+                <div className="md:col-span-3 flex flex-col min-w-0">
+                    <span className="font-semibold text-sm truncate">
+                        {product.name}
+                    </span>
+                    <div className="md:hidden mt-2 flex gap-2 text-xs">
+                        <Badge variant="secondary" className="text-xs">{product.brand}</Badge>
+                        <span className="text-muted-foreground">Stock: {product.minQuantity}</span>
+                    </div>
+                </div>
+
+                <div className="hidden md:flex md:col-span-2 justify-center">
+                    <Badge variant="secondary" className="text-xs uppercase">
+                        {product.brand}
+                    </Badge>
+                </div>
+
+                <div className="hidden md:flex md:col-span-1 justify-center font-semibold text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                        <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-6 w-6"
+                            onClick={() => handleQuantityChange(product.id, -1, product.minQuantity)}
+                            disabled={showCheckbox && !isChecked}
+                        >
+                            <Minus className="w-3 h-3" />
+                        </Button>
+                        <span className="w-8 text-center">{quantity}</span>
+                        <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-6 w-6"
+                            onClick={() => handleQuantityChange(product.id, 1, product.minQuantity)}
+                            disabled={showCheckbox && !isChecked}
+                        >
+                            <Plus className="w-3 h-3" />
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="hidden md:flex md:col-span-2 justify-center text-muted-foreground text-sm">
+                    {product.description}
+                </div>
+
+                <div className="md:col-span-2 flex justify-center md:justify-end">
+                    <span className="font-bold text-base">₹{product.price}</span>
+                </div>
+
+                {isAdmin && (
+                    <div className="md:col-span-1 flex items-center justify-end gap-2">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button size="icon" variant="ghost" className="h-8 w-8">
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Delete this product?</DialogTitle>
+                                    <DialogDescription>
+                                        This action cannot be undone.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <DialogClose asChild>
+                                        <Button variant="outline">Cancel</Button>
+                                    </DialogClose>
+                                    <DialogClose asChild>
+                                        <Button
+                                            variant="destructive"
+                                            onClick={() => handleDelete(product.id)}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </DialogClose>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+
+                        <AddEditProductDialog
+                            product={product}
+                            onSuccess={fetchProducts}
+                            setProducts={setProducts}
+                            trigger={
+                                <Button size="icon" variant="ghost" className="h-8 w-8">
+                                    <Pencil className="w-4 h-4" />
+                                </Button>
+                            }
+                        />
+                    </div>
+                )}
+            </div>
+        )
+    }
 
     return (
         <Card className="border-none shadow-none bg-transparent">
@@ -240,17 +304,15 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
 
             <CardContent className="px-0">
                 <div className="flex justify-end mb-6">
-                   {/* {categoryProducts} */}
-
                     {
                         products.length > 0 && (
-                    <button
-                        type="button"
-                        onClick={handleNextClick}
-                        className="bg-blue-600 text-white rounded-lg px-8 py-2.5 hover:bg-blue-700 transition-colors font-medium"
-                    >
-                        Next
-                    </button>
+                            <button
+                                type="button"
+                                onClick={handleNextClick}
+                                className="bg-blue-600 text-white rounded-lg px-8 py-2.5 hover:bg-blue-700 transition-colors font-medium"
+                            >
+                                Next
+                            </button>
                         )
                     }
                 </div>
@@ -259,36 +321,36 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                     <div className="text-center py-12 text-muted-foreground">Loading...</div>
                 ) : (
                     products.length > 0 ? (
-                    <div className="space-y-8">
-                        {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
-                            <div key={category}>
-                                <h3 className="text-lg font-semibold mb-4 px-2">
-                                    {categoryTitles[category as keyof typeof categoryTitles]}
-                                </h3>
-                                <div className="border rounded-lg overflow-hidden bg-card shadow-sm">
-                                    {/* Header */}
-                                    <div className="grid grid-cols-12 gap-4 bg-muted/50 px-6 py-3 font-semibold text-sm border-b">
-                                        <span className="col-span-1 text-center">Product</span>
-                                        <span className="col-span-3">Name</span>
-                                        <span className="col-span-2 text-center">Brand</span>
-                                        <span className="col-span-1 text-center">Minimum Buy</span>
-                                        <span className="col-span-2 text-center">Description</span>
-                                        <span className="col-span-2 text-center md:text-right">Price</span>
-                                        {isAdmin && <span className="col-span-1 text-right">Actions</span>}
+                        <div className="space-y-8">
+                            {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
+                                <div key={category}>
+                                    <h3 className="text-lg font-semibold mb-4 px-2">
+                                        {categoryTitles[category as keyof typeof categoryTitles]}
+                                    </h3>
+                                    <div className="border rounded-lg overflow-hidden bg-card shadow-sm">
+                                        <div className="grid grid-cols-12 gap-4 bg-muted/50 px-6 py-3 font-semibold text-sm border-b">
+                                            {(category === 'NOTEBOOK' || category === 'STATIONARY') && (
+                                                <span className="col-span-1 text-center">Select</span>
+                                            )}
+                                            <span className="col-span-1 text-center">Product</span>
+                                            <span className="col-span-3">Name</span>
+                                            <span className="col-span-2 text-center">Brand</span>
+                                            <span className="col-span-1 text-center">Quantity</span>
+                                            <span className="col-span-2 text-center">Description</span>
+                                            <span className="col-span-2 text-center md:text-right">Price</span>
+                                            {isAdmin && <span className="col-span-1 text-right">Actions</span>}
+                                        </div>
+                                        {categoryProducts.map(renderRow)}
                                     </div>
-                                    {/* Rows */}
-                                    {categoryProducts.map(renderRow)}
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
                     ) : (
-                    <div className="text-center py-12 text-muted-foreground">NO Products Found</div>
+                        <div className="text-center py-12 text-muted-foreground">NO Products Found</div>
                     )
 
                 )}
 
-                {/* Auth Modal */}
                 {showAuthModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                         <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
