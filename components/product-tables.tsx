@@ -131,14 +131,15 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
     }, [])
 
     useEffect(() => {
-        const initialSelection: Record<string, { checked: boolean; quantity: number }> = {}
-        products.forEach(product => {
-            initialSelection[product.id] = { checked: true, quantity: product.minQuantity }
-        })
-        setSelectedItems(initialSelection)
-        const total = products.reduce((sum, p) => sum + p.price, 0)
+    const total = products.reduce((sum, product) => {
+            const item = selectedItems[product.id]
+            
+            if (!item || !item.checked) return sum
+            
+            return sum + (product.price * item.quantity)
+        }, 0)
         setTotalPrice(total)
-    }, [products])
+    }, [products, selectedItems])
 
     const groupedProducts = products.reduce((acc, product) => {
         const category = product.category.toUpperCase()
@@ -176,6 +177,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
         const showCheckbox = category === 'NOTEBOOK' || category === 'STATIONARY'
         const isChecked = selectedItems[product.id]?.checked ?? true
         const quantity = selectedItems[product.id]?.quantity ?? product.minQuantity
+        const displayPrice = product.price * quantity
 
         return (
             <div
@@ -206,7 +208,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                     </span>
                     <div className="md:hidden mt-2 flex gap-2 text-xs">
                         <Badge variant="secondary" className="text-xs">{product.brand}</Badge>
-                        <span className="text-muted-foreground">Stock: {product.minQuantity}</span>
+                        <span className="text-muted-foreground">Quantity: {product.minQuantity}</span>
                     </div>
                 </div>
 
@@ -245,7 +247,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                 </div>
 
                 <div className="md:col-span-2 flex justify-center md:justify-end">
-                    <span className="font-bold text-base">₹{product.price}</span>
+                    <span className="font-bold text-base">₹{displayPrice}</span>
                 </div>
 
                 {isAdmin && (
