@@ -25,6 +25,7 @@ type Product = {
   category: string;
   class?: string;
   stock: number;
+  minQuantity: number,
   brand: string;
   price: number;
   image: string;
@@ -126,7 +127,7 @@ export default function FilteredProductTable({
               {product.brand}
             </Badge>
             <span className="text-[10px] text-muted-foreground">
-              Stock: {product.stock}
+              Stock: {product.minQuantity}
             </span>
           </div>
         </div>
@@ -142,10 +143,10 @@ export default function FilteredProductTable({
         </Badge>
       </div>
 
-      {/* Stock Column (Desktop) */}
+      {/* Min Quantity Column (Desktop) */}
       <div className="hidden md:flex justify-center">
         <h1 className="font-bold uppercase tracking-wider text-muted-foreground text-center">
-          {product.stock}
+          {product.minQuantity}
         </h1>
       </div>
 
@@ -281,7 +282,7 @@ export default function FilteredProductTable({
                       Brand
                     </span>
                     <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-center">
-                      Stock
+                      Quantity
                     </span>
                     <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-right">
                       Price

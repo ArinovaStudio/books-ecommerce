@@ -7,6 +7,7 @@ import { parse } from "csv-parse/sync";
 import { studentAddedTemplate } from "@/lib/templates"; 
 import sendEmail from "@/lib/email";
 import { parseDate } from "@/lib/parseDate";
+import { Wrapper } from "@/lib/api-handler";
 
 const bulkStudentRowSchema = z.object({
     name: z.string({ required_error: "Student Name is required" }).min(1),
@@ -22,7 +23,7 @@ const bulkStudentRowSchema = z.object({
     section: z.string().optional(), // optional
 });
 
-export async function POST(req: NextRequest) {
+export const POST = Wrapper(async (req: NextRequest) => {
     const auth = await verifyAdmin(req);
     if (!auth.success) {
         return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
@@ -199,4 +200,4 @@ export async function POST(req: NextRequest) {
             "Connection": "keep-alive",
         },
     });
-}
+})

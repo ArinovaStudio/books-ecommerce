@@ -6,6 +6,7 @@ import { verifyAdmin } from "@/lib/verify";
 import { parse } from "csv-parse/sync";
 import { schoolAdminCreatedTemplate } from "@/lib/templates";
 import sendEmail from "@/lib/email";
+import { Wrapper } from "@/lib/api-handler";
 
 const bulkSchoolRowSchema = z.object({
     name: z.string({ required_error: "School Name is required" }).min(1, "School Name is required"),
@@ -48,7 +49,7 @@ function getClassNames(range: string): string[] {
 }
 
 
-export async function POST(req: NextRequest) {
+export const POST = Wrapper(async (req: NextRequest) => {
     const auth = await verifyAdmin(req);
     if (!auth.success || auth.user.role !== "ADMIN") {
         return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
@@ -196,4 +197,4 @@ export async function POST(req: NextRequest) {
             "Connection": "keep-alive",
         },
     });
-}
+})

@@ -31,53 +31,51 @@ export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promis
         const formData = await req.formData();
         const name = formData.get("name") as string;
         const description = formData.get("description") as string;
+        const brand = formData.get("brand") as string;
         const price = formData.get("price") as string;
         const category = formData.get("category") as string;
         const stock = formData.get("stock") as string;
+        const minQuantity = formData.get("minQuantity") as string;
         const imageFile = formData.get("image") as File | null;
 
-        if (!name || !description || !price || !category || !stock) {
-            return NextResponse.json({ success: false, message: "All fields are required" }, { status: 400 });
+        if (!name || !description || !price || !category) {
+            return NextResponse.json({ success: false, message: "All required fields must be filled" }, { status: 400 });
         }
 
-        const newPrice = parseFloat(price);
-
         let imageUrl = existingProduct.image;
+
         if (imageFile) {
-            const newImageUrl = await saveImage(imageFile);
+            try {
+                const newImageUrl = await saveImage(imageFile);
 
-            if (existingProduct.image) {
-                await deleteImage(existingProduct.image);
+                if (existingProduct.image) {
+                    await deleteImage(existingProduct.image);
+                }
+
+                imageUrl = newImageUrl;
+            } catch (error: any) {
+                return NextResponse.json({ success: false, message: "Image upload failed", error: error.message }, { status: 400 });
             }
-
-            imageUrl = newImageUrl;
         }
 
         const updatedProduct = await prisma.product.update({
-            where: { id: productId }, data: {
+            where: { id: productId },
+            data: {
                 name,
                 description,
-                price: newPrice,
+                price: parseFloat(price),
+                brand: brand || null,
                 category: category as "TEXTBOOK" | "NOTEBOOK" | "STATIONARY" | "OTHER",
-                stock: parseInt(stock),
+                stock: stock ? parseInt(stock) : 100, 
+                minQuantity: minQuantity ? parseInt(minQuantity) : 1,
                 image: imageUrl
             }
         });
 
         updatedProduct.image = getFullImageUrl(updatedProduct.image as string, req);
 
-        //updating the price of the kit items
-        if (existingProduct.price !== newPrice) {
-            const priceDifference = newPrice - existingProduct.price;
-
-            const affectedItems = await prisma.kitItem.findMany({ where: { productId } });
-
-            for (const item of affectedItems) {
-                await prisma.kit.update({ where: { id: item.kitId }, data: { totalPrice: { increment: priceDifference * item.quantity } } });
-            }
-        }
-
         return NextResponse.json({ success: true, message: "Product updated successfully", product: updatedProduct }, { status: 200 });
+
     } catch (error) {
         console.error("Product update error:", error);
         return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
@@ -110,17 +108,6 @@ export const DELETE = Wrapper(async (req: NextRequest, { params }: { params: Pro
 
         if (existingProduct.image) {
             await deleteImage(existingProduct.image);
-        }
-
-        const itemsToDelete = await prisma.kitItem.findMany({ where: { productId } });
-
-        for (const item of itemsToDelete) {
-            await prisma.kit.update({
-                where: { id: item.kitId },
-                data: {
-                    totalPrice: { decrement: existingProduct.price * item.quantity }
-                }
-            });
         }
 
         await prisma.product.delete({ where: { id: productId } });

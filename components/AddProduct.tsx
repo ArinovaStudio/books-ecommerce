@@ -31,6 +31,7 @@ type Product = {
   category: string;
   class?: string;
   stock: number;
+  minQuantity: number;
   brand: string;
   price: number;
   image: string;
@@ -48,7 +49,7 @@ interface Item{
   name: string;
   description: string;
   category: "TEXTBOOK" | "NOTEBOOK";
-  stock: number;
+  minQuantity: number;
   brand: string;
   price: number;
   image: string;
@@ -266,11 +267,11 @@ export default function AddEditProductDialog({
             <div className="grid gap-2">
               <Label>Minimum Quantity</Label>
               <Input
-                name="stock"
+                name="minQuantity"
                 type="number"
                 min={1}
                 onChange={sanitizePositiveNumber}
-                defaultValue={product?.stock}
+                defaultValue={product?.minQuantity}
                 required
               />
             </div>

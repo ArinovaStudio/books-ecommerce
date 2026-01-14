@@ -26,6 +26,7 @@ type Product = {
     category: string
     class?: string
     stock: number
+    minQuantity: number
     brand: string
     price: number
     image: string
@@ -155,7 +156,7 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                 </span>
                 <div className="md:hidden mt-2 flex gap-2 text-xs">
                     <Badge variant="secondary" className="text-xs">{product.brand}</Badge>
-                    <span className="text-muted-foreground">Stock: {product.stock}</span>
+                    <span className="text-muted-foreground">Min Quantity: {product.minQuantity}</span>
                 </div>
             </div>
 
@@ -166,9 +167,9 @@ export default function ProductTable({ role, params, searchParams }: PageProps) 
                 </Badge>
             </div>
 
-            {/* Stock - 1 col */}
+            {/* Min Quantity - 1 col */}
             <div className="hidden md:flex md:col-span-1 justify-center font-semibold text-sm text-muted-foreground">
-                {product.stock}
+                {product.minQuantity}
             </div>
 
             {/* Description - 2 cols */}

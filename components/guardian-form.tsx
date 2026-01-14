@@ -32,6 +32,7 @@ type Product = {
   category: string
   class?: Class
   stock: number
+  minQuantity: number
   brand: string
   price: number
   image: string | null
@@ -134,7 +135,7 @@ export function GuardianForm() {
   const categoryTotals = Object.entries(groupedByCategory).reduce(
     (acc, [category, items]) => {
       acc[category as keyof typeof acc] = items.reduce(
-        (sum, product) => sum + product.price * product.stock,
+        (sum, product) => sum + product.price * product.minQuantity,
         0
       )
       return acc
@@ -284,7 +285,7 @@ export function GuardianForm() {
         razorpaySignature: payment.razorpay_signature,
         items: products.map(p => ({
           productId: p.id,
-          quantity: p.stock,
+          quantity: p.minQuantity,
         })),
       }),
     })
@@ -464,10 +465,10 @@ export function GuardianForm() {
                         className="flex justify-between text-sm pl-3"
                       >
                         <span>
-                          {product.name} × {product.stock}
+                          {product.name} × {product.minQuantity}
                         </span>
                         <span>
-                          ₹{product.price * product.stock}
+                          ₹{product.price * product.minQuantity}
                         </span>
                       </div>
                     ))}
