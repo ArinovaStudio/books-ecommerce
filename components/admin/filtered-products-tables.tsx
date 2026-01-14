@@ -127,7 +127,7 @@ export default function FilteredProductTable({
               {product.brand}
             </Badge>
             <span className="text-[10px] text-muted-foreground">
-              Stock: {product.minQuantity}
+              Quantity: {product.minQuantity}
             </span>
           </div>
         </div>

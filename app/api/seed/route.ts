@@ -39,8 +39,6 @@ export async function GET(req: NextRequest) {
                 status: "ACTIVE",
                 phone: "9999999988",
                 address: "Headquarters",
-                landmark: "City Center",
-                pincode: "500001"
             }
         });
 
@@ -72,7 +70,7 @@ export async function GET(req: NextRequest) {
             let school = await prisma.school.findUnique({ where: { email: schoolEmail } });
 
             if (!school) {
-                // A. Create School
+                // Create School
                 const classesList = getClassNames("upto-10");
                 const currentYear = new Date().getFullYear().toString();
                 const academicYear = `${currentYear}-${parseInt(currentYear) + 1}`;
@@ -82,9 +80,6 @@ export async function GET(req: NextRequest) {
                         name: s.name,
                         email: schoolEmail,
                         address: s.address,
-                        landmark: "Near Main Road", // New Field
-                        pincode: "500001",         // New Field
-                        // Removed phone/whatsapp as they are not in your provided schema
                         
                         classRange: "upto-10",
                         languages: ["English", "Telugu", "Hindi"],
@@ -95,7 +90,7 @@ export async function GET(req: NextRequest) {
                     }
                 });
 
-                // B. Create School Sub-Admin
+                // Create School Sub-Admin
                 await prisma.user.create({
                     data: {
                         name: `${s.name} Admin`,
@@ -106,19 +101,17 @@ export async function GET(req: NextRequest) {
                         status: "ACTIVE",
                         phone: Math.floor(1000000000 + Math.random() * 9000000000).toString(),
                         address: s.address,
-                        landmark: "School Campus",
-                        pincode: "500001"
                     }
                 });
 
-                // C. Create Classes & Sections
+                // Create Classes & Sections
                 for (const className of classesList) {
                     const newClass = await prisma.class.create({
                         data: {
                             name: className,
                             schoolId: school.id,
                             academicYear,
-                            sections: ["A", "B"] // Legacy string array
+                            sections: ["A", "B"] 
                         }
                     });
 
@@ -131,7 +124,7 @@ export async function GET(req: NextRequest) {
                         data: { name: "B", language: "Hindi", classId: newClass.id }
                     });
 
-                    // D. Create Products (Linked to Class & School)
+                    // Create Products (Linked to Class & School)
                     const productData = [
                         { name: "Mathematics Textbook", description: "NCERT Math Book", price: 250, category: ProductCategory.TEXTBOOK, stock: 500, brand: "NCERT", type: null, minQuantity: 1 },
                         { name: "Science Textbook", description: "NCERT Science Book", price: 300, category: ProductCategory.TEXTBOOK, stock: 500, brand: "NCERT", type: null, minQuantity: 1 },
@@ -147,7 +140,7 @@ export async function GET(req: NextRequest) {
                         }))
                     });
 
-                    // E. Create Students (One for each section)
+                    // Create Students (One for each section)
                     const sections = [sectionA, sectionB];
 
                     for (let i = 0; i < sections.length; i++) {
@@ -163,8 +156,6 @@ export async function GET(req: NextRequest) {
                                 status: "ACTIVE",
                                 phone: Math.floor(1000000000 + Math.random() * 9000000000).toString(),
                                 address: "123 Parent St",
-                                landmark: "Near Park",
-                                pincode: "500001",
                                 schoolId: school.id
                             }
                         });
@@ -182,8 +173,6 @@ export async function GET(req: NextRequest) {
                                 
                                 section: currentSection.name, // Legacy String
                                 firstLanguage: currentSection.language, // New Field
-                                landmark: "Near Park",
-                                pincode: "500001",
                                 address: "123 Parent St",
                                 
                                 parentEmail: parent.email,
