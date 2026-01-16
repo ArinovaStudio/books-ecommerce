@@ -66,7 +66,7 @@ export default function SchoolsPage() {
 
   return (
     <section className="min-h-screen bg-[#f7f4f2]">
-      <div className="bg-[linear-gradient(135deg,#141f38_0%,#22345e_50%,#1f5c7a_100%)] text-white px-30 py-15">
+      <div className="bg-[linear-gradient(135deg,#141f38_0%,#22345e_50%,#1f5c7a_100%)] w-full text-white max-md:px-5 md:px-30 py-15">
         {/* Title */}
         <h1 className="text-4xl md:text-4xl font-bold">Find Your School</h1>
         <p className="mt-3 text-md text-gray-200">
@@ -80,7 +80,7 @@ export default function SchoolsPage() {
           onChange={setQuery}
           results={filteredSchools}
           placeholder="Search by school name, city, or pincode..."
-          className="mt-10 max-w-3xl text-black"
+          className="mt-10 w-full md:max-w-3xl text-black"
         />
       </div>
       {/* MAIN CONTENT */}
@@ -105,7 +105,7 @@ export default function SchoolsPage() {
             return (
               <div key={address} className="space-y-5">
                 {/* CITY HEADER */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 max-md:mx-4">
                   <MapPin size={18} className="text-blue-900" />
                   <h2 className="text-xl font-semibold text-blue-950">
                     {address}
@@ -116,7 +116,7 @@ export default function SchoolsPage() {
                 </div>
 
                 {/* GRID */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-md:mx-4">
                   {citySchools.map((school: School) => (
                     <Link key={school.id} href={`/schools/${school.id}`}>
                       <Card className="flex flex-row justify-between p-6 rounded-2xl bg-white shadow-sm border hover:shadow-md transition cursor-pointer hover:-translate-y-1 group">

@@ -79,7 +79,7 @@ export default function PartnerSchools() {
       {
         popup && (
           <div className="w-screen h-screen fixed inset-0 bg-black/40 z-9999 flex justify-center items-center">
-            <div className="w-1/3 h-auto bg-white rounded-2xl p-8 px-8 pb-6">
+            <div className="max-md:mx-5 md:w-1/3 h-auto bg-white rounded-2xl p-8 px-8 pb-6">
               <h1 className="text-xl">Please <b>Login</b> First to access</h1>
               <p className="text-sm text-gray-600 mt-2">You must be logged in to access the school portal. Please sign in with your registered credentials to continue.</p>
 
