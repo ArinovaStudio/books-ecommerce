@@ -1,5 +1,3 @@
-// HELPER: Common styles to match your Website UI
-// Primary Dark Blue: #111827 | Accent Cyan: #06b6d4 | Text: #374151
 const headerStyle = `
     background-color: #111827; 
     padding: 24px; 
@@ -42,8 +40,6 @@ const buttonStyle = `
     margin-top: 10px;
 `;
 
-// --- TEMPLATES ---
-
 export const emailOtpTemplate = (otp: string) => ({
     subject: "OTP Verification - Glow Nest",
     html: `
@@ -75,20 +71,37 @@ export const studentAddedTemplate = (
     sectionName: string,
     password?: string
 ) => {
-
-    const accountDetails = password 
-        ? `<div style="background-color: #f8fafc; border-left: 4px solid #06b6d4; padding: 20px; border-radius: 4px; margin: 25px 0;">
-             <p style="margin-top: 0; color: #334155; font-weight: bold;">Parent Account Created</p>
-             <p style="color: #64748b; margin-bottom: 15px;">Use these credentials to sign in:</p>
-             <ul style="padding-left: 20px; margin: 0; color: #334155;">
-               <li style="margin-bottom: 5px;"><strong>Email:</strong> ${email}</li>
-               <li><strong>Password:</strong> ${password}</li>
-             </ul>
-             <p style="font-size: 0.85em; color: #94a3b8; margin-top: 15px;">*Please change your password after logging in.</p>
-           </div>`
-        : `<div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; border-radius: 6px; margin: 20px 0; text-align: center;">
-             <p style="margin: 0; color: #166534; font-weight: 600;">✓ Student successfully linked to your existing account.</p>
-           </div>`;
+    
+    const accountInfoSection = password 
+        ? `
+        <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; padding: 20px; border-radius: 8px; margin: 25px 0;">
+            <p style="margin-top: 0; color: #0369a1; font-weight: bold; font-size: 16px; margin-bottom: 10px;">
+                🆕 Parent Account Created
+            </p>
+            <p style="color: #334155; margin: 0 0 15px 0;">We have created an account for you. Please login with:</p>
+            
+            <div style="background-color: #ffffff; padding: 15px; border-radius: 6px; border: 1px dashed #0ea5e9;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="color: #64748b; width: 80px;">Email:</td>
+                        <td style="font-weight: bold; color: #0f172a;">${email}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #64748b;">Password:</td>
+                        <td style="font-weight: bold; color: #0f172a;">${password}</td>
+                    </tr>
+                </table>
+            </div>
+            <p style="font-size: 0.85em; color: #64748b; margin-top: 10px;">*Please change your password after your first login.</p>
+        </div>`
+        : `
+        <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 20px; border-radius: 8px; margin: 25px 0;">
+            <p style="margin-top: 0; color: #15803d; font-weight: bold; font-size: 16px; margin-bottom: 10px;">
+                ✅ Account Linked Successfully
+            </p>
+            <p style="color: #334155; margin: 0 0 10px 0;">This student has been linked to your existing parent account.</p>
+            <p style="margin: 0; color: #374151;">Login ID: <strong>${email}</strong></p>
+        </div>`;
 
     return {
         subject: "New Student Added - Glow Nest",
@@ -120,7 +133,7 @@ export const studentAddedTemplate = (
                             </table>
                         </div>
 
-                        ${accountDetails}
+                        ${accountInfoSection}
 
                         <div style="text-align: center; margin-top: 30px;">
                             <a href="https://glow-nest.in" style="${buttonStyle}">Login to Portal</a>
