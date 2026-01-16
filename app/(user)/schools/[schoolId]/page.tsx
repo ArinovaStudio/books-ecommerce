@@ -186,7 +186,7 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
         </div>
       )}
 
-      <div className="relative py-8 sm:py-10 lg:py-12 px-4 sm:px-6 relative z-50 shadow-lg bg-center bg-contain bg-size-[100%_auto]" style={{ backgroundImage: `url(${school.image || "/school.jpg"})` }}>
+      <div className="relative py-8 sm:py-10 lg:py-12 px-4 sm:px-6 relative z-20 shadow-lg bg-center bg-contain bg-size-[100%_auto]" style={{ backgroundImage: `url(${school.image || "/school.jpg"})` }}>
         <div className="absolute bg-black/50 w-full h-full top-0 left-0 -z-1"></div>
         <div className="max-w-7xl mx-auto">
           <button
@@ -218,7 +218,7 @@ export default function SchoolClassesPage({ params }: { params: Promise<{ school
                   <span>{school.address}</span>
                 </p>
                 {school.board && (
-                  <span className="text-xs sm:text-sm bg-blue-100/20 text-blue-100 px-2 py-1 rounded-full">
+                  <span className="w-fit text-xs sm:text-sm bg-blue-100/20 text-blue-100 px-2 py-1 rounded-full">
                     {school.board}
                   </span>
                 )}
