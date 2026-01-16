@@ -6,7 +6,7 @@ export default function Advartisement() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <p className="text-sm text-muted-foreground font-semibold uppercase tracking-wide">
-            Trusted Schools
+            What else do we sell
           </p>
         </div>
 
