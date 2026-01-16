@@ -307,14 +307,14 @@ export default function AboutUs() {
                                 className="text-center"
                             >
                                 {/* IMAGE */}
-                                <div className="relative w-48 h-48 mx-auto mb-6 rounded-full overflow-hidden border-4 border-white shadow-md">
+                                {/* <div className="relative w-48 h-48 mx-auto mb-6 rounded-full overflow-hidden border-4 border-white shadow-md">
                                     <Image
                                         src={member.image}
                                         alt={member.name}
                                         fill
                                         className="object-cover"
                                     />
-                                </div>
+                                </div> */}
 
                                 {/* NAME */}
                                 <h3 className="text-xl font-semibold text-gray-900">
