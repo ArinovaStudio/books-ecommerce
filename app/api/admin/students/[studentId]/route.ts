@@ -174,8 +174,27 @@ export const PUT = Wrapper(async( req: NextRequest, { params }: { params: Promis
         const studentName = name || existingStudent.name;
         const pName = parentName || "Parent";
         
-        const emailData = studentAddedTemplate(studentName, pName, parentEmail, password);
-        await sendEmail(parentEmail, emailData.subject, emailData.html);
+        const studentDetails = await prisma.student.findUnique({
+            where: { id: studentId },
+            include: {
+                school: { select: { name: true } },
+                class: { select: { name: true } },
+                sectionDetails: { select: { name: true } }
+            }
+        });
+
+        if (studentDetails) {
+            const emailData = studentAddedTemplate(
+                studentName,
+                pName,
+                parentEmail,
+                studentDetails.school.name,
+                studentDetails.class.name,
+                studentDetails.sectionDetails?.name || newSectionName,
+                password
+            );
+            await sendEmail(parentEmail, emailData.subject, emailData.html);
+        }
     }
 
     return NextResponse.json({ success: true, message: "Student updated successfully", student: updatedStudent }, { status: 200 });

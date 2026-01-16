@@ -108,7 +108,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
 
         const section = await prisma.section.findUnique({
             where: { id: sectionId },
-            include: { class: true }
+            include: { class: { include: { school: true } } }
         });
 
         if (!section) {
@@ -194,11 +194,13 @@ export const POST = Wrapper(async (req: NextRequest) => {
             }
         });
 
-        if (isNewParent){
-            // Send Welcome Email
-            const emailData = studentAddedTemplate(name, parentName, parentEmail, isNewParent ? password : undefined);
-            await sendEmail(parentEmail, emailData.subject, emailData.html);
-        }
+        const schoolName = section.class.school.name;
+        const className = section.class.name;
+        const sectionName = section.name;
+
+        // Send Welcome Email
+        const emailData = studentAddedTemplate(name, parentName, parentEmail, schoolName, className, sectionName, isNewParent ? password : undefined);
+        await sendEmail(parentEmail, emailData.subject, emailData.html);
 
         return NextResponse.json({ success: true, message: "Student added successfully", student: newStudent }, { status: 201 });
 

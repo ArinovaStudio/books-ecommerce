@@ -54,7 +54,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
 
     let globalSection: any = null;
     if (globalSectionId) {
-        globalSection = await prisma.section.findUnique({ where: { id: globalSectionId }, include: { class: true }});
+        globalSection = await prisma.section.findUnique({ where: { id: globalSectionId }, include: { class: { include: { school: true } } } });
         if (!globalSection) {
             return NextResponse.json({ success: false, message: "Invalid Section ID provided" }, { status: 400 });
         }
@@ -98,7 +98,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
                         
                         targetSection = await prisma.section.findFirst({
                             where: { classId, name: { equals: data.section, mode: 'insensitive' } },
-                            include: { class: true }
+                            include: { class: { include: { school: true } } }
                         });
                         
                         if (!targetSection) throw new Error(`Section '${data.section}' not found in this class.`);
@@ -172,11 +172,13 @@ export const POST = Wrapper(async (req: NextRequest) => {
                         });
                     });
 
-                    if (isNewParent){
-                        // Send Welcome Email
-                        const emailData = studentAddedTemplate(data.name, data.parentName, data.parentEmail, isNewParent ? finalPassword : undefined);
-                        sendEmail(data.parentEmail, emailData.subject, emailData.html).catch(err => console.error(`Failed to send email to ${data.parentEmail}`, err));
-                    }
+                    const schoolName = targetSection.class.school.name;
+                    const className = targetSection.class.name;
+                    const sectionName = targetSection.name;
+
+                    // Send Welcome Email
+                    const emailData = studentAddedTemplate(data.name, data.parentName, data.parentEmail, schoolName, className, sectionName, isNewParent ? finalPassword : undefined);
+                    sendEmail(data.parentEmail, emailData.subject, emailData.html).catch(err => console.error(`Failed to send email to ${data.parentEmail}`, err));
 
                     
                     addedCount++;
