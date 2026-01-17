@@ -193,13 +193,7 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
                         </CardDescription>
                       </div>
                       <Badge
-                        variant={
-                          order.status === "Completed"
-                            ? "default"
-                            : order.status === "Pending"
-                              ? "secondary"
-                              : "destructive"
-                        }
+                      className={`py-2 h-fit ${order.status.toLocaleLowerCase() === "completed" ? "text-green-400 bg-green-500/20" : order.status.toLowerCase() === "pending" ? "bg-amber-500/20 text-amber-400" : "text-red-400 bg-red-500/20"}`}
                       >
                         {order.status}
                       </Badge>
@@ -209,7 +203,7 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
                   <CardContent className="flex justify-between">
                     <div>
                       <p className="text-sm">Date: {order.createdAt.split("T")[0]}</p>
-                      <p className="text-sm">Date: {order.student.parent.address}</p>
+                      <p className="text-sm">Address: {order.student.parent.address}</p>
                     </div>
 
                     <div className="text-right">

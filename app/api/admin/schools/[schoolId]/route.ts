@@ -242,13 +242,37 @@ export const DELETE = Wrapper(async (req: NextRequest, { params }: { params: Pro
       await deleteImage(existingSchool.image);
     }
 
-    await prisma.$transaction(async (tx) => {
-        await tx.user.deleteMany({
-            where: { schoolId: schoolId, role: "SUB_ADMIN" }
-        });
+await prisma.$transaction(async (tx) => {
+  // 1. Delete orders linked to students of this school
+  await tx.order.deleteMany({
+    where: {
+      student: {
+        schoolId: schoolId,
+      },
+    },
+  });
 
-        await tx.school.delete({ where: { id: schoolId } });
-    });
+  // 2. Delete students
+  await tx.student.deleteMany({
+    where: { schoolId },
+  });
+
+  // 3. Delete classes
+  await tx.class.deleteMany({
+    where: { schoolId },
+  });
+
+  // 4. Delete sub-admins
+  await tx.user.deleteMany({
+    where: { schoolId, role: "SUB_ADMIN" },
+  });
+
+  // 5. Delete school
+  await tx.school.delete({
+    where: { id: schoolId },
+  });
+});
+
 
     return NextResponse.json({ success: true, message: "School and Admin deleted successfully" }, { status: 200 });
 
