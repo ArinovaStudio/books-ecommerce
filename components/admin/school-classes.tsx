@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Loader2, Share, Share2 } from "lucide-react";
 import {toast} from "sonner";
+import CopyUrlLinkDialog from "../CopyUrlLinkDialog";
 const hostName = process.env.NEXT_PUBLIC_DOMAIN;
 
 type ClassItem = { name: string };
@@ -55,6 +56,7 @@ type Props = {
 export function SchoolClasses({ schoolId, onBack, onSelectClass }: Props) {
   const [classes, setClasses] = useState<ClassType[]>([]);
   const [loading, setLoading] = useState(false);
+  const [open,setOpen] = useState(false);
   useEffect(() => {
     if (!schoolId) {
       setClasses([]);
@@ -91,18 +93,12 @@ export function SchoolClasses({ schoolId, onBack, onSelectClass }: Props) {
             <ArrowLeft className="h-4 w-4" />
             Back to Schools
           </Button>
-          <Button
-            type="button"
-            onClick={() => {
-              navigator.clipboard.writeText(
-                `${hostName}/signup?id=${schoolId}`
-              );
-              toast.success("Link Copied Successfully!");
-            }}
-          >
+          <CopyUrlLinkDialog url={`${hostName}/signup?id=${schoolId}`} open={open} setOpen={setOpen}>
+          <Button type="button">
             <Share2 size={30} />
             Share Invite Link
           </Button>
+          </CopyUrlLinkDialog>
         </div>
       )}
 
