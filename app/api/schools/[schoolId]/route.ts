@@ -11,7 +11,7 @@ export const GET = Wrapper(async (req: NextRequest, { params }: { params: Promis
       return NextResponse.json({ success: false, message: "School ID is required" }, { status: 400 });
     }
 
-    const school = await prisma.school.findUnique({ where: { id: schoolId }, include: { classes: true } });
+    const school = await prisma.school.findUnique({ where: { id: schoolId }, include: { classes: {include:{sectionDetails:true}} } });
 
     if (!school) {
       return NextResponse.json({ success: false, message: "School not found" }, { status: 404 });

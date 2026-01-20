@@ -12,6 +12,7 @@ const signupValidation = z.object({
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   address: z.string().min(5, "Address is required and must be valid"),
+  schoolId: z.string().optional().nullable()
 });
 
 const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY";
@@ -25,9 +26,7 @@ export const POST = Wrapper(async(req: NextRequest) => {
         const errors = validation.error.errors.map((error) => ({ field: error.path[0], message: error.message }));;
         return NextResponse.json({ success: false, message: "Vlidation error", errors }, { status: 400 });
     }
-
-    const { name, email, phone, password, address } = validation.data;
-
+    const { name, email, phone, password, address,schoolId } = validation.data;
     const existing = await prisma.user.findFirst({ where: { OR: [{ email }, { phone }] }});
 
     if (existing) {
@@ -35,8 +34,13 @@ export const POST = Wrapper(async(req: NextRequest) => {
     };
 
     const hashedPassword = await bcrypt.hash(password, 12);
-
-    const newUser = await prisma.user.create({ data: { name, email, phone, password: hashedPassword, address }});
+    if(schoolId){
+      const school = await prisma.school.findUnique({where:{id:schoolId as string}});
+      if(!school){
+        return NextResponse.json({ success: false, message: "School With Specified Id Not Found"}, { status: 403 });
+      }
+    }
+    const newUser = await prisma.user.create({ data: { name, email, phone, password: hashedPassword, address,schoolId:schoolId }});
 
     // Linking students to parent at time of registration
     await prisma.student.updateMany({ where: { parentEmail: email }, data: { parentId: newUser.id } });

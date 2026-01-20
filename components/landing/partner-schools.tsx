@@ -8,7 +8,7 @@ import Link from "next/link"
 import SchoolSearch from "../schoolSearch"
 import { Button } from "../ui/button"
 import { useRouter } from "next/navigation"
-
+import { useSchoolHelper } from "@/hooks/useSchoolHelper"
 type School = {
   id: string
   name: string

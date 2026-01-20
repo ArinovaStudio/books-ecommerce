@@ -408,14 +408,14 @@ export function GuardianForm() {
               {/* LANDMARK (Replaces Address) */}
               <div className="space-y-2">
                 <Label htmlFor="landmark" className="text-sm sm:text-base font-medium">
-                  Landmark <span className="text-destructive">*</span>
+                  Full Address with Landmark <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5" />
                   <Input
                     id="landmark"
                     type="text"
-                    placeholder="Enter nearest landmark"
+                    placeholder="Enter Full Address with Landmark"
                     value={formData.landmark}
                     onChange={(e) => handleInputChange("landmark", e.target.value)}
                     className={cn(
