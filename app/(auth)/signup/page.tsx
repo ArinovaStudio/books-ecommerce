@@ -395,7 +395,7 @@ const SignUpPage = () => {
                   )}
                 </Button>
 
-                {/* <p className="mt-6 text-center text-sm text-gray-500">
+                <p className="mt-6 text-center text-sm text-gray-500">
                   Already have an account?{" "}
                   <Link
                     href="/signin"
@@ -403,7 +403,7 @@ const SignUpPage = () => {
                   >
                     Sign In
                   </Link>
-                </p> */}
+                </p>
               </div>
             </form>
           </div>
