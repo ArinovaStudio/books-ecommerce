@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
-
 export const metadata: Metadata = {
   title: "GlowNest - School Books & Stationary Delivered"
 }
