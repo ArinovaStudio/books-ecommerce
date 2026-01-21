@@ -203,7 +203,8 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
                   <CardContent className="flex justify-between">
                     <div>
                       <p className="text-sm">Date: {order.createdAt.split("T")[0]}</p>
-                      <p className="text-sm">Address: {order.student.parent.address}</p>
+                      <p className="text-sm">Address: {order.landmark}</p>
+                      <p className="text-sm">Pincode: {order.pincode}</p>
                     </div>
 
                     <div className="text-right">
