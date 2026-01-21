@@ -24,6 +24,8 @@ type Order = {
   userName: string
   email: string
   phone: string
+  landmark: string;
+  pincode: string;
   class: string
   bundleName: string
   orderNumber: string
