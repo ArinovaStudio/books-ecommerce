@@ -26,6 +26,7 @@ type Product = {
   description: string;
   category: string;
   class?: string;
+  stock: number;
   minQuantity: number;
   brand: string;
   price: number;
@@ -37,6 +38,7 @@ type PageProps = {
   params: {
     schoolId: string;
     classId: string;
+    section: string;
   };
   searchParams: {
     language?: string;
@@ -206,6 +208,7 @@ export default function ProductTable({
             <div className="flex items-center gap-3">
               {showCheckbox && (
                 <Checkbox
+                className="border-2! border-gray-600!"
                   checked={isChecked}
                   onCheckedChange={(checked) =>
                     handleCheckboxChange(product.id, checked as boolean)
@@ -279,7 +282,7 @@ export default function ProductTable({
             {showCheckbox && (
               <div className="md:col-span-1 flex justify-center">
                 <Checkbox
-                  className="border border-2 border-muted"
+                  className="border-2! border-gray-700!"
                   checked={isChecked}
                   onCheckedChange={(checked) =>
                     handleCheckboxChange(product.id, checked as boolean)

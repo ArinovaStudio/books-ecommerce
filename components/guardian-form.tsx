@@ -493,10 +493,10 @@ export function GuardianForm() {
                       </div>
                     ))}
 
-                    <div className="flex justify-between font-semibold text-sm border-t pt-1">
-                      <span>{category} Total</span>
-                      <span>₹{categoryTotals[category as keyof typeof categoryTotals]}</span>
-                    </div>
+                    {/* <div className="flex justify-between font-semibold text-sm border-t pt-1"> */}
+                      {/* <span>{category} Total</span> */}
+                      {/* <span>₹{categoryTotals[category as keyof typeof categoryTotals]}</span> */}
+                    {/* </div> */}
                   </div>
                 ))}
                 <div className="border-t pt-3 flex justify-between text-base font-bold">
