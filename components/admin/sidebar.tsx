@@ -28,7 +28,7 @@ const navItems: {
 }[] = [
     { id: "analytics", label: "Analytics", icon: BarChart3, roles: ["ADMIN"], href: "/admin/analytics" },
     { id: "users", label: "Students", icon: Users, roles: ["ADMIN", "SUB_ADMIN"], href: "/admin/users" },
-    { id: "schools", label: "Schools", icon: GraduationCap, roles: ["ADMIN"], href: "/admin/schools" },
+    { id: "schools", label: "Products", icon: GraduationCap, roles: ["ADMIN"], href: "/admin/schools" },
     { id: "orders", label: "Orders", icon: ClipboardList, roles: ["ADMIN", "SUB_ADMIN"], href: "/admin/orders" },
   ]
 

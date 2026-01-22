@@ -19,7 +19,7 @@ type School = {
   id: string
   name: string
 }
-
+ 
 type Class = {
   id: string
   name: string

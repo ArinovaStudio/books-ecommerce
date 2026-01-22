@@ -95,7 +95,7 @@ const SignInPage = () => {
 
   return (
     <>
-    <Button className="text-center absolute left-0" onClick={goBack}><ArrowLeft/>Back</Button>
+    <Button className="text-center bg-blue-600 hover:bg-blue-700 absolute left-0" onClick={goBack}><ArrowLeft/></Button>
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gray-50/50 p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl sm:shadow-none sm:bg-transparent p-6 sm:p-0">
         <div className="mb-8 text-center sm:text-left">

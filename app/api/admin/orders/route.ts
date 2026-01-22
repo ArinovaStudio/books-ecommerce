@@ -75,7 +75,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
                 },
             },
             orderBy: {
-                createdAt: "desc",
+                id: "asc",
             },
         });
 

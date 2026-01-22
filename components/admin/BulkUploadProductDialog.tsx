@@ -231,6 +231,16 @@ export default function BulkUploadProductDialog({ classId, onSuccess }: Props) {
           {/* File Input Phase */}
           {!uploading && !summary && (
             <div className="grid w-full items-center gap-2">
+              <div className="flex gap-5 items-center">
+                <div className="text-blue-400 font-semibold ">Products.csv</div>{" "}
+                <a
+                  href={"/csv_samples/products.csv"}
+                  download
+                  className="bg-primary py-1 px-2 text-white rounded-lg"
+                >
+                  Download Starter File
+                </a>
+              </div>
               <Label htmlFor="csv">CSV File</Label>
               <div className="flex gap-2">
                 <Input

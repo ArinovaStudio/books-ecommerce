@@ -2,7 +2,9 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-
+input[type="file"]{
+  @apply file:pb-2 file:pt-1 file:px-2! file:rounded-lg file:mr-2! file:shadow-sm file:text-white! file:bg-primary!;
+}
 /* global.css */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

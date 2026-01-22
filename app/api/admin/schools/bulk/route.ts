@@ -68,19 +68,10 @@ export const POST = Wrapper(async (req: NextRequest) => {
     let records: any[] = [];
     try {
         records = parse(csvText, {
+            columns: true,
             skip_empty_lines: true,
             trim: true,
-        }).map((record: string[])=>{
-            return {
-                name: record[0],
-                email: record[1],
-                password: record[2],
-                location: record[3],
-                classRange: record[4],
-                board: record[5],
-                languages: record[6]
-            }
-        });
+        })
     } catch (e) {
         return NextResponse.json({ success: false, message: "Invalid CSV Format" }, { status: 400 });
     }

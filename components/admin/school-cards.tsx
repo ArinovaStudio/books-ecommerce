@@ -131,7 +131,7 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                     />
                 </div>
                 
-                {activeTab === "schools" ? (
+                {activeTab === "products" ? (
                     <div className="flex gap-2">
                         <BulkUploadSchoolDialog onSuccess={() => setLocalRefresh(prev => prev + 1)} />
                         <AddSchoolModal onSchoolAdded={() => setLocalRefresh(prev => prev + 1)} />

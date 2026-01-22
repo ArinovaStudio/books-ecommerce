@@ -24,8 +24,8 @@ export function AdminHeader() {
     }
     if (pathname.includes('/schools')) {
       return {
-        title: 'Schools',
-        description: 'View and manage all schools'
+        title: 'Products',
+        description: 'View and manage all products'
       }
     }
     if (pathname.includes('/orders')) {

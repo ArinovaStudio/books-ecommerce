@@ -126,7 +126,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
               class: student.class.name,
               section: student.section,
               academicYear: student.class.academicYear,       
-              status: "Ordered",
+              status: "ORDER_PLACED",
               totalAmount: totalAmount,
               phone,
               landmark,

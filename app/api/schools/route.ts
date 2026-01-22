@@ -44,7 +44,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
 
     const schools = await prisma.school.findMany({
       where: whereClause,
-      orderBy: { createdAt: "desc" },
+      orderBy: { name: "asc" },
       include: {
         _count: {
           select: {

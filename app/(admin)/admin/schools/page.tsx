@@ -34,7 +34,7 @@ export default function SchoolsPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbPage>Schools</BreadcrumbPage>
+              <BreadcrumbPage>Products</BreadcrumbPage>
             </BreadcrumbItem>
 
             {selectedSchool && (
@@ -74,7 +74,7 @@ export default function SchoolsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab="schools" />}
+          {!selectedSchool && <SchoolCards onSelectSchool={setSelectedSchool} activeTab="products" />}
           {selectedSchool && !selectedClass && (
             <SchoolClasses
               schoolId={selectedSchool.id}

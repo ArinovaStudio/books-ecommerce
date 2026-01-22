@@ -3,6 +3,34 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
+#file-upload-button{
+  @apply border-3! border-black!;
+}
+
+.pdf-safe * {
+  color: rgb(17, 24, 39) !important;
+  background-color: rgb(255, 255, 255) !important;
+  border-color: rgb(229, 231, 235) !important;
+}
+
+@media print {
+  body {
+    background: white;
+  }
+
+  #receipt {
+    position: static !important;
+    min-height: auto !important;
+  }
+}
+
+/* PDF-safe colors (prevents lab() error) */
+* {
+  color-scheme: light;
+}
+
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
