@@ -141,6 +141,7 @@ model Product {
   updatedAt DateTime @updatedAt
   kitItems KitItem[]
   orderItems OrderItem[]
+  language String?
   classId String
   class Class @relation(fields:[classId],references: [id],onDelete: Cascade)
 }
@@ -196,7 +197,12 @@ model Payment {
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
-
+enum OrderStatus{
+  ORDER_PLACED
+  PACKAGING_DONE
+  OUT_FOR_DELIVERY
+  DELIVERED
+}
 model Order {
   id String @id
   userId String
@@ -208,7 +214,7 @@ model Order {
   phone String
   landmark String
   pincode String
-  status String
+  status OrderStatus @default(ORDER_PLACED)
   totalAmount Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

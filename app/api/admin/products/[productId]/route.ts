@@ -3,7 +3,7 @@ import { deleteImage, getFullImageUrl, saveImage } from "@/lib/upload";
 import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
 import { Wrapper } from '@/lib/api-handler';
-
+ 
 export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promise<{ productId: string }> }) => {
     try {
         const auth = await verifyAdmin(req);
@@ -37,7 +37,7 @@ export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promis
         const stock = formData.get("stock") as string;
         const minQuantity = formData.get("minQuantity") as string;
         const imageFile = formData.get("image") as File | null;
-
+        const language = formData.get("language") as string;
         if (!name || !description || !price || !category) {
             return NextResponse.json({ success: false, message: "All required fields must be filled" }, { status: 400 });
         }
@@ -68,7 +68,8 @@ export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promis
                 category: category as "TEXTBOOK" | "NOTEBOOK" | "STATIONARY" | "OTHER",
                 stock: stock ? parseInt(stock) : 100, 
                 minQuantity: minQuantity ? parseInt(minQuantity) : 1,
-                image: imageUrl
+                image: imageUrl,
+                language: language
             }
         });
 

@@ -4,11 +4,12 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useSchoolHelper } from "@/hooks/useSchoolHelper";
+import useGoBack from "@/hooks/useGoBack";
 interface FormErrors {
   [key: string]: string;
 }
@@ -24,7 +25,7 @@ const SignInPage = () => {
   const { clearSchool } = useSchoolHelper();
   const router = useRouter();
   const { toast } = useToast();
-
+  const goBack = useGoBack();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -93,6 +94,8 @@ const SignInPage = () => {
   };
 
   return (
+    <>
+    <Button className="text-center absolute left-0" onClick={goBack}><ArrowLeft/>Back</Button>
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gray-50/50 p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl sm:shadow-none sm:bg-transparent p-6 sm:p-0">
         <div className="mb-8 text-center sm:text-left">
@@ -223,6 +226,7 @@ const SignInPage = () => {
         </form>
       </div>
     </div>
+    </>
   );
 };
 

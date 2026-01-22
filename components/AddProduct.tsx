@@ -23,7 +23,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { CsvFile as CsvFileValidation } from "@/lib/validateCsvFile";
 import papa from "papaparse";
-import {v4 as uuidv4} from "uuid";
+import { v4 as uuidv4 } from "uuid";
 type Product = {
   id: string;
   name: string;
@@ -45,7 +45,7 @@ type Props = {
   onSuccess: () => void;
   trigger?: React.ReactNode; // 👈 custom trigger (Edit button)
 };
-interface Item{
+interface Item {
   name: string;
   description: string;
   category: "TEXTBOOK" | "NOTEBOOK";
@@ -67,13 +67,14 @@ export default function AddEditProductDialog({
   const isEdit = !!product;
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [fileLoading,setFileLoading] = useState(false);
+  const [fileLoading, setFileLoading] = useState(false);
   const [category, setCategory] = useState("");
   const [productClass, setProductClass] = useState("");
-  const [csvData,setCsvData] = useState<Item[]>([]);
+  const [csvData, setCsvData] = useState<Item[]>([]);
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [alertOpen,setAlertOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [languages, setLanguages] = useState<string[]>([]);
   /* ✅ Prefill for edit */
   useEffect(() => {
     if (product) {
@@ -82,7 +83,16 @@ export default function AddEditProductDialog({
       setImagePreview(product.image);
     }
   }, [product, selectedClass, selectedSchool]);
-
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      const request = await fetch(`/api/schools/${selectedSchool}`);
+      const response = await request.json();
+      if(response.success){
+        setLanguages(response.school.languages);
+      }
+    };
+    fetchLanguages();
+  }, [selectedSchool]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -135,70 +145,6 @@ export default function AddEditProductDialog({
       e.target.value = "1";
     }
   };
-  const sendFile = async (data: any) => {
-    const socket = new WebSocket("ws://localhost:3001");
-    socket.onopen = ()=>{
-        const requestId = uuidv4();
-        setFileLoading(true);
-       data.forEach((item: Item,index: number)=>{
-           socket.send(JSON.stringify({
-               chunk: {...item,schoolId:selectedSchool,classId:selectedClass},
-               requestId: requestId,
-               done: index===data.length-1
-            }));
-        })
-    }
-    socket.onmessage = (event)=>{
-        const response = JSON.parse(event.data);
-        const data = response.data;
-        if(data.success){
-          setProducts((prev: any)=>[...prev,data.product]);
-        }
-        if(response.done){
-          toast({
-            title: "Products Added Successfully!",
-            description: "The Products listed in the csv file are added successfully!"
-          });
-          setFileLoading(false);
-        }
-    }
-  };
-  const handleFileValidation = async (e: any) => {
-    const file = e.target.files[0];
-    if(!file) return;
-    setFileLoading(true);
-    papa.parse(file ,{
-        header: true,
-        dynamicTyping: true,
-        complete:async (items)=>{
-            const data = items.data.slice(0,items.data.length-1);
-            const parsedData = CsvFileValidation.safeParse(data);
-            if(parsedData.error){
-                toast({
-                title: "Error Occured!",
-                description: "Error Occured While Validating Your Data!",
-                variant: "destructive"
-            });
-            return;
-            }else{
-
-              if(confirm("Your Data is parsed successfully! Do You Really Want To Add This Data?")){
-                sendFile(parsedData.data);
-              }
-            }
-            
-        },
-        error:()=>{
-            toast({
-                title: "Error Occured!",
-                description: "Error Occured While Parsing Your File",
-                variant: "destructive"
-            });
-        }
-    });
-    setFileLoading(false);
-    e.target.value = '';
-  }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {/* <ConfirmationAlert open={alertOpen} setOpen={setAlertOpen} action={()=>{}}/> */}
@@ -275,27 +221,9 @@ export default function AddEditProductDialog({
                 required
               />
             </div>
-
-            {/* {category === "TEXTBOOK" && (
-                            <div className="grid gap-2">
-                                <Label>Class</Label>
-                                <Select value={productClass} onValueChange={setProductClass}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Class" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {Array.from({ length: 12 }, (_, i) => (
-                                            <SelectItem key={i} value={`class-${i + 1}`}>
-                                                Class {i + 1}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        )} */}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="grid gap-2">
               <Label>Brand</Label>
               <Input name="brand" defaultValue={product?.brand} required />
@@ -310,6 +238,22 @@ export default function AddEditProductDialog({
                 defaultValue={product?.price}
                 required
               />
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Language</Label>
+              <Select name="language">
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Language" />
+                </SelectTrigger>
+                <SelectContent>
+                  {languages.map((language: string,idx: number)=> (
+                    <SelectItem key={language} value={language}>
+                      {language.toUpperCase()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -349,8 +293,7 @@ export default function AddEditProductDialog({
               type="button"
               variant="outline"
               onClick={() => {
-                setOpen(false),
-                setImagePreview(null);
+                setOpen(false), setImagePreview(null);
               }}
             >
               Cancel

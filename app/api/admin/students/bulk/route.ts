@@ -14,13 +14,13 @@ const bulkStudentRowSchema = z.object({
     rollNo: z.string({ required_error: "Roll Number is required" }).min(1),
     parentName: z.string({ required_error: "Parent Name is required" }).min(1),
     parentEmail: z.string({ required_error: "Parent Email is required" }).min(1).email("Invalid Parent Email"),
-    password: z.string().optional(), 
     firstLanguage: z.string({ required_error: "First Language is required" }).min(1),
+    password: z.string().optional(), 
     gender: z.string().optional(),
     dob: z.string().optional(),
     bloodGroup: z.string().optional(),
     address: z.string().optional(),
-    section: z.string().optional(), // optional
+    section: z.string().optional()
 });
 
 export const POST = Wrapper(async (req: NextRequest) => {
@@ -44,9 +44,17 @@ export const POST = Wrapper(async (req: NextRequest) => {
     let records: any[] = [];
     try {
         records = parse(csvText, {
-            columns: true,
             skip_empty_lines: true,
             trim: true,
+        }).map((record: string[])=>{
+            return {
+                name: record[0],
+                rollNo: record[1],
+                parentName: record[2],
+                parentEmail: record[3],
+                firstLanguage: record[4],
+                password: record[5]
+            };
         });
     } catch (e) {
         return NextResponse.json({ success: false, message: "Invalid CSV Format" }, { status: 400 });

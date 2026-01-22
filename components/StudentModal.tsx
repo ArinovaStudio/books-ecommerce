@@ -103,7 +103,8 @@ export function StudentModal({
                 <Label>Name</Label>
                 <Input
                   name="name"
-                  className="p-1 rounded-xl border ring-gray-500 bg-background ring-1 outline-none"
+                  placeholder="Name"
+                  className="p-1 border ring-gray-500 bg-background shadow-sm focus:shadow-md outline-none"
                   required
                 />
               </div>
@@ -112,7 +113,8 @@ export function StudentModal({
                 <Label>Roll No.</Label>
                 <Input
                   name="rollNo"
-                  className="p-1 rounded-xl border ring-gray-500 bg-background ring-1 outline-none"
+                  placeholder="Roll No."
+                  className="p-1 border ring-gray-500 bg-background shadow-sm focus:shadow-md outline-none"
                   required
                 />
               </div>
@@ -120,7 +122,7 @@ export function StudentModal({
               <div className="grid gap-2">
                 <Label>Class</Label>
                 <Select name="class" required onValueChange={handleClassChange}>
-                  <SelectTrigger className="px-3 py-2 w-full rounded-xl border ring-1 bg-background outline-none">
+                  <SelectTrigger className="px-3 py-2 w-full shadow-sm focus:shaodw-md bg-background outline-none">
                     <SelectValue placeholder="Select Class" />
                   </SelectTrigger>
                   <SelectContent>
@@ -140,7 +142,7 @@ export function StudentModal({
                   required
                   disabled={!selectedClass || sections.length === 0}
                 >
-                  <SelectTrigger className="px-3 py-2 w-full rounded-xl border ring-1 bg-background outline-none">
+                  <SelectTrigger className="px-3 py-2 w-full shadow-sm focus:shaodw-md bg-background outline-none">
                     <SelectValue
                       placeholder={
                         !selectedClass
@@ -170,7 +172,7 @@ export function StudentModal({
               <div className="grid gap-2">
                 <Label>First Language</Label>
                 <Select name="language" required>
-                  <SelectTrigger className="px-3 py-2 w-full rounded-xl border ring-1 bg-background outline-none">
+                  <SelectTrigger className="px-3 py-2 w-full shadow-sm focus:shaodw-md bg-background outline-none">
                     <SelectValue placeholder="Select Language" />
                   </SelectTrigger>
                   <SelectContent>
@@ -186,7 +188,7 @@ export function StudentModal({
               <div className="grid gap-2">
                 <Label>Gender</Label>
                 <Select name="gender" required>
-                  <SelectTrigger className="px-3 py-2 w-full rounded-xl border ring-1 bg-background outline-none">
+                  <SelectTrigger className="px-3 py-2 w-full shadow-sm focus:shaodw-md bg-background outline-none">
                     <SelectValue placeholder="Select Gender" />
                   </SelectTrigger>
                   <SelectContent>
@@ -204,15 +206,14 @@ export function StudentModal({
                 <Input
                   type="date"
                   name="dob"
-                  className="px-3 py-2 w-full rounded-xl border border-gray-400 bg-background outline-none"
-                  required
+                  className="px-3 py-2 shadow-sm focus:shadow-md outline-none"
                 />
               </div>
 
               <div className="grid gap-2">
                 <Label>Blood Group</Label>
-                <Select name="bloodGroup" required>
-                  <SelectTrigger className="px-3 py-2 w-full rounded-xl border ring-1 bg-background outline-none">
+                <Select name="bloodGroup">
+                  <SelectTrigger className="px-3 py-2 w-full shadow-sm focus:shaodw-md bg-background outline-none">
                     <SelectValue placeholder="Select Blood Group" />
                   </SelectTrigger>
                   <SelectContent>

@@ -12,12 +12,20 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { ChevronLeft, Loader2, Search } from "lucide-react"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectValue } from "../ui/select"
+import { SelectTrigger } from "@radix-ui/react-select"
 
 /* ================= TYPES ================= */
 type School = {
   id: string
   name: string
 }
+const ORDER_STATUS = [
+  "ORDER_PLACED",
+  "PACKAGING_DONE",
+  "OUT_FOR_DELIVERY",
+  "DELIVERED",
+];
 
 type Order = {
   id: string
@@ -35,7 +43,7 @@ type Order = {
   student: {name: string, rollNo: number, 
     parent: {email: string, phone: string, address: string}
   }
-  status: "Pending" | "Completed" | "Cancelled"
+  status: "ORDER_PLACED" | "PACKAGING_DONE" | "OUT_FOR_DELIVERY" | "DELIVERED"
 }
 
 type Props = {
@@ -51,7 +59,7 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
   const [schoolLoading, setSchoolLoading] = useState(false)
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState("")
-
+  const [statusUpdating,setStatusUpdating] = useState(false);
   /* ================= FETCH SCHOOLS ================= */
   const fetchSchools = async () => {
     if (role === "SUB_ADMIN") return
@@ -194,17 +202,45 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
                           {order?.student.parent.email} {order?.student.parent.phone && `• ${order?.student.parent.phone}`}
                         </CardDescription>
                       </div>
-                      <Badge
-                      className={`py-2 h-fit ${order.status.toLocaleLowerCase() === "completed" ? "text-green-400 bg-green-500/20" : order.status.toLowerCase() === "pending" ? "bg-amber-500/20 text-amber-400" : "text-red-400 bg-red-500/20"}`}
+                      <Select disabled={statusUpdating} value={order.status} onValueChange={async (value: any)=>{
+                        setStatusUpdating(true);
+                        const request = await fetch("/api/order/change-status",{
+                          method: "PATCH",
+                          body:JSON.stringify({
+                            orderId: order.id,
+                            status: value
+                          })
+                        })
+                        const response = await request.json();
+                        if(response.success){
+                          setOrders((prev)=>{
+                            return [...prev.filter((ord)=>ord.id!==order.id),{...order,status: value}];
+                          })
+                        }
+                        setStatusUpdating(false);
+                      }}>
+                        <SelectTrigger className={`disabled:bg-gray-200 disabled:text-white shadow-sm max-h-10 rounded-lg outline-none px-2 text-sm py-2 h-fit ${order.status === "DELIVERED" ? "text-green-400 bg-green-500/20" : order.status === "OUT_FOR_DELIVERY" ? "bg-amber-500/20 text-amber-400" : "text-red-400 bg-red-500/20"}`}>
+                          <SelectValue placeholder={order.status.replaceAll("_"," ")}/>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                          {
+                            ORDER_STATUS.map((status: string)=><SelectItem key={status} value={status}>{status.replaceAll('_'," ")}</SelectItem>)
+                          }
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                      {/* <Badge
+                      className={`py-2 h-fit ${order.status === "DELIVERED" ? "text-green-400 bg-green-500/20" : order.status === "OUT_FOR_DELIVERY" ? "bg-amber-500/20 text-amber-400" : "text-red-400 bg-red-500/20"}`}
                       >
-                        {order.status}
-                      </Badge>
+                        {order.status.replaceAll("_"," ")}
+                      </Badge> */}
                     </div>
                   </CardHeader>
 
                   <CardContent className="flex justify-between">
                     <div>
-                      <p className="text-sm">Date: {order.createdAt.split("T")[0]}</p>
+                      <p className="text-sm">Order Placed on: {order.createdAt.split("T")[0]}</p>
                       <p className="text-sm">Address: {order.landmark}</p>
                       <p className="text-sm">Pincode: {order.pincode}</p>
                     </div>

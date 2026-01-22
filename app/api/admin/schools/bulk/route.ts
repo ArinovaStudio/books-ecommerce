@@ -7,7 +7,7 @@ import { parse } from "csv-parse/sync";
 import { schoolAdminCreatedTemplate } from "@/lib/templates";
 import sendEmail from "@/lib/email";
 import { Wrapper } from "@/lib/api-handler";
-
+ 
 const bulkSchoolRowSchema = z.object({
     name: z.string({ required_error: "School Name is required" }).min(1, "School Name is required"),
     email: z.string({ required_error: "Email is required" }).email("Invalid Email"),
@@ -68,9 +68,18 @@ export const POST = Wrapper(async (req: NextRequest) => {
     let records: any[] = [];
     try {
         records = parse(csvText, {
-            columns: true,
             skip_empty_lines: true,
             trim: true,
+        }).map((record: string[])=>{
+            return {
+                name: record[0],
+                email: record[1],
+                password: record[2],
+                location: record[3],
+                classRange: record[4],
+                board: record[5],
+                languages: record[6]
+            }
         });
     } catch (e) {
         return NextResponse.json({ success: false, message: "Invalid CSV Format" }, { status: 400 });

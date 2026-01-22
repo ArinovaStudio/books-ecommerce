@@ -99,7 +99,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
             parentEmail: parent.email,
             dob: student.dob ? new Date(student.dob) : null,
             gender: student.gender,
-            bloodGroup: student.bloodGroup,
+            bloodGroup: student.bloodGroup || null,
             address: parent.address,
             isActive: true,
             parentId: parentUser.id,

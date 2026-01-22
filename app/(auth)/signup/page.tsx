@@ -144,7 +144,7 @@ const SignUpPage = () => {
             schoolId: id,
           },
         };
-        const request = await fetch("/api/auth/add-childrens-as-students", {
+        const request = await fetch("/api/auth/newsignup", {
           method: "POST",
           body: JSON.stringify(data),
         });

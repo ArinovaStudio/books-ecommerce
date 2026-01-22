@@ -2,6 +2,8 @@ import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { Suspense } from "react";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 export default function AuthLayout({
     children,
 }: {
@@ -9,7 +11,7 @@ export default function AuthLayout({
 }) {
     return (
         <div className="h-screen overflow-hidden bg-white">
-            <div className="flex h-full m-5">
+            <div className="relative flex h-full m-5">
                 <div className="hidden no-scrollbar lg:flex lg:w-1/2 bg-brand-950 flex-col items-center justify-center p-12">
                     <div className="flex items-center justify-center">
                         <Image

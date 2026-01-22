@@ -47,7 +47,6 @@ export default function FilteredProductTable({
   const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
-
   const fetchProducts = async () => {
     setLoading(true);
     try {
