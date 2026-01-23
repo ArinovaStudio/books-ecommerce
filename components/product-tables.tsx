@@ -152,7 +152,8 @@ export default function ProductTable({
     }, 0);
     setTotalPrice(total);
   }, [products, selectedItems]);
-
+  const PRIORITY = ["TEXTBOOK","NOTEBOOK","STATIONARY","OTHER"];
+  
   const groupedProducts = products.reduce((acc, product) => {
     const category = product.category.toUpperCase();
     if (!acc[category]) acc[category] = [];
@@ -435,9 +436,10 @@ export default function ProductTable({
           </div>
         ) : products.length > 0 ? (
           <div className="space-y-8">
-            {Object.entries(groupedProducts).map(
-              ([category, categoryProducts]) => (
-                <div key={category}>
+            {PRIORITY.map(
+              (category) => {
+              const categoryProducts = groupedProducts[category];
+               return <div key={category}>
                   <h3 className="text-lg font-semibold mb-4 px-2">
                     {categoryTitles[category as keyof typeof categoryTitles]}
                   </h3>
@@ -465,7 +467,7 @@ export default function ProductTable({
                     {categoryProducts.map(renderRow)}
                   </div>
                 </div>
-              )
+              }
             )}
           </div>
         ) : (

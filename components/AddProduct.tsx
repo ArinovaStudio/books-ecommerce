@@ -35,6 +35,7 @@ type Product = {
   brand: string;
   price: number;
   image: string;
+  language?: string;
 };
 
 type Props = {
@@ -242,7 +243,7 @@ export default function AddEditProductDialog({
 
             <div className="grid gap-2">
               <Label>Language</Label>
-              <Select name="language">
+              <Select name="language" defaultValue={product?.language}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Language" />
                 </SelectTrigger>

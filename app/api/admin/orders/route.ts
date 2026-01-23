@@ -51,7 +51,8 @@ export const GET = Wrapper(async (req: NextRequest) => {
                             select: {
                                 email: true,
                                 phone: true,
-                                address: true
+                                address: true,
+                                name: true,
                             }
                         }
                     },
@@ -69,6 +70,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
                             select: {
                                 name: true,
                                 image: true,
+                                description: true,
                             },
                         },
                     },

@@ -203,7 +203,7 @@ const SignUpPage = () => {
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                      name="name"
+                      name="name" 
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="John Doe"
