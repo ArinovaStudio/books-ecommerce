@@ -161,6 +161,7 @@ export default function ProductTable({
     return acc;
   }, {} as Record<string, Product[]>);
 
+  console.log(groupedProducts)
   const categoryTitles = {
     TEXTBOOK: "Textbooks",
     NOTEBOOK: "Notebooks",
@@ -438,7 +439,8 @@ export default function ProductTable({
           <div className="space-y-8">
             {PRIORITY.map(
               (category) => {
-              const categoryProducts = groupedProducts[category];
+              const categoryProducts = groupedProducts[category] ?? [];
+              if(categoryProducts.length===0) return ;
                return <div key={category}>
                   <h3 className="text-lg font-semibold mb-4 px-2">
                     {categoryTitles[category as keyof typeof categoryTitles]}
