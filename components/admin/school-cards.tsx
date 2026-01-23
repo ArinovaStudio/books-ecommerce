@@ -182,7 +182,7 @@ export function SchoolCards({ activeTab, onSelectSchool, refreshTrigger = 0 }: P
                                     </div>
 
                                     {/* 🔹 ACTION MENU */}
-                                    {activeTab === "schools" && (
+                                    {activeTab === "products" && (
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button
