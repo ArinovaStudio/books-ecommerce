@@ -245,12 +245,12 @@ export default function AddEditProductDialog({
               <Label>Language</Label>
               <Select name="language" defaultValue={product?.language}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Language" />
+                  <div className="truncate! max-w-15"><SelectValue  placeholder="Language" /></div>
                 </SelectTrigger>
                 <SelectContent>
                   {languages.map((language: string,idx: number)=> (
                     <SelectItem key={language} value={language}>
-                      {language.toUpperCase()}
+                      <div>{language.toUpperCase()}</div>
                     </SelectItem>
                   ))}
                 </SelectContent>

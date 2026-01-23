@@ -2,30 +2,53 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-    const { schoolId, classId } = await req.json();
-    if (schoolId === "" || classId === "") {
-        return NextResponse.json({ success: false, message: "School Id Or class id is not present" });
+  const { schoolId, classId, sectionName } = await req.json();
+  if (schoolId === "" || classId === "") {
+    return NextResponse.json({
+      success: false,
+      message: "School Id Or class id is not present",
+    });
+  }
+  try {
+    if (!sectionName) {
+      const products = await prisma.product.findMany({
+        where: {
+          classId: classId,
+          class: {
+            schoolId: schoolId,
+          },
+        },
+        include: {
+          class: true, // 👈 include related class
+        },
+        orderBy: {
+          name: "asc",
+        },
+      });
+      return NextResponse.json({ success: true, data: products });
     }
-    try {
-        const products = await prisma.product.findMany({
-            where: {
-                classId: classId,
-                class: {
-                    schoolId: schoolId,
-                },
-            },
-            include: {
-                class: true, // 👈 include related class
-            },
-            orderBy: {
-                name: "asc",
-            },
-        });
-
-        return NextResponse.json({ success: true, data: products });
-
-        // return NextResponse.json({success: false,message: "Runned"});
-    } catch (error) {
-        return NextResponse.json({ success: false, message: "Failed to fetch products" }, { status: 500 });
-    }
+    const section = await prisma.section.findFirst({
+      where: { classId: classId, name: sectionName },
+    });
+    const products = await prisma.product.findMany({
+      where: {
+        classId: classId,
+        class: {
+          schoolId: schoolId,
+        },
+        language: section?.language,
+      },
+      include: {
+        class: true,
+      },
+      orderBy: { name: "asc" },
+    });
+    return NextResponse.json({ success: true, data: products });
+    // return NextResponse.json({success: false,message: "Runned"});
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, message: "Failed to fetch products" },
+      { status: 500 }
+    );
+  }
 }

@@ -33,7 +33,7 @@ export default function SchoolsPage() {
           );
           setSchools(filtered_schools);
           // console.log(filtered_schools);
-          setCities([...new Set(filtered_schools.map((s: School) => s.address))])
+          setCities([...new Set(filtered_schools.map((s: School) => s.address))] as any)
         }
       } catch (error) {
         console.error("Error fetching schools:", error);

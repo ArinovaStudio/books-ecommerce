@@ -59,7 +59,6 @@ export default function ProductTable({
     Record<string, { checked: boolean; quantity: number }>
   >({});
   const router = useRouter();
-
   const handleNextClick = async () => {
     const res = await fetch("/api/auth/check");
     const data = await res.json();
@@ -102,6 +101,7 @@ export default function ProductTable({
         body: JSON.stringify({
           schoolId: params?.schoolId,
           classId: params?.classId,
+          sectionName: params?.section
         }),
       });
       const data = await res.json();
@@ -161,7 +161,6 @@ export default function ProductTable({
     return acc;
   }, {} as Record<string, Product[]>);
 
-  console.log(groupedProducts)
   const categoryTitles = {
     TEXTBOOK: "Textbooks",
     NOTEBOOK: "Notebooks",
@@ -440,7 +439,7 @@ export default function ProductTable({
             {PRIORITY.map(
               (category) => {
               const categoryProducts = groupedProducts[category] ?? [];
-              if(categoryProducts.length===0) return ;
+              if(categoryProducts.length===0) return;
                return <div key={category}>
                   <h3 className="text-lg font-semibold mb-4 px-2">
                     {categoryTitles[category as keyof typeof categoryTitles]}
@@ -466,7 +465,7 @@ export default function ProductTable({
                         <span className="col-span-1 text-right">Actions</span>
                       )}
                     </div>
-                    {categoryProducts.map(renderRow)}
+                    {categoryProducts?.map(renderRow)}
                   </div>
                 </div>
               }
