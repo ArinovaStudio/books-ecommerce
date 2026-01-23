@@ -141,12 +141,12 @@ export default function EditStudentDialog({
                 name: form.name.trim(),
                 rollNo: form.rollNo.trim(),
                 sectionId,
-                firstLanguage: form.firstLanguage || null,
+                firstLanguage: form.firstLanguage || "",
                 parentEmail: form.parentEmail.trim(),
-                parentName: form.parentName.trim() || null,
-                dob: form.dob || null,
-                gender: form.gender || null,
-                bloodGroup: form.bloodGroup || null,
+                parentName: form.parentName.trim() || "",
+                dob: form.dob || "",
+                gender: form.gender || "",
+                bloodGroup: form.bloodGroup || "",
             }
 
             const res = await fetch(`/api/admin/students/${student.id}`, {

@@ -126,7 +126,14 @@ const SignUpPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) return;
+    if (!validate()) {
+      toast({
+        title: "Error",
+        description: "Please fill all the details.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setLoading(true);
 
@@ -324,14 +331,15 @@ const SignUpPage = () => {
                       School
                     </Label>
                     <div className="relative">
-                      <School className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <School className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-800" />
                       <Input
                         value={
                           formData.school.name || "This is value from my side"
                         }
-                        disabled
-                        onChange={handleChange}
-                        className={`pl-9 pr-9 w-full h-11 rounded-xl bg-gray-50 text-sm ${
+                        readOnly
+                        // disabled
+                        // onChange={handleChange}
+                        className={`pl-9 pr-9 w-full h-11 rounded-xl bg-gray-200 disabled:text-black text-black text-sm ${
                           errors.school
                             ? "border-red-500 focus-visible:ring-red-500"
                             : ""

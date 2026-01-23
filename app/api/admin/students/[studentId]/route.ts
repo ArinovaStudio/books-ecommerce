@@ -67,30 +67,18 @@ export const PUT = Wrapper(async( req: NextRequest, { params }: { params: Promis
     // Class/Section/Language Consistency Check
     if (classId || sectionId || firstLanguage) {
         const targetClassId = classId || existingStudent.classId;
-        const targetSectionId = sectionId || existingStudent.sectionId;
         const targetLanguage = firstLanguage || existingStudent.firstLanguage;
 
-        const sectionDetails = await prisma.section.findUnique({
-            where: { id: targetSectionId },
-            include: { class: true }
-        });
-
-        if (!sectionDetails) {
-            return NextResponse.json({ success: false, message: "Invalid Section ID" }, { status: 400 });
+        if (targetLanguage) {   
+            const allSections = await prisma.section.findMany({
+                where: { classId: targetClassId }
+            })
+            
+            const sectionDetArray = allSections.filter((sec: any) => sec.language.toLowerCase() === targetLanguage?.toLowerCase());
+            const sectionDetails = sectionDetArray[0];
+            newSectionName = sectionDetails.name;
         }
-
-        if (sectionDetails.classId !== targetClassId) {
-            return NextResponse.json({ success: false, message: "Section does not belong to the selected Class" }, { status: 400 });
-        }
-
-        if (targetLanguage && sectionDetails.language.toLowerCase() !== targetLanguage.toLowerCase()) {
-            return NextResponse.json({ 
-                success: false, 
-                message: `Language Mismatch: Section '${sectionDetails.name}' is for '${sectionDetails.language}', but student language is '${targetLanguage}'` 
-            }, { status: 400 });
-        }
-
-        newSectionName = sectionDetails.name;
+        
     }
 
     // Duplicate Roll No Check

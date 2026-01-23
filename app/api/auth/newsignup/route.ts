@@ -12,7 +12,7 @@ const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY";
 export const POST = Wrapper(async (req: NextRequest) => {
   try {
     const body = await req.json();
-    console.log(body);
+
     const { parent, students, schoolInfo } = body;
 
     if (!parent || !students?.length || !schoolInfo?.schoolId) {
