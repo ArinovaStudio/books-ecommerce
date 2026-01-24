@@ -105,6 +105,8 @@ export default function ProductTable({
         }),
       });
       const data = await res.json();
+      // console.log(data);
+      
       setProducts(data.success ? data.data : []);
     } catch (err) {
       console.error("Failed to fetch products", err);

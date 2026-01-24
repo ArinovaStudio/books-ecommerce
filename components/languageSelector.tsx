@@ -49,7 +49,8 @@ export default function LanguageSelector({ schoolId, classId, onSelectingLang, o
                 setLanguages(data.languages);
             }
         } catch (error) {
-            console.log(error);
+            alert("Failed to fetch languages");
+            // console.log(error);
         } finally {
             setLoading(false)
         }

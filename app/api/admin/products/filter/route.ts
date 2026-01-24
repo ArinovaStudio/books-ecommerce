@@ -30,21 +30,31 @@ export async function POST(req: NextRequest) {
     const section = await prisma.section.findFirst({
       where: { classId: classId, name: sectionName },
     });
-    const products = await prisma.product.findMany({
-      where: {
-        classId: classId,
-        class: {
-          schoolId: schoolId,
-        },
+const products = await prisma.product.findMany({
+  where: {
+    classId: classId,
+    class: {
+      schoolId: schoolId,
+    },
+    OR: [
+      {
+        category: "TEXTBOOK",
         language: section?.language,
       },
-      include: {
-        class: true,
+      {
+        category: {
+          not: "TEXTBOOK",
+        },
       },
-      orderBy: { name: "asc" },
-    });
+    ],
+  },
+  include: {
+    class: true,
+  },
+  orderBy: { name: "asc" },
+});
+
     return NextResponse.json({ success: true, data: products });
-    // return NextResponse.json({success: false,message: "Runned"});
   } catch (error) {
     return NextResponse.json(
       { success: false, message: "Failed to fetch products" },

@@ -38,7 +38,7 @@ const SignInPage = () => {
     const newErrors: FormErrors = {};
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.toLowerCase())) {
       newErrors.email = "Invalid email format";
     }
     if (!formData.password.trim()) {
@@ -123,7 +123,7 @@ const SignInPage = () => {
                 id="email"
                 name="email"
                 type="email"
-                value={formData.email}
+                value={formData.email.toLowerCase()}
                 onChange={handleChange}
                 placeholder="name@example.com"
                 className={`pl-11 h-12 rounded-xl border-gray-200 bg-gray-50/30 focus:bg-white transition-all ${

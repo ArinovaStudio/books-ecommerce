@@ -184,12 +184,13 @@ export default function AddEditProductDialog({
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label>Product Name</Label>
-            <Input name="name" defaultValue={product?.name} required />
+            <Input className="border border-gray-300" name="name" defaultValue={product?.name} required />
           </div>
 
           <div className="grid gap-2">
             <Label>Description</Label>
             <Input
+            className="border border-gray-300"
               name="description"
               defaultValue={product?.description}
               required
@@ -200,7 +201,7 @@ export default function AddEditProductDialog({
             <div className="grid gap-2">
               <Label>Category</Label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full border border-gray-300">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
@@ -214,6 +215,7 @@ export default function AddEditProductDialog({
             <div className="grid gap-2">
               <Label>Minimum Quantity</Label>
               <Input
+              className="border border-gray-300"
                 name="minQuantity"
                 type="number"
                 min={1}
@@ -227,11 +229,12 @@ export default function AddEditProductDialog({
           <div className="grid grid-cols-3 gap-4">
             <div className="grid gap-2">
               <Label>Brand</Label>
-              <Input name="brand" defaultValue={product?.brand} required />
+              <Input className="border border-gray-300" name="brand" defaultValue={product?.brand} required />
             </div>
             <div className="grid gap-2">
               <Label>Price (₹)</Label>
               <Input
+              className="border border-gray-300"
                 name="price"
                 type="number"
                 min={0}
@@ -244,7 +247,7 @@ export default function AddEditProductDialog({
             <div className="grid gap-2">
               <Label>Language</Label>
               <Select name="language" defaultValue={product?.language}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full border border-gray-300">
                   <div className="truncate! max-w-15"><SelectValue  placeholder="Language" /></div>
                 </SelectTrigger>
                 <SelectContent>

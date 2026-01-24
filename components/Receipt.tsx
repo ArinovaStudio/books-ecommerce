@@ -6,6 +6,8 @@ type ReceiptProps = {
 }
 const COMPANY = "Glow Nest";
 const NOT_AVAILABLE = "Not Provided";
+
+
 export default function Receipt({order}: ReceiptProps) {
   const subtotal = order?.items?.reduce(
     (a: number, b: any) => a + b.quantity * b.price,
@@ -24,8 +26,8 @@ export default function Receipt({order}: ReceiptProps) {
             <Image src="/logo.png" className="rounded-full" alt={COMPANY} width={100} height={100}/>
             <h2 className="text-xl font-semibold">{COMPANY}</h2>
             <p className="text-sm text-muted-foreground">
-              3150 McGavock Pk, Nashville, TN 37214<br />
-              hello@questprovider.com
+              Hyderabad, TG- 500043<br />
+              contact@glow-nest.in
             </p>
           </div>
 
@@ -51,13 +53,12 @@ export default function Receipt({order}: ReceiptProps) {
           <table className="w-full text-sm border-collapse">
             <thead className="bg-blue-500 text-white">
               <tr>
-                <th className="p-3 text-left">Product / Service</th>
+                <th className="p-3 text-left">Product</th>
                 <th className="p-3 text-left hidden md:table-cell">
                   Description
                 </th>
                 <th className="p-3 text-center">Qty</th>
                 <th className="p-3 text-right">Cost</th>
-                <th className="p-3 text-right">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -65,13 +66,10 @@ export default function Receipt({order}: ReceiptProps) {
                 <tr key={i} className="border-b last:border-none">
                   <td className="align-top p-3 font-medium">{item.product.name}</td>
                   <td className="align-top p-3 pb-0 max-md:hidden md:table-cell md:line-clamp-2! text-muted-foreground">
-                    {item.product.description || "—"} Lorem ipsum dolor sit amet, consectetur adipisicing elit. Possimus quae modi, ab explicabo quas ipsa minima! Labore exercitationem qui quo dolore quis, dolorum culpa aliquid hic vel, consequuntur quidem illum.
+                    {item?.product?.description || "No description available"}
                   </td>
                   <td className="align-top p-3 text-center">{item.quantity}</td>
-                  <td className="align-top p-3 text-right">${item.price.toFixed(2)}</td>
-                  <td className="align-top p-3 text-right font-medium">
-                    ${(item.quantity * item.price).toFixed(2)}
-                  </td>
+                  <td className="align-top p-3 text-right">₹{item.price.toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>

@@ -26,6 +26,7 @@ type Product = {
   category: string;
   class?: string;
   stock: number;
+  language: string;
   minQuantity: number,
   brand: string;
   price: number;
@@ -36,8 +37,9 @@ interface Props {
   selectedSchool: string;
   selectedClass: string;
 }
-const GRID_STYLE =
-  "grid grid-cols-1 md:grid-cols-[80px_1fr_120px_100px_100px_100px] gap-3 md:gap-4 items-center";
+const GRID_STYLE = "grid grid-cols-1 md:grid-cols-[80px_1fr_120px_100px_100px_100px] gap-3 md:gap-4 items-center";
+const GRID_STYLE_LANG = "grid grid-cols-1 md:grid-cols-[80px_1fr_120px_100px_100px_100px_100px] gap-3 md:gap-4 items-center";
+
 
 export default function FilteredProductTable({
   setSelectedClass,
@@ -59,6 +61,8 @@ export default function FilteredProductTable({
       });
       const data = await res.json();
       if (data.success) {
+        console.log(data.data);
+        
         setProducts(data.data);
       } else {
         setProducts([]);
@@ -100,10 +104,10 @@ export default function FilteredProductTable({
     fetchProducts();
   }, []);
 
-  const renderRow = (product: Product) => (
+  const renderRow = (product: Product, type: string) => (
     <div
       key={product.id}
-      className={`${GRID_STYLE} px-4 py-4 md:px-6 hover:bg-muted/30 transition-colors border-b last:border-0`}
+      className={`${type === "TEXTBOOK" ? GRID_STYLE_LANG : GRID_STYLE} px-4 py-4 md:px-6 hover:bg-muted/30 transition-colors border-b last:border-0`}
     >
       {/* Image & Name Section */}
       <div className="flex items-center gap-4 md:contents">
@@ -117,7 +121,7 @@ export default function FilteredProductTable({
 
         <div className="flex flex-col flex-1 min-w-0">
           <span className="font-semibold md:font-medium text-sm text-foreground truncate">
-            {product.name}
+            {product.name} <br /> <span className="text-gray-400 text-xs font-normal">{product.description}</span>
           </span>
           <div className="md:hidden mt-1 flex gap-2 items-center">
             <Badge
@@ -144,7 +148,14 @@ export default function FilteredProductTable({
       </div>
 
       {/* Min Quantity Column (Desktop) */}
+      {type === "TEXTBOOK" && (
       <div className="hidden md:flex justify-center">
+        <p className="font-normal text-xs tracking-wider text-muted-foreground text-center">
+          {product.language}
+        </p>
+      </div>
+      )}
+            <div className="hidden md:flex justify-center">
         <h1 className="font-bold uppercase tracking-wider text-muted-foreground text-center">
           {product.minQuantity}
         </h1>
@@ -277,7 +288,7 @@ export default function FilteredProductTable({
               >
                 <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
                   <div
-                    className={`${GRID_STYLE} hidden md:grid bg-muted/50 px-6 py-3 border-b`}
+                    className={`${catKey === "TEXTBOOK" ? GRID_STYLE_LANG : GRID_STYLE} hidden md:grid bg-muted/50 px-6 py-3 border-b`}
                   >
                     <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
                       Preview
@@ -288,6 +299,13 @@ export default function FilteredProductTable({
                     <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-center">
                       Brand
                     </span>
+                    {
+                      catKey === "TEXTBOOK" && (
+                    <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-center">
+                      Language
+                    </span>
+                      )
+                    }
                     <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-center">
                       Quantity
                     </span>
@@ -302,7 +320,7 @@ export default function FilteredProductTable({
                   <div className="divide-y divide-border">
                     {products
                       .filter((p) => p.category.toUpperCase() === catKey)
-                      .map(renderRow)}
+                      .map((product) => renderRow(product, catKey))}
 
                     {products.filter((p) => p.category.toUpperCase() === catKey)
                       .length === 0 && (

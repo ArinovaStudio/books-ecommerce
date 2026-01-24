@@ -156,6 +156,9 @@ const SignUpPage = () => {
           body: JSON.stringify(data),
         });
         const response = await request.json();
+        if (!response.success) {
+          alert(response.message);
+        }
         if (response.success) {
           toast({
             title: "Success",

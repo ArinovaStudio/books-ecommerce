@@ -56,23 +56,34 @@ export function StudentModal({
   const [loading, setLoading] = useState(false);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [sections, setSections] = useState<string[]>([]);
-  const fetchStudent = (id: string) => {};
+  const [selectedSection, setSelectedSection] = useState<any | null>(null);
+
   const handleClassChange = (value: string) => {
     setSelectedClass(value);
-
     const cls = school?.classes?.find((c: any) => c.id === value);
-    console.log(cls);
+    // console.log(cls);
     setSections(cls?.sectionDetails);
   };
 
+  const handleLangChange = (value: string) => {
+    const section = sections.filter((a: any) => a.language.toLowerCase() === value.toLowerCase());
+    const selectedSec: any = section.length > 0 ? section[0] : null;
+    setSelectedSection(selectedSec ? selectedSec : null);
+  }
+
   const handleSubmit = async (fd: FormData) => {
+    
     if (!school) return;
     setLoading(true);
     try {
+      fd.append("sectionId", selectedSection?.id);
+      fd.append("section", selectedSection?.name);
+      
       const data = Object.fromEntries(fd);
-      setStudents([...students,{...data,id:Date.now()}]);
+      setStudents([...students,{...data, section: selectedSection?.name, sectionId: selectedSection?.id, id:Date.now()}]);
       setSelectedClass(null);
       setSections([]);
+      setSelectedSection(null)
       onOpenChange(false);
     } catch (error: any) {
       toast({
@@ -135,45 +146,20 @@ export function StudentModal({
                 </Select>
               </div>
 
-              <div className="grid gap-2">
-                <Label>Section</Label>
-                <Select
-                  name="section"
-                  required
-                  disabled={!selectedClass || sections.length === 0}
-                >
-                  <SelectTrigger className="px-3 py-2 w-full shadow-sm focus:shaodw-md bg-background outline-none">
-                    <SelectValue
-                      placeholder={
-                        !selectedClass
-                          ? "Select Class First"
-                          : sections.length === 0
-                          ? "No Sections Available"
-                          : "Select Section"
-                      }
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sections.length > 0 ? (
-                      sections.map((section: any) => (
-                        <SelectItem key={section.id} value={section.id}>
-                          {section.name}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <div className="px-3 py-2 text-sm text-muted-foreground">
-                        No sections available
-                      </div>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
 
               <div className="grid gap-2">
                 <Label>First Language</Label>
-                <Select name="language" required>
+                <Select name="language" required onValueChange={handleLangChange} 
+                  disabled={!selectedClass || sections.length === 0}
+                >
                   <SelectTrigger className="px-3 py-2 w-full shadow-sm focus:shaodw-md bg-background outline-none">
-                    <SelectValue placeholder="Select Language" />
+                    <SelectValue placeholder={
+                        !selectedClass
+                          ? "Select Class First"
+                          : sections.length === 0
+                          ? "No Language Available"
+                          : "Select Language"
+                      } />
                   </SelectTrigger>
                   <SelectContent>
                     {school?.languages?.map((language: string) => (
@@ -181,6 +167,30 @@ export function StudentModal({
                         {language}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+                            <div className="grid gap-2">
+                <Label>Section</Label>
+                  {/* <Input
+                  name="section"
+                  placeholder="Select Language first"
+                  className="p-1 border ring-gray-500 bg-background shadow-sm focus:shadow-md outline-none"
+                  required
+                  readOnly
+                  value={selectedSection?.name || ""}
+                /> */}
+                <Select name="class" required disabled value={selectedSection?.id || ""}>
+                  <SelectTrigger className="px-3 py-2 w-full shadow-sm focus:shaodw-md bg-background outline-none">
+                    <SelectValue placeholder="Select Section" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={selectedSection?.id || "filling"}>
+                      {selectedSection?.name || "No Section Selected"}
+                    </SelectItem>
+                    {/* {school?.classes?.map((cls: any) => (
+                    ))} */}
                   </SelectContent>
                 </Select>
               </div>

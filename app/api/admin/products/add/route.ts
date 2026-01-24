@@ -17,17 +17,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
       classId,
       schoolId,
     } = await req.json();
-    console.log({
-      name,
-      description,
-      brand,
-      price,
-      category,
-      stock,
-      preview,
-      classId,
-      schoolId,
-    });
+
     if (!name || !description || !price || !category || !stock) {
       return NextResponse.json(
         { success: false, message: "All fields are required" },

@@ -6,7 +6,6 @@ import { NextRequest, NextResponse } from "next/server";
 export const GET = Wrapper(async (req: NextRequest, { params }: { params: Promise<{ schoolId: string }> }) => {
     try {
         const auth = await verifyUser(req);
-
         if (!auth.success || !auth.user) {
             return NextResponse.json({ success: false, message: "Login required to view classes" }, { status: 401 });
         }
@@ -37,7 +36,6 @@ export const GET = Wrapper(async (req: NextRequest, { params }: { params: Promis
                 },
                 orderBy: { name: 'asc' }
             });
-
         } 
         
         else {

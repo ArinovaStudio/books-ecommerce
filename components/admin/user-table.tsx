@@ -94,29 +94,69 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
   const [search, setSearch] = useState("");
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [receiptData, setReceiptData] = useState<Order | null>(null);
+
+
   const handleReceipt = async (order: Order) => {
-    setReceiptData(order);
+  setReceiptData(order);
 
-    setTimeout(() => {
-      const receipt = document.getElementById("receipt");
-      html2canvas(receipt!, {
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        scale: 2,
-        windowWidth: 794,
-        scrollX: 0,
-        scrollY: 0,
-      }).then((canvas) => {
-        const imgData = canvas.toDataURL("image/png");
-        const pdf = new jspdf("p", "mm", "a4"); // 'p' for portrait, 'mm' for units, 'a4' for size
-        const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
-        const imgHeight = (canvas.height * pageWidth) / canvas.width;
+  setTimeout(async () => {
+    const receipt = document.getElementById("receipt");
+    if (!receipt) return;
 
-        pdf.addImage(imgData, "PNG", 0, 0, pageWidth, imgHeight);
-        pdf.save(`Receipt-${order.id}.pdf`);
-      });
-    }, 2000);
-  };
+    const canvas = await html2canvas(receipt, {
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      scale: 2,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: receipt.scrollWidth,
+      windowHeight: receipt.scrollHeight,
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    // A4 width in mm
+    const pdfWidth = 210;
+
+    // Calculate proportional height in mm
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    // Create PDF with dynamic height
+    const pdf = new jspdf({
+      orientation: "p",
+      unit: "mm",
+      format: [pdfWidth, pdfHeight],
+    });
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`Receipt-${order.id}.pdf`);
+  }, 500);
+};
+
+
+  // const handleReceipt = async (order: Order) => {
+  //   setReceiptData(order);
+
+  //   setTimeout(() => {
+  //     const receipt = document.getElementById("receipt");
+  //     html2canvas(receipt!, {
+  //       useCORS: true,
+  //       backgroundColor: "#ffffff",
+  //       scale: 2,
+  //       windowWidth: 794,
+  //       scrollX: 0,
+  //       scrollY: 0,
+  //     }).then((canvas) => {
+  //       const imgData = canvas.toDataURL("image/png");
+  //       const pdf = new jspdf("p", "mm", "a4"); // 'p' for portrait, 'mm' for units, 'a4' for size
+  //       const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
+  //       const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+  //       pdf.addImage(imgData, "PNG", 0, 0, pageWidth, imgHeight);
+  //       pdf.save(`Receipt-${order.id}.pdf`);
+  //     });
+  //   }, 2000);
+  // };
   /* ================= FETCH SCHOOLS ================= */
   const fetchSchools = async () => {
     if (role === "SUB_ADMIN") return;
@@ -142,7 +182,7 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
       const res = await fetch(`/api/admin/orders?schoolId=${school.id}`);
       const data = await res.json();
       if (data.success) {
-        console.log(data.orders);
+        // console.log(data.orders);
 
         setOrders(data.orders);
       } else setOrders([]);

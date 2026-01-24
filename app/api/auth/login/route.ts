@@ -25,7 +25,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
 
     const { email, password } = validation.data;
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
 
     if (!user) {
       return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
@@ -34,8 +34,6 @@ export const POST = Wrapper(async (req: NextRequest) => {
     if (user.status !== "ACTIVE") {
       return NextResponse.json({ success: false, message: `Account is ${user.status.toLowerCase()}. Contact support.` }, { status: 403 });
     }
-
-    console.log(user.password);
     
     const isPasswordValid = await bcrypt.compare(password, user.password);
 

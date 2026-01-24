@@ -15,6 +15,8 @@ export const POST = Wrapper(async (req: NextRequest) => {
 
     const { parent, students, schoolInfo } = body;
 
+    // console.log(students);
+    
     if (!parent || !students?.length || !schoolInfo?.schoolId) {
       return NextResponse.json(
         { success: false, message: "Invalid payload" },
@@ -33,13 +35,18 @@ export const POST = Wrapper(async (req: NextRequest) => {
     const result = await prisma.$transaction(async (tx) => {
       const schoolId = schoolInfo.schoolId;
 
-      // 2️⃣ Find or create parent
       let parentUser = await tx.user.findUnique({
         where: { email: parent.email },
       });
       if (!parentUser) {
         if (!parent.password || parent.password.length < 8) {
-          throw new Error("Password required for new parent (min 8 chars)");
+          return NextResponse.json(
+            {
+              success: false,
+              message: "Password required for new parent (min 8 chars)",
+            },
+            { status: 400 }
+          );
         }
 
         const hashedPassword = await bcrypt.hash(parent.password, 12);
@@ -63,8 +70,10 @@ export const POST = Wrapper(async (req: NextRequest) => {
 
       for (const student of students) {
         const classInfo = await tx.class.findUnique({
-          where: { id: student.class ,sectionDetails:{some:{id:student.section}}},
+          where: { id: student.class ,sectionDetails: {some:{id:student.sectionId}}},
         });
+        // console.log(classInfo);
+        
         if (!classInfo) {
           throw new Error(`Class Or Section Id Does not exist!`);
         }
@@ -74,17 +83,17 @@ export const POST = Wrapper(async (req: NextRequest) => {
           where: {
             schoolId,
             classId: student.class,
-            sectionId: student.section,
+            sectionId: student.sectionId,
             rollNo: student.rollNo,
           },
         });
 
         if (duplicate) {
           throw new Error(
-            `Roll No ${student.rollNo} already exists in section ${student.section}`
+            `Roll No ${student.rollNo} already exists in section ${student.sectionId}`
           );
         }
-        const section = await tx.section.findUnique({where:{id: student.section}});
+        const section = await tx.section.findUnique({where:{id: student.sectionId}});
         if (!section) {
           throw new Error(`Section With Given Id Does Not Exist`);
         }
@@ -95,7 +104,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
             firstLanguage: student.language,
             schoolId,
             classId: student.class,
-            sectionId: student.section,
+            sectionId: student.sectionId,
             section:section.name,
             parentEmail: parent.email,
             dob: student.dob ? new Date(student.dob) : null,

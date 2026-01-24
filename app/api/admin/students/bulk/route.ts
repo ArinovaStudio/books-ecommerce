@@ -86,7 +86,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
                 try {
                     const validation = bulkStudentRowSchema.safeParse(row);
                     if (!validation.success) {
-                        console.log(validation.error);
+                        // console.log(validation.error);
                         throw new Error(`Validation Error: ${validation.error.errors[0].message}`);
                     }
                     const data = validation.data;

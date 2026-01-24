@@ -63,7 +63,7 @@ export const PUT = Wrapper(async( req: NextRequest, { params }: { params: Promis
     } = validation.data;
 
     let newSectionName = existingStudent.section;
-    
+    let newSectionId = existingStudent.sectionId;
     // Class/Section/Language Consistency Check
     if (classId || sectionId || firstLanguage) {
         const targetClassId = classId || existingStudent.classId;
@@ -77,6 +77,7 @@ export const PUT = Wrapper(async( req: NextRequest, { params }: { params: Promis
             const sectionDetArray = allSections.filter((sec: any) => sec.language.toLowerCase() === targetLanguage?.toLowerCase());
             const sectionDetails = sectionDetArray[0];
             newSectionName = sectionDetails.name;
+            newSectionId = sectionDetails.id;
         }
         
     }
@@ -144,7 +145,7 @@ export const PUT = Wrapper(async( req: NextRequest, { params }: { params: Promis
             name, 
             rollNo, 
             classId, 
-            sectionId,
+            sectionId: newSectionId,
             section: newSectionName,
             firstLanguage,
             parentEmail, 
