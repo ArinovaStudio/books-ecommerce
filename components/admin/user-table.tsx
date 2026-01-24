@@ -96,13 +96,13 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
   const [receiptData, setReceiptData] = useState<Order | null>(null);
 
 
-  const handleReceipt = async (order: Order) => {
+const handleReceipt = async (order: Order) => {
   setReceiptData(order);
-
+  
   setTimeout(async () => {
     const receipt = document.getElementById("receipt");
     if (!receipt) return;
-
+    
     const canvas = await html2canvas(receipt, {
       useCORS: true,
       backgroundColor: "#ffffff",
@@ -112,22 +112,36 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
       windowWidth: receipt.scrollWidth,
       windowHeight: receipt.scrollHeight,
     });
-
+    
     const imgData = canvas.toDataURL("image/png");
-
-    // A4 width in mm
-    const pdfWidth = 210;
-
-    // Calculate proportional height in mm
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    // Create PDF with dynamic height
+    
+    // Get actual canvas dimensions
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+    
+    // Define max PDF width (A4 width in mm)
+    const maxPdfWidth = 210;
+    
+    // Calculate PDF dimensions maintaining aspect ratio
+    // Convert pixels to mm (assuming 96 DPI: 1 inch = 25.4mm, 96px = 25.4mm)
+    const pxToMm = 25.4 / 96;
+    let pdfWidth = imgWidth * pxToMm / 2; // divide by 2 because we used scale: 2
+    let pdfHeight = imgHeight * pxToMm / 2;
+    
+    // If content is wider than A4, scale down proportionally
+    if (pdfWidth > maxPdfWidth) {
+      const scaleFactor = maxPdfWidth / pdfWidth;
+      pdfWidth = maxPdfWidth;
+      pdfHeight = pdfHeight * scaleFactor;
+    }
+    
+    // Create PDF with actual content dimensions
     const pdf = new jspdf({
-      orientation: "p",
+      orientation: pdfHeight > pdfWidth ? "p" : "l",
       unit: "mm",
       format: [pdfWidth, pdfHeight],
     });
-
+    
     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
     pdf.save(`Receipt-${order.id}.pdf`);
   }, 500);
