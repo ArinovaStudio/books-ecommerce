@@ -12,7 +12,8 @@ const bulkProductRowSchema = z.object({
     category: z.string({ required_error: "Category is required" }).min(1),
     brand: z.string({ required_error: "Brand is required" }).min(1),
     stock: z.preprocess((val) => (val ? Number(val) : 100), z.number().int().nonnegative()),
-    minQuantity: z.preprocess((val) => (val ? Number(val) : 1), z.number().int().min(1))
+    minQuantity: z.preprocess((val) => (val ? Number(val) : 1), z.number().int().min(1)),
+    hsncode: z.string().optional()
 });
 
 const ALLOWED_CATEGORIES = ["TEXTBOOK", "NOTEBOOK", "STATIONARY", "OTHER"];
@@ -92,7 +93,8 @@ export const POST = Wrapper(async (req: NextRequest) => {
                             stock: data.stock,
                             minQuantity: data.minQuantity,
                             classId: classId,
-                            image: null 
+                            image: null,
+                            hsncode: data.hsncode || null
                         }
                     });
 

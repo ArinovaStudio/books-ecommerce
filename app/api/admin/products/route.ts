@@ -37,6 +37,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
     const imageFile = formData.get("image") as File | null;
     const classId = formData.get("classId") as string;
     const language = formData.get("language") as string;
+    const hsncode = formData.get("hsncode") as string;
 
     if (!name || !description || !price || !category) {
       return NextResponse.json(
@@ -73,6 +74,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
         image: imageUrl,
         classId: classId,
         language: language,
+        hsncode: hsncode || null
       },
     });
 

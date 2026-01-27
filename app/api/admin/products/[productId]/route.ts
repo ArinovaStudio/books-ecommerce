@@ -38,6 +38,7 @@ export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promis
         const minQuantity = formData.get("minQuantity") as string;
         const imageFile = formData.get("image") as File | null;
         const language = formData.get("language") as string;
+        const hsncode = formData.get("hsncode") as string;
         if (!name || !description || !price || !category) {
             return NextResponse.json({ success: false, message: "All required fields must be filled" }, { status: 400 });
         }
@@ -69,7 +70,8 @@ export const PUT = Wrapper(async (req: NextRequest, { params }: { params: Promis
                 stock: stock ? parseInt(stock) : 100, 
                 minQuantity: minQuantity ? parseInt(minQuantity) : 1,
                 image: imageUrl,
-                language: language
+                language: language,
+                hsncode: hsncode || null
             }
         });
 

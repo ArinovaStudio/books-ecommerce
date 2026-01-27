@@ -16,6 +16,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
       preview,
       classId,
       schoolId,
+      hsncode
     } = await req.json();
 
     if (!name || !description || !price || !category || !stock) {
@@ -35,6 +36,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
         stock: parseInt(stock),
         image: preview,
         classId: classId,
+        hsncode: hsncode || null
       },
     });
     return NextResponse.json(

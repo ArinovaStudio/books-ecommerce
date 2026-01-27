@@ -253,7 +253,7 @@ export default function BulkUploadProductDialog({ classId, onSuccess }: Props) {
               </div>
               <p className="text-xs text-muted-foreground">
                 Headers required: name, description, price, category, brand,
-                stock (optional), minQuantity.
+                stock (optional), minQuantity,hsncode (optional).
               </p>
               <p className="text-xs text-muted-foreground">
                 Valid Categories: TEXTBOOK, NOTEBOOK, STATIONARY, OTHER

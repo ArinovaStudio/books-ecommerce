@@ -30,6 +30,7 @@ type Product = {
   description: string;
   category: string;
   class?: string;
+  hsncode?: string;
   stock: number;
   minQuantity: number;
   brand: string;
@@ -88,7 +89,7 @@ export default function AddEditProductDialog({
     const fetchLanguages = async () => {
       const request = await fetch(`/api/schools/${selectedSchool}`);
       const response = await request.json();
-      if(response.success){
+      if (response.success) {
         setLanguages(response.school.languages);
       }
     };
@@ -184,22 +185,27 @@ export default function AddEditProductDialog({
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label>Product Name</Label>
-            <Input className="border border-gray-300" name="name" defaultValue={product?.name} required />
+            <Input
+              className="border border-gray-300"
+              name="name"
+              defaultValue={product?.name}
+              required
+            />
           </div>
 
           <div className="grid gap-2">
             <Label>Description</Label>
             <Input
-            className="border border-gray-300"
+              className="border border-gray-300"
               name="description"
               defaultValue={product?.description}
               required
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label>Category</Label>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="flex flex-col gap-2">
+              <Label className="flex-1">Category</Label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="w-full border border-gray-300">
                   <SelectValue placeholder="Select" />
@@ -212,10 +218,10 @@ export default function AddEditProductDialog({
               </Select>
             </div>
 
-            <div className="grid gap-2">
-              <Label>Minimum Quantity</Label>
+            <div className="flex flex-col gap-2">
+              <Label className="flex-1">Minimum Quantity</Label>
               <Input
-              className="border border-gray-300"
+                className="border border-gray-300"
                 name="minQuantity"
                 type="number"
                 min={1}
@@ -224,17 +230,32 @@ export default function AddEditProductDialog({
                 required
               />
             </div>
+
+            <div className="flex flex-col gap-2">
+              <Label className="flex-1">HSN Code</Label>
+              <Input
+                className="border border-gray-300"
+                name="hsncode"
+                defaultValue={product?.hsncode}
+                required
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
             <div className="grid gap-2">
               <Label>Brand</Label>
-              <Input className="border border-gray-300" name="brand" defaultValue={product?.brand} required />
+              <Input
+                className="border border-gray-300"
+                name="brand"
+                defaultValue={product?.brand}
+                required
+              />
             </div>
             <div className="grid gap-2">
               <Label>Price (₹)</Label>
               <Input
-              className="border border-gray-300"
+                className="border border-gray-300"
                 name="price"
                 type="number"
                 min={0}
@@ -248,10 +269,12 @@ export default function AddEditProductDialog({
               <Label>Language</Label>
               <Select name="language" defaultValue={product?.language}>
                 <SelectTrigger className="w-full border border-gray-300">
-                  <div className="truncate! max-w-15"><SelectValue  placeholder="Language" /></div>
+                  <div className="truncate! max-w-15">
+                    <SelectValue placeholder="Language" />
+                  </div>
                 </SelectTrigger>
                 <SelectContent>
-                  {languages.map((language: string,idx: number)=> (
+                  {languages.map((language: string, idx: number) => (
                     <SelectItem key={language} value={language}>
                       <div>{language.toUpperCase()}</div>
                     </SelectItem>
