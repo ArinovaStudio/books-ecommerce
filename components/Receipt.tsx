@@ -45,6 +45,7 @@ export default function Receipt({order}: ReceiptProps) {
           <p className="text-sm">
             <span className="text-xl font-semibold">{order?.student.parent.name ?? NOT_AVAILABLE}</span><br />
             {order?.landmark ?? NOT_AVAILABLE}
+            <p className="text-sm font-semibold mb-1">Pincode: {order?.pincode ?? NOT_AVAILABLE}</p>
           </p>
         </div>
 

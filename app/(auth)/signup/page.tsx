@@ -34,6 +34,7 @@ interface FormDataStructure {
   password: string;
   phone: string;
   address: string;
+  pincode: string;
   school: null | School;
 }
 type SchoolStructure = {
@@ -47,8 +48,8 @@ type SchoolStructure = {
   image?: string;
 };
 const SignUpPage = () => {
-  const searchParams =  useSearchParams();
-  if(!searchParams.get("id")){
+  const searchParams = useSearchParams();
+  if (!searchParams.get("id")) {
     return <div className="flex items-center justify-center h-full font-semibold text-red-400">Access Is Forbidden!</div>;
   }
   const [formData, setFormData] = useState<FormDataStructure>({
@@ -57,6 +58,7 @@ const SignUpPage = () => {
     password: "",
     phone: "",
     address: "",
+    pincode: "",
     school: null,
   });
 
@@ -119,6 +121,12 @@ const SignUpPage = () => {
 
     if (!formData.address.trim()) newErrors.address = "Address is required";
 
+    if (!formData.pincode.trim()) {
+      newErrors.pincode = "Pincode is required";
+    } else if (!/^\d{6}$/.test(formData.pincode)) {
+      newErrors.pincode = "Pincode must be 6 digits";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -137,44 +145,44 @@ const SignUpPage = () => {
 
     setLoading(true);
 
-      try {
-        const data = {
-          parent: {
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            address: formData.address,
-            password: formData.password,
-          },
-          students: students,
-          schoolInfo: {
-            schoolId: id,
-          },
-        };
-        const request = await fetch("/api/auth/newsignup", {
-          method: "POST",
-          body: JSON.stringify(data),
-        });
-        const response = await request.json();
-        if (!response.success) {
-          alert(response.message);
-        }
-        if (response.success) {
-          toast({
-            title: "Success",
-            description: response.message,
-          });
-          router.push("/");
-        }
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Something went wrong",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
+    try {
+      const data = {
+        parent: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          password: formData.password,
+        },
+        students: students,
+        schoolInfo: {
+          schoolId: id,
+        },
+      };
+      const request = await fetch("/api/auth/newsignup", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      const response = await request.json();
+      if (!response.success) {
+        alert(response.message);
       }
+      if (response.success) {
+        toast({
+          title: "Success",
+          description: response.message,
+        });
+        router.push("/");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const removeStudent = (id: string) => {
@@ -208,20 +216,19 @@ const SignUpPage = () => {
                 {/* Name */}
                 <div className="space-y-1.5 md:col-span-2 lg:col-span-1">
                   <Label className="text-xs font-semibold text-gray-700 ml-1">
-                    Full Name
+                    Parent Full Name
                   </Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                      name="name" 
+                      name="name"
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="John Doe"
-                      className={`pl-9 h-11 rounded-xl bg-gray-50 text-sm ${
-                        errors.name
-                          ? "border-red-500 focus-visible:ring-red-500"
-                          : ""
-                      }`}
+                      className={`pl-9 h-11 rounded-xl bg-gray-50 text-sm ${errors.name
+                        ? "border-red-500 focus-visible:ring-red-500"
+                        : ""
+                        }`}
                     />
                   </div>
                   {errors.name && (
@@ -244,11 +251,10 @@ const SignUpPage = () => {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="name@example.com"
-                      className={`pl-9 h-11 rounded-xl bg-gray-50 text-sm ${
-                        errors.email
-                          ? "border-red-500 focus-visible:ring-red-500"
-                          : ""
-                      }`}
+                      className={`pl-9 h-11 rounded-xl bg-gray-50 text-sm ${errors.email
+                        ? "border-red-500 focus-visible:ring-red-500"
+                        : ""
+                        }`}
                     />
                   </div>
                   {errors.email && (
@@ -271,11 +277,10 @@ const SignUpPage = () => {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="1234567890"
-                      className={`pl-9 h-11 rounded-xl bg-gray-50 text-sm ${
-                        errors.phone
-                          ? "border-red-500 focus-visible:ring-red-500"
-                          : ""
-                      }`}
+                      className={`pl-9 h-11 rounded-xl bg-gray-50 text-sm ${errors.phone
+                        ? "border-red-500 focus-visible:ring-red-500"
+                        : ""
+                        }`}
                     />
                   </div>
                   {errors.phone && (
@@ -288,7 +293,7 @@ const SignUpPage = () => {
                 {/* Password */}
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-gray-700 ml-1">
-                    Password
+                    Create Password
                   </Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -298,11 +303,10 @@ const SignUpPage = () => {
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="••••••••"
-                      className={`pl-9 pr-9 h-11 rounded-xl bg-gray-50 text-sm ${
-                        errors.password
-                          ? "border-red-500 focus-visible:ring-red-500"
-                          : ""
-                      }`}
+                      className={`pl-9 pr-9 h-11 rounded-xl bg-gray-50 text-sm ${errors.password
+                        ? "border-red-500 focus-visible:ring-red-500"
+                        : ""
+                        }`}
                     />
                     <button
                       type="button"
@@ -342,11 +346,10 @@ const SignUpPage = () => {
                         readOnly
                         // disabled
                         // onChange={handleChange}
-                        className={`pl-9 pr-9 w-full h-11 rounded-xl bg-gray-200 disabled:text-black text-black text-sm ${
-                          errors.school
-                            ? "border-red-500 focus-visible:ring-red-500"
-                            : ""
-                        }`}
+                        className={`pl-9 pr-9 w-full h-11 rounded-xl bg-gray-200 disabled:text-black text-black text-sm ${errors.school
+                          ? "border-red-500 focus-visible:ring-red-500"
+                          : ""
+                          }`}
                       />
                     </div>
                   </div>
@@ -379,9 +382,8 @@ const SignUpPage = () => {
                     onChange={handleChange}
                     rows={2}
                     placeholder="Enter full address"
-                    className={`w-full rounded-xl border border-gray-200 bg-gray-50 pl-9 p-3 resize-none text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all ${
-                      errors.address ? "border-red-500" : ""
-                    }`}
+                    className={`w-full rounded-xl border border-gray-200 bg-gray-50 pl-9 p-3 resize-none text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.address ? "border-red-500" : ""
+                      }`}
                   />
                 </div>
                 {errors.address && (
@@ -390,6 +392,39 @@ const SignUpPage = () => {
                   </p>
                 )}
               </div>
+
+              {/* Pincode */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-gray-700 ml-1">
+                  Pincode <span className="text-red-500">*</span>
+                </Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    name="pincode"
+                    type="tel"
+                    placeholder="Enter 6-digit pincode"
+                    value={formData.pincode}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        pincode: e.target.value.replace(/\D/g, "").slice(0, 6),
+                      }))
+                    }
+                    className={`pl-9 h-11 rounded-xl bg-gray-50 text-sm ${errors.pincode
+                        ? "border-red-500 focus-visible:ring-red-500"
+                        : ""
+                      }`}
+                    maxLength={6}
+                  />
+                </div>
+                {errors.pincode && (
+                  <p className="text-[10px] text-red-500 ml-1">
+                    {errors.pincode}
+                  </p>
+                )}
+              </div>
+
 
               <div className="pt-4 flex flex-col items-center">
                 <Button

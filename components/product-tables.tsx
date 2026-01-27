@@ -106,7 +106,7 @@ export default function ProductTable({
       });
       const data = await res.json();
       // console.log(data);
-      
+
       setProducts(data.success ? data.data : []);
     } catch (err) {
       console.error("Failed to fetch products", err);
@@ -140,6 +140,8 @@ export default function ProductTable({
     }
   };
 
+  const isNotebook = (category: string) => category === "NOTEBOOK";
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -154,8 +156,8 @@ export default function ProductTable({
     }, 0);
     setTotalPrice(total);
   }, [products, selectedItems]);
-  const PRIORITY = ["TEXTBOOK","NOTEBOOK","STATIONARY","OTHER"];
-  
+  const PRIORITY = ["TEXTBOOK", "NOTEBOOK", "STATIONARY", "OTHER"];
+
   const groupedProducts = products.reduce((acc, product) => {
     const category = product.category.toUpperCase();
     if (!acc[category]) acc[category] = [];
@@ -177,20 +179,57 @@ export default function ProductTable({
     }));
   };
 
+  // const handleQuantityChange = (
+  //   productId: string,
+  //   delta: number,
+  //   minBuy: number
+  // ) => {
+  //   setSelectedItems((prev) => {
+  //     const current = prev[productId]?.quantity || minBuy;
+  //     const newQuantity = Math.max(minBuy, current + delta);
+  //     return {
+  //       ...prev,
+  //       [productId]: { ...prev[productId], quantity: newQuantity },
+  //     };
+  //   });
+  // };
+
   const handleQuantityChange = (
     productId: string,
     delta: number,
-    minBuy: number
+    minBuy: number,
+    category: string
   ) => {
     setSelectedItems((prev) => {
-      const current = prev[productId]?.quantity || minBuy;
-      const newQuantity = Math.max(minBuy, current + delta);
+      const isNoteBook = isNotebook(category);
+
+      const current =
+        prev[productId]?.quantity ??
+        (isNoteBook ? minBuy : minBuy);
+
+      let newQuantity = current + delta;
+
+      // 🔒 ONLY NOTEBOOK can go to 0
+      if (isNoteBook) {
+        newQuantity = Math.max(0, newQuantity);
+      } else {
+        newQuantity = Math.max(minBuy, newQuantity);
+      }
+
       return {
         ...prev,
-        [productId]: { ...prev[productId], quantity: newQuantity },
+        [productId]: {
+          quantity: newQuantity,
+          // 🔥 auto-untick ONLY when NOTEBOOK quantity hits 0
+          checked:
+            isNoteBook && newQuantity === 0
+              ? false
+              : prev[productId]?.checked ?? true,
+        },
       };
     });
   };
+
 
   const renderRow = (product: Product) => {
     const category = product.category.toUpperCase();
@@ -199,7 +238,10 @@ export default function ProductTable({
       category === "STATIONARY" ||
       category === "OTHER";
     const isChecked = selectedItems[product.id]?.checked ?? true;
-    const quantity = selectedItems[product.id]?.quantity ?? product.minQuantity;
+    // const quantity = selectedItems[product.id]?.quantity ?? product.minQuantity;
+
+    const quantity = selectedItems[product.id]?.quantity ?? (category === "NOTEBOOK" ? product.minQuantity : product.minQuantity);
+
     const displayPrice = product.price * quantity;
 
     return (
@@ -211,7 +253,7 @@ export default function ProductTable({
             <div className="flex items-center gap-3">
               {showCheckbox && (
                 <Checkbox
-                className="border-2! border-gray-600!"
+                  className="border-2! border-gray-600!"
                   checked={isChecked}
                   onCheckedChange={(checked) =>
                     handleCheckboxChange(product.id, checked as boolean)
@@ -248,9 +290,20 @@ export default function ProductTable({
                   variant="outline"
                   className="h-7 w-7"
                   onClick={() =>
-                    handleQuantityChange(product.id, -1, product.minQuantity)
+                    handleQuantityChange(
+                      product.id,
+                      1,
+                      product.minQuantity,
+                      category
+                    )
+
                   }
-                  disabled={showCheckbox && !isChecked}
+                  disabled={
+                    showCheckbox &&
+                    !isChecked &&
+                    category !== "NOTEBOOK"
+                  }
+
                 >
                   <Minus className="w-3 h-3" />
                 </Button>
@@ -260,9 +313,20 @@ export default function ProductTable({
                   variant="outline"
                   className="h-7 w-7"
                   onClick={() =>
-                    handleQuantityChange(product.id, 1, product.minQuantity)
+                    handleQuantityChange(
+                      product.id,
+                      -1,
+                      product.minQuantity,
+                      category
+                    )
+
                   }
-                  disabled={showCheckbox && !isChecked}
+                  disabled={
+                    showCheckbox &&
+                    !isChecked &&
+                    category !== "NOTEBOOK"
+                  }
+
                 >
                   <Plus className="w-3 h-3" />
                 </Button>
@@ -329,9 +393,20 @@ export default function ProductTable({
                   variant="outline"
                   className="h-6 w-6"
                   onClick={() =>
-                    handleQuantityChange(product.id, -1, product.minQuantity)
+                    handleQuantityChange(
+                      product.id,
+                      -1,
+                      product.minQuantity,
+                      category
+                    )
+
                   }
-                  disabled={showCheckbox && !isChecked}
+                  disabled={
+                    showCheckbox &&
+                    !isChecked &&
+                    category !== "NOTEBOOK"
+                  }
+
                 >
                   <Minus className="w-3 h-3" />
                 </Button>
@@ -341,9 +416,20 @@ export default function ProductTable({
                   variant="outline"
                   className="h-6 w-6"
                   onClick={() =>
-                    handleQuantityChange(product.id, 1, product.minQuantity)
+                    handleQuantityChange(
+                      product.id,
+                      1,
+                      product.minQuantity,
+                      category
+                    )
+
                   }
-                  disabled={showCheckbox && !isChecked}
+                  disabled={
+                    showCheckbox &&
+                    !isChecked &&
+                    category !== "NOTEBOOK"
+                  }
+
                 >
                   <Plus className="w-3 h-3" />
                 </Button>
@@ -440,9 +526,9 @@ export default function ProductTable({
           <div className="space-y-8">
             {PRIORITY.map(
               (category) => {
-              const categoryProducts = groupedProducts[category] ?? [];
-              if(categoryProducts.length===0) return;
-               return <div key={category}>
+                const categoryProducts = groupedProducts[category] ?? [];
+                if (categoryProducts.length === 0) return;
+                return <div key={category}>
                   <h3 className="text-lg font-semibold mb-4 px-2">
                     {categoryTitles[category as keyof typeof categoryTitles]}
                   </h3>
@@ -451,8 +537,8 @@ export default function ProductTable({
                       {(category === "NOTEBOOK" ||
                         category === "STATIONARY" ||
                         category === "OTHER") && (
-                        <span className="col-span-1 text-center">Select</span>
-                      )}
+                          <span className="col-span-1 text-center">Select</span>
+                        )}
                       <span className="col-span-1 text-center">Product</span>
                       <span className="col-span-3">Name</span>
                       <span className="col-span-2 text-center">Brand</span>

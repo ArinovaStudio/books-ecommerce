@@ -211,7 +211,7 @@ export function StudentModal({
                 </Select>
               </div>
 
-              <div className="grid gap-2">
+              {/* <div className="grid gap-2">
                 <Label>Date Of Birth</Label>
                 <Input
                   type="date"
@@ -234,7 +234,7 @@ export function StudentModal({
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
             </div>
 
             <div className="flex justify-end gap-3 pt-1 border-t col-span-full">
