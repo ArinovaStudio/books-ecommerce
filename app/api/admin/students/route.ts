@@ -73,8 +73,6 @@ const createStudentValidation = z.object({
     rollNo: z.string().min(1, "Roll Number is required"),
     classId: z.string().uuid("Invalid Class ID"),
     sectionId: z.string().uuid("Invalid Section ID"),
-    firstLanguage: z.string().min(1, "First Language is required"),
-    
     parentName: z.string().min(1, "Parent Name is required"),
     parentEmail: z.string().email("Invalid Parent Email"),
     password: z.string().optional(),
@@ -82,6 +80,7 @@ const createStudentValidation = z.object({
     gender: z.string().optional(),
     bloodGroup: z.string().optional(),
     address: z.string().optional(),
+    pincode: z.string().optional(),
 });
 
 export const POST = Wrapper(async (req: NextRequest) => {
@@ -100,16 +99,18 @@ export const POST = Wrapper(async (req: NextRequest) => {
         }
 
         const { 
-            name, rollNo, classId, sectionId, firstLanguage,
+            name, rollNo, classId, sectionId,
             parentName, parentEmail, password,
             dob, gender, bloodGroup, 
-            address
+            address, pincode
         } = validation.data;
 
+        let firstLanguage = "";
         const section = await prisma.section.findUnique({
             where: { id: sectionId },
             include: { class: { include: { school: true } } }
         });
+        firstLanguage = section?.language || "";
 
         if (!section) {
             return NextResponse.json({ success: false, message: "Invalid Section ID" }, { status: 404 });
@@ -120,12 +121,12 @@ export const POST = Wrapper(async (req: NextRequest) => {
         }
 
         
-        if (section.language.toLowerCase() !== firstLanguage.toLowerCase()) {
-            return NextResponse.json({ 
-                success: false, 
-                message: `Language Mismatch: Section '${section.name}' is for '${section.language}' students, but you selected '${firstLanguage}'.` 
-            }, { status: 400 });
-        }
+        // if (section.language.toLowerCase() !== firstLanguage.toLowerCase()) {
+        //     return NextResponse.json({ 
+        //         success: false, 
+        //         message: `Language Mismatch: Section '${section.name}' is for '${section.language}' students, but you selected '${firstLanguage}'.` 
+        //     }, { status: 400 });
+        // }
 
         const schoolId = section.class.schoolId;
 
@@ -167,6 +168,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
                     role: "USER",
                     status: "ACTIVE",
                     address,
+                    pincode,
                     schoolId: schoolId 
                 }
             });

@@ -67,6 +67,7 @@ export function StudentModal({
 
   const handleLangChange = (value: string) => {
     const section = sections.filter((a: any) => a.language.toLowerCase() === value.toLowerCase());
+  
     const selectedSec: any = section.length > 0 ? section[0] : null;
     setSelectedSection(selectedSec ? selectedSec : null);
   }

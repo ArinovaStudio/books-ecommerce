@@ -84,6 +84,7 @@ export default function ProductTable({
       const query = new URLSearchParams({
         schoolId: params.schoolId,
         classId: params.classId,
+        section: params.section,
       }).toString();
       router.push(`/guardian-form?${query}`);
     } else {

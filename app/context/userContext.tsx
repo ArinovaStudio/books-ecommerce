@@ -14,6 +14,7 @@ export type User = {
     email: string
     phone?: string | null
     address?: string | null
+    pincode?: string | null
     role: Role
 }
 

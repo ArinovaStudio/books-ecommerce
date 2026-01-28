@@ -32,7 +32,7 @@ const ProfilePage = () => {
     const router = useRouter();
     const { user, loading, logout } = useUser();
 
-    // console.log("user from profile", user);
+    console.log("user from profile", user);
 
     const [profile, setProfile] = useState<UserProfile | null>(null)
 
@@ -128,8 +128,9 @@ const ProfilePage = () => {
                                     <div className="p-2 bg-blue-50 rounded-lg shrink-0">
                                         <MapPin size={16} className="text-blue-600" />
                                     </div>
+                                    
                                     <span className="leading-relaxed">
-                                        {profile?.address ?? "No address added"}
+                                        {profile?.address ?? "No Address"} {profile?.pincode ? `, ${profile.pincode}` : ""}
                                     </span>
                                 </div>
                             </CardContent>

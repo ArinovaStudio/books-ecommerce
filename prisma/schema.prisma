@@ -25,6 +25,7 @@ model User {
   name String
   password String
   address String?
+  pincode  String?
   role UserRole @default(USER)
   status UserStatus @default(ACTIVE)
   schoolId String?

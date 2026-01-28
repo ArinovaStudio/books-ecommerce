@@ -153,6 +153,7 @@ const SignUpPage = () => {
           phone: formData.phone,
           address: formData.address,
           password: formData.password,
+          pincode: formData.pincode
         },
         students: students,
         schoolInfo: {

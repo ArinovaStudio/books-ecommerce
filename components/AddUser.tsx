@@ -35,9 +35,11 @@ interface StudentType {
     section: string
     parentEmail: string
     parentName: string
-    firstLanguage: string
+    // firstLanguage: string
     password?: string
     dob?: string
+    address?: string
+    pincode?: string
     gender?: string
     bloodGroup?: string
 }
@@ -82,7 +84,9 @@ export default function AddUserDialog({
         section: sectionId || "",
         parentEmail: "",
         parentName: "",
-        firstLanguage: "",
+        // firstLanguage: "",
+        address: "",
+        pincode: "",
         password: "",
         dob: "",
         gender: "",
@@ -115,10 +119,12 @@ export default function AddUserDialog({
                 section: student.section || sectionId || "",
                 parentEmail: student.parentEmail || "",
                 parentName: student.parentName || "",
-                firstLanguage: student.firstLanguage || "",
+                // firstLanguage: student.firstLanguage || "",
                 password: student.password || "",
                 dob: student.dob || "",
                 gender: student.gender || "",
+                address: student.address || "",
+                pincode: student.pincode || "",
                 bloodGroup: student.bloodGroup || "",
             })
         } else {
@@ -195,7 +201,7 @@ export default function AddUserDialog({
             newErrors.parentEmail = "Invalid email format"
         }
         if (!formData.parentName.trim()) newErrors.parentName = "Parent Name is required"
-        if (!formData.firstLanguage.trim()) newErrors.firstLanguage = "First Language is required"
+        // if (!formData.firstLanguage.trim()) newErrors.firstLanguage = "First Language is required"
         
         if (parentExists === false && !formData.password?.trim()) {
             newErrors.password = "Password is required"
@@ -360,37 +366,7 @@ export default function AddUserDialog({
                             />
                             {errors.parentName && <p className="text-sm text-red-500">{errors.parentName}</p>}
                         </div>
-                        
-                        {/* Dynamic Language Select */}
-                        <div className="space-y-2">
-                            <Label htmlFor="firstLanguage" className="text-sm font-medium text-foreground">First Language *</Label>
-                            <Select 
-                                value={formData.firstLanguage} 
-                                onValueChange={(value) => handleSelectChange("firstLanguage", value)}
-                            >
-                                <SelectTrigger className="text-foreground border-2 border-gray-200 ">
-                                    <SelectValue placeholder="Select language" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {availableLanguages.length > 0 ? (
-                                        availableLanguages.map((lang) => (
-                                            <SelectItem key={lang} value={lang}>
-                                                {lang}
-                                            </SelectItem>
-                                        ))
-                                    ) : (
-                                        <div className="p-2 text-sm text-muted-foreground text-center">
-                                            No languages found
-                                        </div>
-                                    )}
-                                </SelectContent>
-                            </Select>
-                            {errors.firstLanguage && <p className="text-sm text-red-500">{errors.firstLanguage}</p>}
-                        </div>
-                    </div>
-
-                    {/* Parent Email */}
-                    <div className="space-y-2">
+                                            <div className="space-y-2">
                         <Label htmlFor="parentEmail" className="text-sm font-medium">Parent Email *</Label>
                         <div className="flex gap-2">
                             <Input
@@ -420,6 +396,36 @@ export default function AddUserDialog({
                             <p className="text-sm text-orange-600">⚠ Parent account doesn't exist. Password will be required.</p>
                         )}
                     </div>
+                        {/* Dynamic Language Select */}
+                        {/* <div className="space-y-2">
+                            <Label htmlFor="firstLanguage" className="text-sm font-medium text-foreground">First Language *</Label>
+                            <Select 
+                                value={formData.firstLanguage} 
+                                onValueChange={(value) => handleSelectChange("firstLanguage", value)}
+                            >
+                                <SelectTrigger className="text-foreground border-2 border-gray-200 ">
+                                    <SelectValue placeholder="Select language" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {availableLanguages.length > 0 ? (
+                                        availableLanguages.map((lang) => (
+                                            <SelectItem key={lang} value={lang}>
+                                                {lang}
+                                            </SelectItem>
+                                        ))
+                                    ) : (
+                                        <div className="p-2 text-sm text-muted-foreground text-center">
+                                            No languages found
+                                        </div>
+                                    )}
+                                </SelectContent>
+                            </Select>
+                            {errors.firstLanguage && <p className="text-sm text-red-500">{errors.firstLanguage}</p>}
+                        </div> */}
+                    </div>
+
+                    {/* Parent Email */}
+
 
                     {/* Password (only if parent doesn't exist) */}
                     {parentExists === false && (
@@ -489,6 +495,31 @@ export default function AddUserDialog({
                                     <SelectItem value="O-">O-</SelectItem>
                                 </SelectContent>
                             </Select>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                            <Label htmlFor="address" className="text-sm font-medium">Address</Label>
+                            <Input
+                                id="address"
+                                name="address"
+                                type="text"
+                                value={formData.address}
+                                onChange={handleChange}
+                                placeholder="Address with landmark"
+                                className="border-2 border-gray-200 "
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="pincode" className="text-sm font-medium">Pincode</Label>
+                            <Input
+                                id="pincode"
+                                name="pincode"
+                                type="number"
+                                value={formData.pincode}
+                                onChange={handleChange}
+                                className="border-2 border-gray-200 "
+                            />
                         </div>
                     </div>
 

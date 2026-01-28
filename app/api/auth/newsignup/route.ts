@@ -59,6 +59,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
             role: "USER",
             status: "ACTIVE",
             address: parent.address,
+            pincode: parent.pincode || null,
             phone: parent.phone,
             schoolId
           },

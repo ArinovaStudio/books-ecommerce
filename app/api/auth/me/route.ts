@@ -62,6 +62,7 @@ export const GET = Wrapper(async (_req: NextRequest) => {
                 email: user.email,
                 phone: user.phone ?? null,
                 address: user.address ?? null,
+                pincode: user.pincode ?? null,
                 role: user.role,
                 status: user.status,
                 children: user.children.map((child) => ({

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Phone, User, MapPin, LucideLoader2 } from "lucide-react";
+import { Mail, Phone, User, MapPin, LucideLoader2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -45,6 +45,7 @@ export function GuardianForm() {
   const searchParams = useSearchParams();
   const schoolId = searchParams.get("schoolId");
   const classId = searchParams.get("classId");
+  const section = searchParams.get("section");
 
   // State updated: removed address, added landmark & pincode
   const [formData, setFormData] = useState({
@@ -58,6 +59,7 @@ export function GuardianForm() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [products, setProducts] = useState<Product[]>([]);
+  const [children, setChildren] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState<
     Record<string, { checked: boolean; quantity: number }>
   >({});
@@ -219,13 +221,18 @@ export function GuardianForm() {
         const { user: userData } = resData;
         setUser(userData);
 
+        const childData = userData.children.length > 0 ? userData.children.filter((child: any) => child.schoolId === schoolId && child.classId === classId && child.section === section) : [];
+        if (childData.length === 0) {
+          toast.error("No child found for the selected school, class, and section.");
+        }
+        setChildren(childData);
         setFormData((prev) => ({
           ...prev,
           guardianName: userData.name,
           guardianEmail: userData.email,
           guardianPhone: userData.phone || "",
-          // Note: Landmark/Pincode are strictly for delivery,
-          // so we don't autofill from generic address to ensure accuracy
+          landmark: userData.address || "",
+          pincode: userData.pincode || "",
         }));
       }
     };
@@ -330,6 +337,13 @@ export function GuardianForm() {
     setLoading(false);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen grid place-items-center">
+        <Loader2 className="animate-spin" color="blue" size={42} strokeWidth={2} />
+      </div>
+    )
+  }
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
@@ -346,19 +360,19 @@ export function GuardianForm() {
                             <Label className="text-sm sm:text-base font-medium mt-4 block">
                   Child Info
                 </Label>
-                {user?.children?.length > 0 &&
-                  user.children.map((items: any, index: number) => (
+                {children.length > 0 &&
+                  children.map((items: any, index: number) => (
                     <div
                       key={index}
                       className="w-full flex justify-start items-center gap-3"
                     >
-                      <p className="py-2 bg-gray-200 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
+                      <p className="py-2 bg-gray-200 border border-gray-400 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
                         NAME: {items.name}
                       </p>
-                      <p className="py-2 bg-gray-200 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
+                      <p className="py-2 bg-gray-200 border border-gray-400 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
                         ROLL NO: {items.rollNo}
                       </p>
-                      <p className="py-2 bg-gray-200 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
+                      <p className="py-2 bg-gray-200 border border-gray-400 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
                         SECTION: {items.section}
                       </p>
                     </div>

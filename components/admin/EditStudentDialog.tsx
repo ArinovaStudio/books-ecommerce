@@ -68,6 +68,8 @@ export default function EditStudentDialog({
         dob: "",
         gender: "",
         bloodGroup: "",
+        address: "",
+        pincode: "",
     })
 
     // Fetch Languages
@@ -100,6 +102,8 @@ export default function EditStudentDialog({
                 dob: student.dob ? new Date(student.dob).toISOString().split('T')[0] : "",
                 gender: student.gender ? student.gender.toLowerCase() : "",
                 bloodGroup: student.bloodGroup || "",
+                address: "",
+                pincode: "",
             })
         }
     }, [student])
