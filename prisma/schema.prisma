@@ -143,7 +143,7 @@ model Product {
   updatedAt DateTime @updatedAt
   kitItems KitItem[]
   orderItems OrderItem[]
-  language String?
+  language String? @default("ALL")
   classId String
   class Class @relation(fields:[classId],references: [id],onDelete: Cascade)
 }

@@ -90,7 +90,9 @@ export default function AddEditProductDialog({
       const request = await fetch(`/api/schools/${selectedSchool}`);
       const response = await request.json();
       if (response.success) {
-        setLanguages(response.school.languages);
+        const langs = response.school.languages || [];
+        setLanguages(["ALL", ...langs]);
+        // setLanguages(response.school.languages);
       }
     };
     fetchLanguages();
@@ -107,6 +109,10 @@ export default function AddEditProductDialog({
       formData.append("classId", selectedClass);
       formData.append("schoolId", selectedSchool);
       if (image) formData.append("image", image);
+
+      if (category !== "TEXTBOOK") {
+        formData.set("language", "ALL");
+      }
 
       const res = await fetch(
         isEdit ? `/api/admin/products/${product!.id}` : "/api/admin/products",
@@ -267,21 +273,43 @@ export default function AddEditProductDialog({
 
             <div className="grid gap-2">
               <Label>Language</Label>
-              <Select name="language" defaultValue={product?.language}>
+
+              <Select
+                name="language"
+                defaultValue={
+                  category === "TEXTBOOK"
+                    ? product?.language || "ALL"
+                    : product?.language || languages[1] // first real language
+                }
+              >
                 <SelectTrigger className="w-full border border-gray-300">
                   <div className="truncate! max-w-15">
                     <SelectValue placeholder="Language" />
-                  </div>
+                    </div>
                 </SelectTrigger>
+
                 <SelectContent>
-                  {languages.map((language: string, idx: number) => (
-                    <SelectItem key={language} value={language}>
-                      <div>{language.toUpperCase()}</div>
-                    </SelectItem>
-                  ))}
+                  {/* TEXTBOOK → ALL + languages */}
+                  {category === "TEXTBOOK" &&
+                    languages.map((language: string) => (
+                      <SelectItem key={language} value={language}>
+                        {language.toUpperCase()}
+                      </SelectItem>
+                    ))}
+
+                  {/* NON-TEXTBOOK → only real languages (exclude ALL) */}
+                  {category !== "TEXTBOOK" &&
+                    languages
+                      .filter((lang) => lang !== "ALL")
+                      .map((language: string) => (
+                        <SelectItem key={language} value={language}>
+                          {language.toUpperCase()}
+                        </SelectItem>
+                      ))}
                 </SelectContent>
               </Select>
             </div>
+
           </div>
 
           <div className="grid gap-2">

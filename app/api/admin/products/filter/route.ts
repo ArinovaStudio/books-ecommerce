@@ -37,16 +37,19 @@ const products = await prisma.product.findMany({
       schoolId: schoolId,
     },
     OR: [
-      {
-        category: "TEXTBOOK",
-        language: section?.language,
+    {
+      category: "TEXTBOOK",
+      OR: [
+        { language: "ALL" },
+        { language: section?.language },
+      ],
+    },
+    {
+      category: {
+        not: "TEXTBOOK",
       },
-      {
-        category: {
-          not: "TEXTBOOK",
-        },
-      },
-    ],
+    },
+  ],
   },
   include: {
     class: true,
