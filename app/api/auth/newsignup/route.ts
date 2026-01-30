@@ -1,11 +1,11 @@
 import { Wrapper } from "@/lib/api-handler";
-import sendEmail from "@/lib/email";
 import prisma from "@/lib/prisma";
-import { studentAddedTemplate } from "@/lib/templates";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { studentAddedTemplate } from "@/lib/templates";
+import sendEmail from "@/lib/email";
 
 const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY";
 
@@ -15,8 +15,6 @@ export const POST = Wrapper(async (req: NextRequest) => {
 
     const { parent, students, schoolInfo } = body;
 
-    // console.log(students);
-    
     if (!parent || !students?.length || !schoolInfo?.schoolId) {
       return NextResponse.json(
         { success: false, message: "Invalid payload" },
@@ -26,6 +24,8 @@ export const POST = Wrapper(async (req: NextRequest) => {
     const school = await prisma.school.findUnique({
       where: { id: schoolInfo.schoolId },
     });
+    let createdStudents: any = [];
+    let token = null;
     if (!school) {
       return NextResponse.json({
         success: false,
@@ -59,26 +59,26 @@ export const POST = Wrapper(async (req: NextRequest) => {
             role: "USER",
             status: "ACTIVE",
             address: parent.address,
-            pincode: parent.pincode || null,
+            pincode: parent?.pincode || null,
             phone: parent.phone,
-            schoolId
+            schoolId,
           },
         });
       }
 
-      // 3️⃣ Create students
-      const createdStudents = [];
-
       for (const student of students) {
         const classInfo = await tx.class.findUnique({
-          where: { id: student.class ,sectionDetails: {some:{id:student.sectionId}}},
+          where: {
+            id: student.class,
+            sectionDetails: { some: { id: student.sectionId } },
+          },
         });
         // console.log(classInfo);
-        
+
         if (!classInfo) {
           throw new Error(`Class Or Section Id Does not exist!`);
         }
-      
+
         // Duplicate check
         const duplicate = await tx.student.findFirst({
           where: {
@@ -94,7 +94,9 @@ export const POST = Wrapper(async (req: NextRequest) => {
             `Roll No ${student.rollNo} already exists in section ${student.sectionId}`
           );
         }
-        const section = await tx.section.findUnique({where:{id: student.sectionId}});
+        const section = await tx.section.findUnique({
+          where: { id: student.sectionId },
+        });
         if (!section) {
           throw new Error(`Section With Given Id Does Not Exist`);
         }
@@ -106,7 +108,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
             schoolId,
             classId: student.class,
             sectionId: student.sectionId,
-            section:section.name,
+            section: section.name,
             parentEmail: parent.email,
             dob: student.dob ? new Date(student.dob) : null,
             gender: student.gender,
@@ -115,30 +117,42 @@ export const POST = Wrapper(async (req: NextRequest) => {
             isActive: true,
             parentId: parentUser.id,
           },
+          include: {
+            class: true,
+            parent: true,
+          },
         });
-
         createdStudents.push(newStudent);
       }
-      const token = jwt.sign(
+      token = jwt.sign(
         { id: parentUser.id, email: parentUser.email, role: parentUser.role },
         SECRET_KEY,
         { expiresIn: "7d" }
       );
-
-      const cookieStore = await cookies();
-
-      cookieStore.set("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24 * 7,
-        path: "/",
-        sameSite: "lax"
-      });
-
     });
-
-
-
+    for (let student of createdStudents) {
+      const emailData = studentAddedTemplate(
+        student.name,
+        student.parent.name,
+        student.parent.email,
+        school.name,
+        student.class.name,
+        student.section,
+        parent.password
+      );
+      await sendEmail(parent.email, emailData.subject, emailData.html);
+    }
+    const cookieStore = await cookies();
+    if(!token){
+      throw Error("There was an issue while your registeration !")
+    }
+    cookieStore.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+      sameSite: "lax",
+    });
     return NextResponse.json(
       {
         success: true,

@@ -61,7 +61,7 @@ export default function FilteredProductTable({
       });
       const data = await res.json();
       if (data.success) {
-        console.log(data.data);
+        // console.log(data.data);
         
         setProducts(data.data);
       } else {
