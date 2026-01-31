@@ -248,7 +248,7 @@ export default function AddEditProductDialog({
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className={`grid grid-cols-${(product?.category==="TEXTBOOK" || category==="TEXTBOOK") ? "3":"2"} gap-4`}>
             <div className="grid gap-2">
               <Label>Brand</Label>
               <Input
@@ -270,48 +270,47 @@ export default function AddEditProductDialog({
                 required
               />
             </div>
+            {(product?.category === "TEXTBOOK" || category==="TEXTBOOK") && (
+              <div className="grid gap-2">
+                <Label>Language</Label>
 
-            <div className="grid gap-2">
-              <Label>Language</Label>
-
-              <Select
-                name="language"
-                defaultValue={
-                  category === "TEXTBOOK"
-                    ? product?.language || "ALL"
-                    : product?.language || languages[1] // first real language
-                }
-              >
-                <SelectTrigger className="w-full border border-gray-300">
-                  <div className="truncate! max-w-15">
-                    <SelectValue placeholder="Language" />
+                <Select
+                  name="language"
+                  defaultValue={
+                    category === "TEXTBOOK"
+                      ? product?.language || "ALL"
+                      : product?.language || languages[1] // first real language
+                  }
+                >
+                  <SelectTrigger className="w-full border border-gray-300">
+                    <div className="truncate! max-w-15">
+                      <SelectValue placeholder="Language" />
                     </div>
-                </SelectTrigger>
+                  </SelectTrigger>
 
-                <SelectContent>
-                  {/* TEXTBOOK → ALL + languages */}
-                  {category === "TEXTBOOK" &&
-                    languages.map((language: string) => (
-                      <SelectItem key={language} value={language}>
-                        {language.toUpperCase()}
-                      </SelectItem>
-                    ))}
-
-                  {/* NON-TEXTBOOK → only real languages (exclude ALL) */}
-                  {category !== "TEXTBOOK" &&
-                    languages
-                      .filter((lang) => lang !== "ALL")
-                      .map((language: string) => (
+                  <SelectContent>
+                    {/* TEXTBOOK → ALL + languages */}
+                    {category === "TEXTBOOK" &&
+                      languages.map((language: string) => (
                         <SelectItem key={language} value={language}>
                           {language.toUpperCase()}
                         </SelectItem>
                       ))}
-                </SelectContent>
-              </Select>
-            </div>
 
+                    {/* NON-TEXTBOOK → only real languages (exclude ALL) */}
+                    {category !== "TEXTBOOK" &&
+                      languages
+                        .filter((lang) => lang !== "ALL")
+                        .map((language: string) => (
+                          <SelectItem key={language} value={language}>
+                            {language.toUpperCase()}
+                          </SelectItem>
+                        ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
-
           <div className="grid gap-2">
             <Label>Product Image</Label>
 

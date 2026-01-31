@@ -47,6 +47,10 @@ type SchoolStructure = {
   board?: string;
   image?: string;
 };
+const basics = ["Nursery", "PP I", "PP II"];
+const upTo8 = [...basics,"Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8"];
+const upTo10 = [...upTo8, "Class 9", "Class 10"];
+const upTo12 = [...upTo10, "Class 11", "Class 12"];
 const SignUpPage = () => {
   const searchParams = useSearchParams();
   if (!searchParams.get("id")) {
@@ -77,7 +81,15 @@ const SignUpPage = () => {
       const request = await fetch(`/api/schools/${id}`);
       const response = await request.json();
       if (response.success) {
-        setSchool(response.school);
+        const classes = [];
+        const tempClasses = response?.school?.classes ?? [];
+        for(let cls of upTo12){
+          const classIndex = tempClasses.findIndex((item: any)=>item.name===cls);
+          if(classIndex!=-1){
+            classes.push(tempClasses[classIndex]);
+          }
+        }
+        setSchool({...response.school,classes:classes});
         setFormData({
           ...formData,
           school: {

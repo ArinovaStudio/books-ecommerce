@@ -18,11 +18,10 @@ import {
 } from "@/components/ui/select";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ImageIcon, Loader2, Plus, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { DialogFooter, DialogHeader } from "@/components/ui/dialog";
 import { Input } from "./ui/input";
+
 
 type School = {
   id: string;
@@ -37,6 +36,7 @@ type School = {
 };
 const GENDERS = ["Male", "Female", "Prefer Not To Say"];
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -58,11 +58,11 @@ export function StudentModal({
   const [sections, setSections] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
   const [selectedSection, setSelectedSection] = useState<any | null>(null);
-
+  
   const handleClassChange = (value: string) => {
     setSelectedClass(value);
     const cls = school?.classes?.find((c: any) => c.id === value);
-    console.log(cls.sectionDetails.map((sd: any) => sd.language));
+    // console.log(cls.sectionDetails.map((sd: any) => sd.language));
     setLanguages(cls.sectionDetails.map((sd: any) => sd.language));
     setSections(cls?.sectionDetails);
   };
@@ -81,7 +81,6 @@ export function StudentModal({
     try {
       fd.append("sectionId", selectedSection?.id);
       fd.append("section", selectedSection?.name);
-      
       const data = Object.fromEntries(fd);
       setStudents([...students,{...data, section: selectedSection?.name, sectionId: selectedSection?.id, id:Date.now()}]);
       setSelectedClass(null);
