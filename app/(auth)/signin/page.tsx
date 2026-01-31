@@ -50,7 +50,7 @@ const SignInPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm()) alert("Please fix the errors in the form before submitting.");
 
     setLoading(true);
     try {
@@ -76,18 +76,10 @@ const SignInPage = () => {
         };
         router.push(roleRoutes[data.user.role] ?? "/");
       } else {
-        toast({
-          title: "Error",
-          description: data.message || "Invalid credentials",
-          variant: "destructive",
-        });
+        alert("Invalid credentials");
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+      alert("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }

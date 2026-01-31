@@ -56,12 +56,14 @@ export function StudentModal({
   const [loading, setLoading] = useState(false);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [sections, setSections] = useState<string[]>([]);
+  const [languages, setLanguages] = useState<string[]>([]);
   const [selectedSection, setSelectedSection] = useState<any | null>(null);
 
   const handleClassChange = (value: string) => {
     setSelectedClass(value);
     const cls = school?.classes?.find((c: any) => c.id === value);
-    // console.log(cls);
+    console.log(cls.sectionDetails.map((sd: any) => sd.language));
+    setLanguages(cls.sectionDetails.map((sd: any) => sd.language));
     setSections(cls?.sectionDetails);
   };
 
@@ -163,7 +165,7 @@ export function StudentModal({
                       } />
                   </SelectTrigger>
                   <SelectContent>
-                    {school?.languages?.map((language: string) => (
+                    {languages?.map((language: string) => (
                       <SelectItem key={language} value={language}>
                         {language}
                       </SelectItem>
@@ -184,7 +186,7 @@ export function StudentModal({
                 /> */}
                 <Select name="class" required disabled value={selectedSection?.id || ""}>
                   <SelectTrigger className="px-3 py-2 w-full shadow-sm focus:shaodw-md bg-background outline-none">
-                    <SelectValue placeholder="Select Section" />
+                    <SelectValue placeholder="Select Language" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={selectedSection?.id || "filling"}>

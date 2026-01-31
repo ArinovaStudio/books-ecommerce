@@ -390,7 +390,7 @@ const handleReceipt = async (order: Order) => {
                   <CardContent className="flex justify-between">
                     <div>
                       <p className="text-sm">
-                        Order Placed on: {order.createdAt.split("T")[0]}
+                        Order Placed on: {new Date(order.createdAt.split("T")[0]).toLocaleDateString()}
                       </p>
                       <p className="text-sm">Address: {order.landmark}</p>
                       <p className="text-sm">Pincode: {order.pincode}</p>
