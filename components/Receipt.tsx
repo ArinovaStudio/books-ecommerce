@@ -70,7 +70,7 @@ export default function Receipt({order}: ReceiptProps) {
                     {item?.product?.description || "No description available"}
                   </td>
                   <td className="align-top p-3 text-center">{item.quantity}</td>
-                  <td className="align-top p-3 text-right">₹{item.price.toFixed(2)}</td>
+                  <td className="align-top p-3 text-right">₹{(item.price * item.quantity).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
