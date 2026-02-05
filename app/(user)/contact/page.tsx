@@ -1,126 +1,147 @@
-"use client"
+"use client";
 
-import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Phone, Mail, MapPin, MessageCircle, Send, Loader2 } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Send,
+  Loader2,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface FormData {
-  name: string
-  email: string
-  phone: string
-  address: string
-  message: string
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  message: string;
 }
 
 interface FormErrors {
-  [key: string]: string
+  [key: string]: string;
 }
 
 const ContactPage = () => {
   const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    message: ''
-  })
-  const [loading, setLoading] = useState(false)
-  const [errors, setErrors] = useState<FormErrors>({})
-  const { toast } = useToast()
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const { toast } = useToast();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }))
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
-  }
+  };
 
   const validateForm = () => {
-    const newErrors: FormErrors = {}
-    if (!formData.name.trim()) newErrors.name = 'Name is required'
+    const newErrors: FormErrors = {};
+    if (!formData.name.trim()) newErrors.name = "Name is required";
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required'
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format'
+      newErrors.email = "Invalid email format";
     }
-    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required'
-    if (!formData.message.trim()) newErrors.message = 'Message is required'
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
+    if (!formData.message.trim()) newErrors.message = "Message is required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validateForm()) return
+    e.preventDefault();
+    if (!validateForm()) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
+      const response = await fetch("/api/contact", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        toast({ 
-          title: 'Success', 
-          description: data.message || 'Your message has been sent successfully!' 
-        })
-        setFormData({ name: '', email: '', phone: '', address: '', message: '' })
-        setErrors({})
+        toast({
+          title: "Success",
+          description:
+            data.message || "Your message has been sent successfully!",
+        });
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          address: "",
+          message: "",
+        });
+        setErrors({});
       } else {
         if (data.errors && Array.isArray(data.errors)) {
-          const apiErrors: FormErrors = {}
+          const apiErrors: FormErrors = {};
           data.errors.forEach((err: any) => {
-            if (err.field) apiErrors[err.field] = err.message
-          })
-          setErrors(apiErrors)
-          toast({ 
-            title: 'Validation Error', 
-            description: 'Please fix the errors in the form.', 
-            variant: 'destructive' 
-          })
+            if (err.field) apiErrors[err.field] = err.message;
+          });
+          setErrors(apiErrors);
+          toast({
+            title: "Validation Error",
+            description: "Please fix the errors in the form.",
+            variant: "destructive",
+          });
         } else {
-          throw new Error(data.message || 'Something went wrong')
+          throw new Error(data.message || "Something went wrong");
         }
       }
     } catch (error: any) {
-      toast({ 
-        title: 'Error', 
-        description: error.message || 'Failed to send message. Please try again.', 
-        variant: 'destructive' 
-      })
+      toast({
+        title: "Error",
+        description:
+          error.message || "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleWhatsApp = () => {
-    const message = encodeURIComponent('Hello! I would like to get in touch regarding your services.')
-    window.open(`https://wa.me/1234567890?text=${message}`, '_blank')
-  }
+    const message = encodeURIComponent(
+      "Hello, I am interested in booking the order / Service related queries. Please call me back.",
+    );
+    window.open(`https://wa.me/9391779949?text=${message}`, "_blank");
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Information */}
           <div className="space-y-8">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Get in Touch
+              </h2>
               <p className="text-gray-600 mb-8">
-                Have questions about our books or services? We're here to help! Reach out to us through any of the following methods.
+                Have questions about our books or services? We're here to help!
+                Reach out to us through any of the following methods.
               </p>
             </div>
 
@@ -133,7 +154,7 @@ const ContactPage = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">Phone</h3>
-                      <p className="text-gray-600">+91 12345 67890</p>
+                      <p className="text-gray-600">+91 9391779949</p>
                     </div>
                   </div>
                 </CardContent>
@@ -147,7 +168,7 @@ const ContactPage = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">Email</h3>
-                      <p className="text-gray-600">contact@bookstore.com</p>
+                      <p className="text-gray-600">glownestserv@gmail.com</p>
                     </div>
                   </div>
                 </CardContent>
@@ -161,7 +182,10 @@ const ContactPage = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">Address</h3>
-                      <p className="text-gray-600">123 Book Street, Education City, State 123456</p>
+                      <p className="text-gray-600">
+                        Glow Nest service Church Gagillapur, Dundigal,
+                        Medchal-Malkajgiri TG 500043
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -169,7 +193,7 @@ const ContactPage = () => {
             </div>
 
             {/* WhatsApp Button */}
-            <Button 
+            <Button
               onClick={handleWhatsApp}
               className="w-full bg-green-500 hover:bg-green-600 text-white gap-2 py-3"
             >
@@ -181,12 +205,16 @@ const ContactPage = () => {
           {/* Contact Form */}
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold text-gray-900">Send us a Message</CardTitle>
+              <CardTitle className="text-2xl font-bold text-gray-900">
+                Send us a Message
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium">Name *</Label>
+                  <Label htmlFor="name" className="text-sm font-medium">
+                    Name *
+                  </Label>
                   <Input
                     id="name"
                     name="name"
@@ -195,11 +223,15 @@ const ContactPage = () => {
                     className="border-2 border-gray-200 focus:border-blue-500"
                     placeholder="Your full name"
                   />
-                  {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                  {errors.name && (
+                    <p className="text-sm text-red-500">{errors.name}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium">Email *</Label>
+                  <Label htmlFor="email" className="text-sm font-medium">
+                    Email *
+                  </Label>
                   <Input
                     id="email"
                     name="email"
@@ -209,11 +241,15 @@ const ContactPage = () => {
                     className="border-2 border-gray-200 focus:border-blue-500"
                     placeholder="your.email@example.com"
                   />
-                  {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+                  {errors.email && (
+                    <p className="text-sm text-red-500">{errors.email}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-sm font-medium">Phone Number *</Label>
+                  <Label htmlFor="phone" className="text-sm font-medium">
+                    Phone Number *
+                  </Label>
                   <Input
                     id="phone"
                     name="phone"
@@ -222,11 +258,15 @@ const ContactPage = () => {
                     className="border-2 border-gray-200 focus:border-blue-500"
                     placeholder="+91 12345 67890"
                   />
-                  {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
+                  {errors.phone && (
+                    <p className="text-sm text-red-500">{errors.phone}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address" className="text-sm font-medium">Address</Label>
+                  <Label htmlFor="address" className="text-sm font-medium">
+                    Address
+                  </Label>
                   <Input
                     id="address"
                     name="address"
@@ -238,7 +278,9 @@ const ContactPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="message" className="text-sm font-medium">Message *</Label>
+                  <Label htmlFor="message" className="text-sm font-medium">
+                    Message *
+                  </Label>
                   <Textarea
                     id="message"
                     name="message"
@@ -247,18 +289,24 @@ const ContactPage = () => {
                     className="border-2 border-gray-200 focus:border-blue-500 min-h-[120px]"
                     placeholder="Tell us how we can help you..."
                   />
-                  {errors.message && <p className="text-sm text-red-500">{errors.message}</p>}
+                  {errors.message && (
+                    <p className="text-sm text-red-500">{errors.message}</p>
+                  )}
                 </div>
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={loading}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white gap-2 py-3"
                 >
                   {loading ? (
-                    <><Loader2 className="h-5 w-5 animate-spin" /> Sending...</>
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" /> Sending...
+                    </>
                   ) : (
-                    <><Send className="h-5 w-5" /> Send Message</>
+                    <>
+                      <Send className="h-5 w-5" /> Send Message
+                    </>
                   )}
                 </Button>
               </form>
@@ -267,7 +315,7 @@ const ContactPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ContactPage
+export default ContactPage;
