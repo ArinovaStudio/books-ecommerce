@@ -14,6 +14,7 @@ import Cta from "@/components/landing/cta"
 import Testimonial from "@/components/landing/testimonial"
 import Event from "@/components/landing/event"
 import Advartisement from "@/components/landing/advertisement"
+import FloatingActionButtons from "@/components/FloatingActionButtons"
 
 export default function Home() {
   useEffect(() => {
@@ -42,6 +43,9 @@ export default function Home() {
       <HeroCTA />
       <Event/>
       */}
+      
+      {/* Floating Action Buttons */}
+      <FloatingActionButtons />
     </main>
   )
 }

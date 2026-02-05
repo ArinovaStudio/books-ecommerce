@@ -98,7 +98,10 @@ export default function Receipt({order}: ReceiptProps) {
 
         {/* Footer */}
         <div className="text-xs text-muted-foreground flex justify-between items-center pt-4">
-          <p>Thanks for your business!</p>
+          <p>Thanks for placing your order!</p>
+
+          <p className="text-[#000000]">Order will not be taken back</p>
+          
           <p>Powered by {COMPANY}</p>
         </div>
       </CardContent>

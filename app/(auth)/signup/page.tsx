@@ -394,7 +394,7 @@ const SignUpPage = () => {
                     value={formData.address}
                     onChange={handleChange}
                     rows={2}
-                    placeholder="Enter full address"
+                    placeholder="Enter Full Address with Landmark"
                     className={`w-full rounded-xl border border-gray-200 bg-gray-50 pl-9 p-3 resize-none text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.address ? "border-red-500" : ""
                       }`}
                   />
