@@ -385,7 +385,7 @@ const SignUpPage = () => {
               {/* Address */}
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold text-gray-700 ml-1">
-                  Address
+                  Full Address with Landmark
                 </Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
