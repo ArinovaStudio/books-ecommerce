@@ -19,6 +19,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import AddEditProductDialog from "./AddProduct";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarImage } from "./ui/avatar";
+import { AvatarFallback } from "@radix-ui/react-avatar";
 
 type Product = {
   id: string;
@@ -262,11 +264,14 @@ export default function ProductTable({
                 />
               )}
 
-              <img
+              <Avatar className="w-14 h-14 border-1 flex items-center justify-center">
+              <AvatarImage
                 src={product.image}
                 alt={product.name}
-                className="w-14 h-14 rounded-md border bg-white object-cover"
-              />
+                className="border bg-white object-cover"
+                />
+                <AvatarFallback>{product.name[0]}</AvatarFallback>
+                </Avatar>
 
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-sm truncate">{product.name}</p>
@@ -283,6 +288,8 @@ export default function ProductTable({
             </div>
 
             {/* Quantity */}
+           {
+            category!=="TEXTBOOK" &&
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Quantity</span>
               <div className="flex items-center gap-2">
@@ -333,7 +340,7 @@ export default function ProductTable({
                 </Button>
               </div>
             </div>
-
+            }
             {/* Footer */}
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">
@@ -360,11 +367,15 @@ export default function ProductTable({
             )}
 
             <div className="md:col-span-1 flex justify-center">
-              <img
+             
+              <Avatar className="h-14 w-14 border-1 flex items-center justify-center">
+              <AvatarImage
                 src={product.image}
                 alt={product.name}
-                className="w-14 h-14 rounded-md object-cover border bg-white"
-              />
+                className="border bg-white object-fit"
+                />
+                <AvatarFallback>{product.name[0]}</AvatarFallback>
+                </Avatar>
             </div>
 
             <div className="md:col-span-3 flex flex-col min-w-0">
@@ -388,7 +399,7 @@ export default function ProductTable({
             </div>
 
             <div className="hidden md:flex md:col-span-1 justify-center font-semibold text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
+              {product.category!=="TEXTBOOK" && <div className="flex items-center gap-1">
                 <Button
                   size="icon"
                   variant="outline"
@@ -434,7 +445,7 @@ export default function ProductTable({
                 >
                   <Plus className="w-3 h-3" />
                 </Button>
-              </div>
+              </div>}
             </div>
 
             <div className="hidden md:flex md:col-span-2 justify-center text-muted-foreground text-sm">
@@ -507,17 +518,7 @@ export default function ProductTable({
       </CardHeader>
 
       <CardContent className="px-0">
-        <div className="flex justify-end mb-6">
-          {products.length > 0 && (
-            <button
-              type="button"
-              onClick={handleNextClick}
-              className="bg-blue-600 text-white rounded-lg px-8 py-2.5 hover:bg-blue-700 transition-colors font-medium"
-            >
-              Next
-            </button>
-          )}
-        </div>
+
 
         {loading ? (
           <div className="text-center py-12 text-muted-foreground">
@@ -543,7 +544,7 @@ export default function ProductTable({
                       <span className="col-span-1 text-center">Product</span>
                       <span className="col-span-3">Name</span>
                       <span className="col-span-2 text-center">Brand</span>
-                      <span className="col-span-1 text-center">Quantity</span>
+                      {category!=="TEXTBOOK" ? <span className="col-span-1 text-center">Quantity</span>:<div></div>}
                       <span className="col-span-2 text-center">
                         Description
                       </span>
@@ -565,7 +566,17 @@ export default function ProductTable({
             NO Products Found
           </div>
         )}
-
+        <div className="flex justify-end mt-6">
+          {products.length > 0 && (
+            <button
+              type="button"
+              onClick={handleNextClick}
+              className="bg-blue-600 text-white rounded-lg px-8 py-2.5 hover:bg-blue-700 transition-colors font-medium"
+            >
+              Next
+            </button>
+          )}
+        </div>
         {showAuthModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
             <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">

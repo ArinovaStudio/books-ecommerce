@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 // import { schools } from "@/data/demodata";
 import Image from "next/image";
 import SchoolSearch from "@/components/schoolSearch";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { AvatarFallback } from "@radix-ui/react-avatar";
 type School = {
   id: string;
   name: string;
@@ -122,13 +124,16 @@ export default function SchoolsPage() {
                       <Card className="flex flex-row justify-between p-6 rounded-2xl bg-white shadow-sm border hover:shadow-md transition cursor-pointer hover:-translate-y-1 group">
                         <div className="flex items-center gap-5">
                           <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden group-hover:bg-gray-200">
-                            <Image
+                            <Avatar className="flex items-center justify-center">
+                            <AvatarImage
                               src={school.image || "/school.jpg"}
                               alt={school.name}
                               width={64}
                               height={64}
                               className="object-cover"
-                            />
+                              />
+                              <AvatarFallback className="text-lg">{school.name[0]}</AvatarFallback>
+                              </Avatar>
                           </div>
 
                           <div>

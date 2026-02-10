@@ -1,12 +1,15 @@
 import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import bcrypt, { compare, compareSync } from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { schoolAdminCreatedTemplate, studentAddedTemplate } from "@/lib/templates";
+import {
+  schoolAdminCreatedTemplate,
+  studentAddedTemplate,
+} from "@/lib/templates";
 import sendEmail from "@/lib/email";
-
+const ADMIN_EMAIL = process.env.EMAIL_USER!;
 const SECRET_KEY = process.env.JWT_SECRET || "MY_SECRET_KEY";
 
 export const POST = Wrapper(async (req: NextRequest) => {
@@ -64,7 +67,19 @@ export const POST = Wrapper(async (req: NextRequest) => {
             schoolId,
           },
         });
-      }
+      } 
+      // else {
+      //   const result = await compare(parent.password, parentUser.password);
+      //   if (!result) {
+      //     return NextResponse.json(
+      //       {
+      //         success: false,
+      //         message: "Password Does not match With existing one!",
+      //       },
+      //       { status: 400 }
+      //     );
+      //   }
+      // }
 
       for (const student of students) {
         const classInfo = await tx.class.findUnique({
@@ -140,20 +155,23 @@ export const POST = Wrapper(async (req: NextRequest) => {
         student.section,
         parent.password
       );
-
       const sendAdminEmail = schoolAdminCreatedTemplate(
         school.name,
         student.parent.name,
-        student.parent.email,
-      ) 
-      
+        student.parent.email
+      );
+
       await sendEmail(parent.email, emailData.subject, emailData.html);
-      await sendEmail(school.email, sendAdminEmail.subject, sendAdminEmail.html);
-      await sendEmail("glownestserv@gmail.com", sendAdminEmail.subject, sendAdminEmail.html);
+      await sendEmail(
+        school.email,
+        sendAdminEmail.subject,
+        sendAdminEmail.html
+      );
+      await sendEmail(ADMIN_EMAIL, sendAdminEmail.subject, sendAdminEmail.html);
     }
     const cookieStore = await cookies();
-    if(!token){
-      throw Error("There was an issue while your registeration !")
+    if (!token) {
+      throw Error("There was an issue while your registeration !");
     }
     cookieStore.set("token", token, {
       httpOnly: true,
