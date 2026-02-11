@@ -41,8 +41,8 @@ const buttonStyle = `
 `;
 
 export const emailOtpTemplate = (otp: string) => ({
-    subject: "OTP Verification - Glow Nest",
-    html: `
+  subject: "OTP Verification - Glow Nest",
+  html: `
         <div style="${bodyStyle}">
             <div style="${containerStyle}">
                 <div style="${headerStyle}">
@@ -63,17 +63,16 @@ export const emailOtpTemplate = (otp: string) => ({
 });
 
 export const studentAddedTemplate = (
-    studentName: string, 
-    parentName: string, 
-    email: string, 
-    schoolName: string,
-    className: string,
-    sectionName: string,
-    password?: string
+  studentName: string,
+  parentName: string,
+  email: string,
+  schoolName: string,
+  className: string,
+  sectionName: string,
+  password?: string
 ) => {
-    
-    const accountInfoSection = password 
-        ? `
+  const accountInfoSection = password
+    ? `
         <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; padding: 20px; border-radius: 8px; margin: 25px 0;">
             <p style="margin-top: 0; color: #0369a1; font-weight: bold; font-size: 16px; margin-bottom: 10px;">
                 🆕 Parent Account Created
@@ -94,7 +93,7 @@ export const studentAddedTemplate = (
             </div>
             <p style="font-size: 0.85em; color: #64748b; margin-top: 10px;">*Please change your password after your first login.</p>
         </div>`
-        : `
+    : `
         <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 20px; border-radius: 8px; margin: 25px 0;">
             <p style="margin-top: 0; color: #15803d; font-weight: bold; font-size: 16px; margin-bottom: 10px;">
                 ✅ Account Linked Successfully
@@ -103,9 +102,9 @@ export const studentAddedTemplate = (
             <p style="margin: 0; color: #374151;">Login ID: <strong>${email}</strong></p>
         </div>`;
 
-    return {
-        subject: "New Student Added - Glow Nest",
-        html: `
+  return {
+    subject: "New Student Added - Glow Nest",
+    html: `
             <div style="${bodyStyle}">
                 <div style="${containerStyle}">
                     <div style="${headerStyle}">
@@ -145,13 +144,17 @@ export const studentAddedTemplate = (
                     </div>
                 </div>
             </div>
-        `
-    };
+        `,
+  };
 };
 
-export const schoolAdminCreatedTemplate = (name: string, email: string, password: string) => ({
-    subject: "School Admin Access - Glow Nest",
-    html: `
+export const schoolAdminCreatedTemplate = (
+  name: string,
+  email: string,
+  password: string
+) => ({
+  subject: "School Admin Access - Glow Nest",
+  html: `
         <div style="${bodyStyle}">
             <div style="${containerStyle}">
                 <div style="${headerStyle}">
@@ -184,28 +187,39 @@ export const schoolAdminCreatedTemplate = (name: string, email: string, password
                 </div>
             </div>
         </div>
-    `
+    `,
 });
 
 export const orderReceiptTemplate = (
-    userName: string, 
-    orderId: string, 
-    studentName: string, 
-    totalAmount: number, 
-    items: { name: string, quantity: number, price: number }[]
+  userName: string,
+  orderId: string,
+  studentName: string,
+  className: string,
+  schoolName: string,
+  sectionName: string,
+  totalAmount: number,
+  items: { name: string; quantity: number; price: number }[]
 ) => {
-    
-    const itemsList = items.map((item, index) => 
-        `<tr style="border-bottom: 1px solid #f3f4f6; background-color: ${index % 2 === 0 ? '#ffffff' : '#f9fafb'};">
+  const itemsList = items
+    .map(
+      (item, index) =>
+        `<tr style="border-bottom: 1px solid #f3f4f6; background-color: ${
+          index % 2 === 0 ? "#ffffff" : "#f9fafb"
+        };">
             <td style="padding: 12px; color: #374151;">${item.name}</td>
-            <td style="padding: 12px; text-align: center; color: #374151;">${item.quantity}</td>
-            <td style="padding: 12px; text-align: right; color: #374151;">₹${item.price}</td>
+            <td style="padding: 12px; text-align: center; color: #374151;">${
+              item.quantity
+            }</td>
+            <td style="padding: 12px; text-align: right; color: #374151;">₹${
+              item.quantity * item.price
+            }</td>
         </tr>`
-    ).join('');
+    )
+    .join("");
 
-    return {
-        subject: `Order Receipt - #${orderId.toUpperCase()}`,
-        html: `
+  return {
+    subject: `Order Receipt - #${orderId.toUpperCase()}`,
+    html: `
             <div style="${bodyStyle}">
                 <div style="${containerStyle}">
                     <div style="${headerStyle}">
@@ -213,13 +227,17 @@ export const orderReceiptTemplate = (
                     </div>
                     <div style="padding: 30px;">
                         <div style="text-align: center; margin-bottom: 30px;">
-                            <h2 style="color: #111827; margin: 0;">Order Confirmed</h2>
-                            <p style="color: #06b6d4; font-weight: bold; margin-top: 5px;">#${orderId}</p>
-                        </div>
+                        <h2 style="color: #111827; margin: 0;">Order Confirmed</h2>
+                        <p style="color: #06b6d4; font-weight: bold; margin-top: 5px;">#${orderId}</p>
+                            </div>
                         
                         <p style="color: #4b5563;">Hi ${userName},</p>
                         <p style="color: #4b5563;">Thank you for your purchase for <strong>${studentName}</strong>. Here is your receipt.</p>
-                        
+                                    <div style="margin: 20px 0; padding: 15px; background-color: #f9fafb; border-radius: 8px;">
+              <p style="margin: 5px 0; color: #374151;"><strong>School:</strong> ${schoolName}</p>
+              <p style="margin: 5px 0; color: #374151;"><strong>Class:</strong> ${className}</p>
+              <p style="margin: 5px 0; color: #374151;"><strong>Section:</strong> ${sectionName}</p>
+            </div>
                         <table style="width: 100%; border-collapse: collapse; margin: 25px 0; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
                             <thead>
                                 <tr style="background-color: #f3f4f6;">
@@ -246,20 +264,20 @@ export const orderReceiptTemplate = (
                     </div>
                 </div>
             </div>
-        `
-    };
+        `,
+  };
 };
 
-
 export const newOrderAlertTemplate = (
-    adminName: string,
-    orderId: string,
-    studentName: string,
-    className: string,
-    totalAmount: number
+  adminName: string,
+  schoolName: string,
+  orderId: string,
+  studentName: string,
+  className: string,
+  totalAmount: number
 ) => ({
-    subject: `💰 New Order - #${orderId.toUpperCase()}`,
-    html: `
+  subject: `💰 New Order - #${orderId.toUpperCase()}`,
+  html: `
         <div style="${bodyStyle}">
             <div style="${containerStyle}">
                 <div style="${headerStyle}">
@@ -275,6 +293,10 @@ export const newOrderAlertTemplate = (
                             <tr>
                                 <td style="padding: 5px 0; color: #64748b; font-size: 14px;">Order ID:</td>
                                 <td style="padding: 5px 0; color: #0f172a; font-weight: bold;">${orderId}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px 0; color: #64748b; font-size: 14px;">School:</td>
+                                <td style="padding: 5px 0; color: #0f172a; font-weight: bold;">${schoolName}</td>
                             </tr>
                             <tr>
                                 <td style="padding: 5px 0; color: #64748b; font-size: 14px;">Student:</td>
@@ -297,17 +319,17 @@ export const newOrderAlertTemplate = (
                 </div>
             </div>
         </div>
-    `
+    `,
 });
 
 export const newContactQueryTemplate = (
-    name: string,
-    email: string,
-    phone: string | null | undefined,
-    message: string
+  name: string,
+  email: string,
+  phone: string | null | undefined,
+  message: string
 ) => ({
-    subject: `New Inquiry from ${name}`,
-    html: `
+  subject: `New Inquiry from ${name}`,
+  html: `
         <div style="${bodyStyle}">
             <div style="${containerStyle}">
                 <div style="${headerStyle}">
@@ -320,7 +342,9 @@ export const newContactQueryTemplate = (
                         <p style="margin: 5px 0; color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Sender Details</p>
                         <p style="margin: 0; color: #111827; font-weight: bold; font-size: 16px;">${name}</p>
                         <p style="margin: 5px 0; color: #06b6d4;"><a href="mailto:${email}" style="color: #06b6d4; text-decoration: none;">${email}</a></p>
-                        <p style="margin: 0; color: #4b5563;">${phone || "No phone number provided"}</p>
+                        <p style="margin: 0; color: #4b5563;">${
+                          phone || "No phone number provided"
+                        }</p>
                     </div>
 
                     <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
@@ -333,5 +357,5 @@ export const newContactQueryTemplate = (
                 </div>
             </div>
         </div>
-    `
+    `,
 });

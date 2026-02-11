@@ -161,13 +161,13 @@ export const POST = Wrapper(async (req: NextRequest) => {
     });
 
     // send mails to parent
-    const userEmailData = orderReceiptTemplate(userName, orderId, student.name, totalAmount, emailItems);
+    const userEmailData = orderReceiptTemplate(userName, orderId, student.name,student.class.name,student.school.name,student.section, totalAmount, emailItems);
     sendEmail(userEmail, userEmailData.subject, userEmailData.html).catch(err => console.error("User email failed", err));
 
     // send mail to sub admins
     if (student.school.subAdmins.length > 0) {
         student.school.subAdmins.forEach(admin => {
-            const adminEmailData = newOrderAlertTemplate( admin.name, orderId, student.name, `${student.class.name} - ${student.section}`, totalAmount);
+            const adminEmailData = newOrderAlertTemplate( admin.name,student.school.name, orderId, student.name, `${student.class.name} - ${student.section}`, totalAmount);
             sendEmail(admin.email, adminEmailData.subject, adminEmailData.html).catch(err => console.error("Admin notification failed", err));
         });
     }
@@ -182,6 +182,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
         systemAdmins.forEach(admin => {
             const systemAdminEmailData = newOrderAlertTemplate(
                 admin.name,
+                student.school.name,
                 orderId,
                 student.name,
                 `${student.class.name} - ${student.section} (${student.school.name})`,
