@@ -359,3 +359,95 @@ export const newContactQueryTemplate = (
         </div>
     `,
 });
+
+
+export const adminParentRegisteredTemplate = (
+schoolName: string,
+city: string,
+parentName: string,
+email: string,
+password: string,
+) => {
+  return {
+    subject: "New Parent Registration - Glow Nest",
+    html: `
+      <div style="${bodyStyle}">
+        <div style="${containerStyle}">
+          
+          <!-- Header -->
+          <div style="${headerStyle}">
+            <span style="${logoStyle}">Glow Nest - Student Registeration</span>
+          </div>
+
+          <!-- Body -->
+          <div style="padding: 30px;">
+            <h2 style="color: #111827; margin-top: 0;">
+              🚀 New Parent Registration Alert
+            </h2>
+
+            <p style="color: #4b5563; line-height: 1.6;">
+              A new parent has successfully registered and has been linked to a school in the system.
+              Below are the registration details:
+            </p>
+
+            <!-- Parent Details Card -->
+            <div style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-top: 20px;">
+              <h3 style="margin: 0 0 15px 0; color: #06b6d4; font-size: 18px;">
+                Parent Information
+              </h3>
+
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #6b7280; width: 40%;">Parent Name:</td>
+                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">
+                    ${parentName}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #6b7280;">Email:</td>
+                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">
+                    ${email}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #6b7280;">Password:</td>
+                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">
+                    ${password}
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- School Details Card -->
+            <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 20px; margin-top: 20px;">
+              <h3 style="margin: 0 0 15px 0; color: #0369a1; font-size: 18px;">
+                Linked School Information
+              </h3>
+
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #6b7280; width: 40%;">School Name:</td>
+                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">
+                    ${schoolName}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #6b7280;">City:</td>
+                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">
+                    ${city}
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div style="${footerStyle}">
+            This is an automated admin notification from Glow Nest.<br>
+            Please review the registration details in the admin dashboard.
+          </div>
+        </div>
+      </div>
+    `,
+  };
+};

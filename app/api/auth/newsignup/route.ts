@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import {
-  schoolAdminCreatedTemplate,
+  adminParentRegisteredTemplate,
   studentAddedTemplate,
 } from "@/lib/templates";
 import sendEmail from "@/lib/email";
@@ -155,12 +155,13 @@ export const POST = Wrapper(async (req: NextRequest) => {
         student.section,
         parent.password
       );
-      const sendAdminEmail = schoolAdminCreatedTemplate(
+      const sendAdminEmail = adminParentRegisteredTemplate(
         school.name,
-        student.parent.name,
-        student.parent.email
+        school.address || "No Address Provided!",
+        parent.name,
+        parent.email,
+        parent.password
       );
-
       await sendEmail(parent.email, emailData.subject, emailData.html);
       await sendEmail(
         school.email,

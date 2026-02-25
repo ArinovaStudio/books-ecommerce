@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Search, Mail, User, ArrowLeft, Loader2, Pencil, Trash, ShieldOff, Shield, Send } from "lucide-react"
+import { MoreHorizontal, Search, Mail, User, ArrowLeft, Loader2, Pencil, Trash, ShieldOff, Shield, Send, Phone } from "lucide-react"
 import AddUserDialog from "../AddUser"
 import { useToast } from "@/hooks/use-toast"
 import EditStudentDialog from "./EditStudentDialog"
@@ -54,8 +54,8 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionItem, 
                 setUsers(data.students.map((student: any) => ({
                     id: student.id,
                     name: student.name,
-                    email: student.parent?.email || student.parentEmail,
-                    phone: student.parent?.phone || "",
+                    email: student?.parent?.email || student.parentEmail,
+                    phone: student?.parent?.phone || "",
                     role: "User",
                     status: student.isActive ? "Active" : "Inactive",
                     joinDate: new Date(student.createdAt).toLocaleDateString()
@@ -226,6 +226,10 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionItem, 
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                     <Mail className="h-4 w-4" />
                                     {user.email}
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Phone className="h-4 w-4" />
+                                    {user?.phone || "Phone Not Provided!"}
                                 </div>
                             </CardHeader>
 
