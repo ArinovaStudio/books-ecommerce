@@ -155,21 +155,22 @@ export const POST = Wrapper(async (req: NextRequest) => {
         student.section,
         parent.password
       );
-      const sendAdminEmail = adminParentRegisteredTemplate(
-        school.name,
-        school.address || "No Address Provided!",
-        parent.name,
-        parent.email,
-        parent.password
-      );
       await sendEmail(parent.email, emailData.subject, emailData.html);
-      await sendEmail(
-        school.email,
-        sendAdminEmail.subject,
-        sendAdminEmail.html
-      );
-      await sendEmail(ADMIN_EMAIL, sendAdminEmail.subject, sendAdminEmail.html);
     }
+    const sendAdminEmail = adminParentRegisteredTemplate(
+      school.name,
+      school.address || "No Address Provided!",
+      parent.name,
+      parent.email,
+      parent.password,
+      createdStudents
+    );
+    await sendEmail(
+      school.email,
+      sendAdminEmail.subject,
+      sendAdminEmail.html
+    );
+    await sendEmail(ADMIN_EMAIL, sendAdminEmail.subject, sendAdminEmail.html);
     const cookieStore = await cookies();
     if (!token) {
       throw Error("There was an issue while your registeration !");

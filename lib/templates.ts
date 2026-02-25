@@ -361,13 +361,38 @@ export const newContactQueryTemplate = (
 });
 
 
+type Student = {
+  name: string;
+  class: {name: string};
+  section: string;
+};
+
 export const adminParentRegisteredTemplate = (
-schoolName: string,
-city: string,
-parentName: string,
-email: string,
-password: string,
+  schoolName: string,
+  city: string,
+  parentName: string,
+  email: string,
+  password: string,
+  students: Student[]
 ) => {
+  const studentsRows = students
+    .map(
+      (student) => `
+        <tr>
+          <td style="padding: 8px 0; color: #111827; font-weight: 500;">
+            ${student.name}
+          </td>
+          <td style="padding: 8px 0; color: #111827; font-weight: 500;">
+            ${student.class.name}
+          </td>
+          <td style="padding: 8px 0; color: #111827; font-weight: 500;">
+            ${student.section}
+          </td>
+        </tr>
+      `
+    )
+    .join("");
+
   return {
     subject: "New Parent Registration - Glow Nest",
     html: `
@@ -376,21 +401,21 @@ password: string,
           
           <!-- Header -->
           <div style="${headerStyle}">
-            <span style="${logoStyle}">Glow Nest - Student Registeration</span>
+            <span style="${logoStyle}">Glow Nest - Student Registration</span>
           </div>
 
           <!-- Body -->
           <div style="padding: 30px;">
             <h2 style="color: #111827; margin-top: 0;">
-              🚀 New Parent Registration Alert
+              New Parent Registration Alert
             </h2>
 
-            <p style="color: #4b5563; line-height: 1.6;">
+            <p style="color: #6b7280; line-height: 1.6;">
               A new parent has successfully registered and has been linked to a school in the system.
               Below are the registration details:
             </p>
 
-            <!-- Parent Details Card -->
+            <!-- Parent Details -->
             <div style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-top: 20px;">
               <h3 style="margin: 0 0 15px 0; color: #06b6d4; font-size: 18px;">
                 Parent Information
@@ -399,26 +424,20 @@ password: string,
               <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td style="padding: 8px 0; color: #6b7280; width: 40%;">Parent Name:</td>
-                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">
-                    ${parentName}
-                  </td>
+                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">${parentName}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; color: #6b7280;">Email:</td>
-                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">
-                    ${email}
-                  </td>
+                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">${email}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; color: #6b7280;">Password:</td>
-                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">
-                    ${password}
-                  </td>
+                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">${password}</td>
                 </tr>
               </table>
             </div>
 
-            <!-- School Details Card -->
+            <!-- School Details -->
             <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 20px; margin-top: 20px;">
               <h3 style="margin: 0 0 15px 0; color: #0369a1; font-size: 18px;">
                 Linked School Information
@@ -427,16 +446,28 @@ password: string,
               <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td style="padding: 8px 0; color: #6b7280; width: 40%;">School Name:</td>
-                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">
-                    ${schoolName}
-                  </td>
+                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">${schoolName}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; color: #6b7280;">City:</td>
-                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">
-                    ${city}
-                  </td>
+                  <td style="padding: 8px 0; color: #111827; font-weight: 500;">${city}</td>
                 </tr>
+              </table>
+            </div>
+
+            <!-- Students Details -->
+            <div style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-top: 20px;">
+              <h3 style="margin: 0 0 15px 0; color: #06b6d4; font-size: 18px;">
+                Students Information
+              </h3>
+
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <th style="text-align: left; padding: 8px 0; color: #6b7280;">Name</th>
+                  <th style="text-align: left; padding: 8px 0; color: #6b7280;">Class</th>
+                  <th style="text-align: left; padding: 8px 0; color: #6b7280;">Section</th>
+                </tr>
+                ${studentsRows}
               </table>
             </div>
           </div>
