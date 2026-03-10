@@ -12,7 +12,8 @@ import {
     Baby,
     ChevronRight,
     LogOut,
-    Loader2Icon
+    Loader2Icon,
+    LockKeyhole
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,7 @@ import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { useUser, UserProfile } from "@/app/context/userContext"
+import Link from "next/link"
 
 /* ---------------- TYPES ---------------- */
 
@@ -59,7 +61,7 @@ const ProfilePage = () => {
 
     useEffect(() => {
         if (!loading && user) {
-            setProfile(user)
+            setProfile(user as any)
         }
     }, [user])
 
@@ -86,7 +88,7 @@ const ProfilePage = () => {
 
                     {/* Left Column: Personal Info */}
                     <div className="lg:col-span-1">
-                        <Card className="rounded-3xl shadow-sm border-gray-100 sticky top-4 overflow-hidden flex flex-col">
+                        <Card className="rounded-3xl pb-0 shadow-sm border-gray-100 sticky top-4 overflow-hidden flex flex-col">
                             <CardHeader>
                                 <div className="flex flex-col items-center gap-3 text-center">
                                     <div className="h-16 w-16 sm:h-20 sm:w-20 border-2 border-blue-50 bg-white rounded-full flex items-center justify-center shadow-inner">
@@ -134,8 +136,17 @@ const ProfilePage = () => {
                                     </span>
                                 </div>
                             </CardContent>
-
-                            <div className="bg-red-600 absolute bottom-0 w-full">
+                            <div className="grid gap-0 w-full">
+                                <Link href={"/change-password"}>
+                                <Button
+                                    variant="secondary"
+                                    type="button"
+                                    className="w-full text-center h-14 rounded-none border-t border-gray-100 bg-gray-50 hover:bg-gray-60 text-gray-600 font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                                >
+                                    <LockKeyhole size={18} />
+                                    Change Password
+                                </Button>
+                                </Link>
                                 <Button
                                     variant="secondary"
                                     onClick={logout}

@@ -40,6 +40,11 @@ export const GET = Wrapper(async (req: NextRequest) => {
                 student: {
                     schoolId,
                 },
+                payment:{
+                    some:{
+                        status: "SUCCESS"
+                    }
+                }
             },
             include: {
                 student: {
@@ -77,7 +82,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
                 },
             },
             orderBy: {
-                id: "asc",
+                id: "desc",
             },
         });
 

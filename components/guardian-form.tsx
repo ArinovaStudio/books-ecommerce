@@ -7,7 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Phone, User, MapPin, LucideLoader2, Loader2 } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  User,
+  MapPin,
+  LucideLoader2,
+  Loader2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -221,9 +228,19 @@ export function GuardianForm() {
         const { user: userData } = resData;
         setUser(userData);
 
-        const childData = userData.children.length > 0 ? userData.children.filter((child: any) => child.schoolId === schoolId && child.classId === classId && child.section === section) : [];
+        const childData =
+          userData.children.length > 0
+            ? userData.children.filter(
+                (child: any) =>
+                  child.schoolId === schoolId &&
+                  child.classId === classId &&
+                  child.section === section
+              )
+            : [];
         if (childData.length === 0) {
-          toast.error("No child found for the selected school, class, and section.");
+          toast.error(
+            "No child found for the selected school, class, and section."
+          );
         }
         setChildren(childData);
         setFormData((prev) => ({
@@ -243,15 +260,29 @@ export function GuardianForm() {
 
   //razorpay integration
   const startRazorpayPayment = async () => {
+    const orderItems = products
+      .filter((p) => selectedProducts[p.id]?.checked)
+      .map((p) => ({
+        productId: p.id,
+        quantity: selectedProducts[p.id]?.quantity || p.stock,
+      }));
+
     const res = await fetch("/api/razorpay/order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: grandTotal }),
+      body: JSON.stringify({
+        amount: grandTotal,
+        studentId: user?.children[0].id,
+        paymentMethod: "Razorpay",
+        phone: formData.guardianPhone,
+        landmark: formData.landmark,
+        pincode: formData.pincode,
+        items: orderItems,
+      }),
     });
 
     const data = await res.json();
     if (!data.success) throw new Error("Order creation failed");
-
     const isLoaded = await import("@/lib/loadRazorpay").then((m) =>
       m.loadRazorpay()
     );
@@ -280,69 +311,74 @@ export function GuardianForm() {
 
     // @ts-ignore
     const rzp = new window.Razorpay(options);
+    rzp.on("payment.failed", function () {
+      toast.error("Payment failed");
+      setLoading(false);
+    });
     rzp.open();
   };
 
   const verifyAndPlaceOrder = async (payment: any) => {
-    const verifyRes = await fetch("/api/razorpay/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payment),
-    });
+    try {
+      const verifyRes = await fetch("/api/razorpay/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...payment, studentId: user?.children[0].id }),
+      });
 
-    const verifyData = await verifyRes.json();
-    if (!verifyData.success) {
-      toast.error("Payment verification failed");
-      setLoading(false);
-      return;
-    }
-
-    // ✅ Payment verified → create DB order
-    await sendFinalOrder(payment);
-  };
-
-  const sendFinalOrder = async (payment: any) => {
-    const orderItems = products
-      .filter((p) => selectedProducts[p.id]?.checked)
-      .map((p) => ({
-        productId: p.id,
-        quantity: selectedProducts[p.id]?.quantity || p.stock,
-      }));
-
-    const res = await fetch("/api/order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        studentId: user?.children[0].id,
-        paymentMethod: "Razorpay",
-        phone: formData.guardianPhone,
-        landmark: formData.landmark,
-        pincode: formData.pincode,
-        razorpayOrderId: payment.razorpay_order_id,
-        razorpayPaymentId: payment.razorpay_payment_id,
-        razorpaySignature: payment.razorpay_signature,
-        items: orderItems,
-      }),
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      toast.success("Order placed successfully 🎉");
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) {
+        toast.error("Payment verification failed");
+        setLoading(false);
+        return;
+      }
+      toast.success("Payment Done and Order placed successfully 🎉");
       setTimeout(() => {
         window.location.replace("/");
       }, 2000);
-    } else {
-      toast.error("Order failed");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+    // ✅ Payment verified → create DB order
+    // await sendFinalOrder(payment);
   };
+
+  // const sendFinalOrder = async (payment: any) => {
+  //   const res = await fetch("/api/order", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({
+  //       razorpayOrderId: payment.razorpay_order_id,
+  //       razorpayPaymentId: payment.razorpay_payment_id,
+  //       razorpaySignature: payment.razorpay_signature,
+  //     }),
+  //   });
+
+  //   const data = await res.json();
+  //   if (data.success) {
+  //     toast.success("Order placed successfully 🎉");
+  //     // setTimeout(() => {
+  //     //   window.location.replace("/");
+  //     // }, 2000);
+  //   } else {
+  //     toast.error("Order failed");
+  //   }
+  //   setLoading(false);
+  // };
 
   if (loading) {
     return (
       <div className="min-h-screen grid place-items-center">
-        <Loader2 className="animate-spin" color="blue" size={42} strokeWidth={2} />
+        <Loader2
+          className="animate-spin"
+          color="blue"
+          size={42}
+          strokeWidth={2}
+        />
       </div>
-    )
+    );
   }
   return (
     <div className="min-h-screen bg-background">
@@ -357,30 +393,29 @@ export function GuardianForm() {
             <p className="text-sm sm:text-base">
               Please provide details to complete your order
             </p>
-                            <Label className="text-sm sm:text-base font-medium mt-4 block">
-                  Child Info
-                </Label>
-                {children.length > 0 &&
-                  children.map((items: any, index: number) => (
-                    <div
-                      key={index}
-                      className="w-full flex justify-start items-center gap-3"
-                    >
-                      <p className="py-2 bg-gray-200 border border-gray-400 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
-                        NAME: {items.name}
-                      </p>
-                      <p className="py-2 bg-gray-200 border border-gray-400 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
-                        ROLL NO: {items.rollNo}
-                      </p>
-                      <p className="py-2 bg-gray-200 border border-gray-400 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
-                        SECTION: {items.section}
-                      </p>
-                    </div>
-                  ))}
+            <Label className="text-sm sm:text-base font-medium mt-4 block">
+              Child Info
+            </Label>
+            {children.length > 0 &&
+              children.map((items: any, index: number) => (
+                <div
+                  key={index}
+                  className="w-full flex justify-start items-center gap-3"
+                >
+                  <p className="py-2 bg-gray-200 border border-gray-400 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
+                    NAME: {items.name}
+                  </p>
+                  <p className="py-2 bg-gray-200 border border-gray-400 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
+                    ROLL NO: {items.rollNo}
+                  </p>
+                  <p className="py-2 bg-gray-200 border border-gray-400 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
+                    SECTION: {items.section}
+                  </p>
+                </div>
+              ))}
           </CardHeader>
 
           <CardContent className="space-y-4 sm:space-y-6">
-            
             <form onSubmit={sendOrder} className="space-y-4 sm:space-y-5">
               {/* Parent / Guardian Name */}
               <div className="space-y-2">

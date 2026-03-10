@@ -37,6 +37,7 @@ export type UserProfile = {
     email: string
     phone: string | null
     address: string | null
+    pincode?: string;
     role: "USER" | "ADMIN" | "SUB_ADMIN"
     status: "ACTIVE" | "INACTIVE"
     children: Student[]
