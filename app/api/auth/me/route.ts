@@ -32,7 +32,7 @@ export const GET = Wrapper(async (_req: NextRequest) => {
                     children: {
                         include: {
                             school: {
-                                select: { name: true },
+                                select: { name: true,id: true },
                             },
                             class: {
                                 select: { name: true },
@@ -65,6 +65,7 @@ export const GET = Wrapper(async (_req: NextRequest) => {
                 pincode: user.pincode ?? null,
                 role: user.role,
                 status: user.status,
+                schoolId: user.schoolId,
                 children: user.children.map((child) => ({
                     id: child.id,
                     name: child.name,

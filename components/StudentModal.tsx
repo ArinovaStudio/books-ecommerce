@@ -22,7 +22,6 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "./ui/input";
 
-
 type School = {
   id: string;
   name: string;
@@ -35,7 +34,6 @@ type School = {
   classes?: any;
 };
 const GENDERS = ["Male", "Female", "Prefer Not To Say"];
-const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 type Props = {
   open: boolean;
@@ -58,7 +56,7 @@ export function StudentModal({
   const [sections, setSections] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
   const [selectedSection, setSelectedSection] = useState<any | null>(null);
-  
+
   const handleClassChange = (value: string) => {
     setSelectedClass(value);
     const cls = school?.classes?.find((c: any) => c.id === value);
@@ -68,24 +66,33 @@ export function StudentModal({
   };
 
   const handleLangChange = (value: string) => {
-    const section = sections.filter((a: any) => a.language.toLowerCase() === value.toLowerCase());
-  
+    const section = sections.filter(
+      (a: any) => a.language.toLowerCase() === value.toLowerCase()
+    );
+
     const selectedSec: any = section.length > 0 ? section[0] : null;
     setSelectedSection(selectedSec ? selectedSec : null);
-  }
+  };
 
   const handleSubmit = async (fd: FormData) => {
-    
     if (!school) return;
     setLoading(true);
     try {
       fd.append("sectionId", selectedSection?.id);
       fd.append("section", selectedSection?.name);
       const data = Object.fromEntries(fd);
-      setStudents([...students,{...data, section: selectedSection?.name, sectionId: selectedSection?.id, id:Date.now()}]);
+      setStudents([
+        ...students,
+        {
+          ...data,
+          section: selectedSection?.name,
+          sectionId: selectedSection?.id,
+          id: Date.now(),
+        },
+      ]);
       setSelectedClass(null);
       setSections([]);
-      setSelectedSection(null)
+      setSelectedSection(null);
       onOpenChange(false);
     } catch (error: any) {
       toast({
@@ -148,20 +155,24 @@ export function StudentModal({
                 </Select>
               </div>
 
-
               <div className="grid gap-2">
                 <Label>First Language</Label>
-                <Select name="language" required onValueChange={handleLangChange} 
+                <Select
+                  name="language"
+                  required
+                  onValueChange={handleLangChange}
                   disabled={!selectedClass || sections.length === 0}
                 >
                   <SelectTrigger className="px-3 py-2 w-full shadow-sm focus:shaodw-md bg-background outline-none">
-                    <SelectValue placeholder={
+                    <SelectValue
+                      placeholder={
                         !selectedClass
                           ? "Select Class First"
                           : sections.length === 0
                           ? "No Language Available"
                           : "Select Language"
-                      } />
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {languages?.map((language: string) => (
@@ -173,17 +184,14 @@ export function StudentModal({
                 </Select>
               </div>
 
-                            <div className="grid gap-2">
+              <div className="grid gap-2">
                 <Label>Section</Label>
-                  {/* <Input
-                  name="section"
-                  placeholder="Select Language first"
-                  className="p-1 border ring-gray-500 bg-background shadow-sm focus:shadow-md outline-none"
+                <Select
+                  name="class"
                   required
-                  readOnly
-                  value={selectedSection?.name || ""}
-                /> */}
-                <Select name="class" required disabled value={selectedSection?.id || ""}>
+                  disabled
+                  value={selectedSection?.id || ""}
+                >
                   <SelectTrigger className="px-3 py-2 w-full shadow-sm focus:shaodw-md bg-background outline-none">
                     <SelectValue placeholder="Select Language" />
                   </SelectTrigger>
@@ -212,31 +220,6 @@ export function StudentModal({
                   </SelectContent>
                 </Select>
               </div>
-
-              {/* <div className="grid gap-2">
-                <Label>Date Of Birth</Label>
-                <Input
-                  type="date"
-                  name="dob"
-                  className="px-3 py-2 shadow-sm focus:shadow-md outline-none"
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Blood Group</Label>
-                <Select name="bloodGroup">
-                  <SelectTrigger className="px-3 py-2 w-full shadow-sm focus:shaodw-md bg-background outline-none">
-                    <SelectValue placeholder="Select Blood Group" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BLOOD_GROUPS.map((group: string) => (
-                      <SelectItem key={group} value={group}>
-                        {group}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div> */}
             </div>
 
             <div className="flex justify-end gap-3 pt-1 border-t col-span-full">
