@@ -122,9 +122,9 @@ export default function Header() {
 
             {!loading && (
               user ? (
-                <Link href={user.role === "ADMIN" ? "/admin" : "/profile"} className="text-left py-4 text-lg font-medium text-cyan-400 flex items-center gap-3">
+                <button onClick={() => handleNavClick(user.role === "ADMIN" ? "/admin" : "/profile", true)} className="text-left py-4 text-lg font-medium text-cyan-400 flex items-center gap-3">
                   <User size={22} /> My Profile
-                </Link>
+                </button>
               ) : (
                 <button onClick={() => handleNavClick("/signin", true)} className="mt-4 py-4 rounded-xl bg-cyan-400 text-[#141f38] font-bold flex items-center justify-center gap-2 shadow-lg">
                   <LogIn size={20} /> Sign In

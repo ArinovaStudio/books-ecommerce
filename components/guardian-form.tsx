@@ -429,6 +429,7 @@ export function GuardianForm() {
                   <Input
                     disabled
                     id="guardianName"
+                    required
                     type="text"
                     placeholder="Enter guardian's full name"
                     value={formData.guardianName || ""}
@@ -463,6 +464,7 @@ export function GuardianForm() {
                   <Input
                     id="guardianPhone"
                     type="tel"
+                    required
                     placeholder="Enter 10-digit phone number"
                     value={formData.guardianPhone || ""}
                     onChange={(e) =>
@@ -508,6 +510,7 @@ export function GuardianForm() {
                       }
                       className="pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base border-0 bg-transparent"
                       disabled
+                      required
                     />
                   </div>
                 </div>
@@ -527,6 +530,7 @@ export function GuardianForm() {
                   <Input
                     id="landmark"
                     type="text"
+                    required
                     placeholder="Enter Full Address with Landmark"
                     value={formData.landmark}
                     onChange={(e) =>
@@ -557,6 +561,7 @@ export function GuardianForm() {
                   <Input
                     id="pincode"
                     type="tel"
+                    required
                     placeholder="Enter 6-digit pincode"
                     value={formData.pincode}
                     onChange={(e) =>
