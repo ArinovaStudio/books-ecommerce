@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
     await prisma.payment.update({
       where: {
         id: order.id,
-        orderId: order.id,
+        // orderId: order.id,
       },
       data: {
         method: "Razorpay",
@@ -152,27 +152,29 @@ export async function POST(req: NextRequest) {
       totalAmount,
       emailItems
     );
-    sendEmail(userEmail, userEmailData.subject, userEmailData.html).catch(
+    await sendEmail(userEmail, userEmailData.subject, userEmailData.html).catch(
       (err) => console.error("User email failed", err)
     );
 
     // send mail to sub admins
     if (student.school.subAdmins.length > 0) {
-      student.school.subAdmins.forEach((admin) => {
-        const adminEmailData = newOrderAlertTemplate(
-          admin.name,
-          student.school.name,
-          order.id,
-          student.name,
-          `${student.class.name} - ${student.section}`,
-          totalAmount
-        );
-        sendEmail(
-          admin.email,
-          adminEmailData.subject,
-          adminEmailData.html
-        ).catch((err) => console.error("Admin notification failed", err));
-      });
+      console.log("Sub Admins", student.school.subAdmins);
+      await Promise.all(
+        student.school.subAdmins.map(async (admin) => {
+          console.log("Admin", admin);
+          const adminEmailData = newOrderAlertTemplate(
+            admin.name,
+            student.school.name,
+            order.id,
+            student.name,
+            `${student.class.name} - ${student.section}`,
+            totalAmount
+          );
+          await sendEmail(admin.email, adminEmailData.subject, adminEmailData.html).catch(
+            (err) => console.error("Admin notification failed", err)
+          );
+        })
+      );
     }
 
     // send mail to all admins
@@ -182,24 +184,24 @@ export async function POST(req: NextRequest) {
     });
 
     if (systemAdmins.length > 0) {
-      systemAdmins.forEach((admin) => {
-        const systemAdminEmailData = newOrderAlertTemplate(
-          admin.name,
-          student.school.name,
-          order.id,
-          student.name,
-          `${student.class.name} - ${student.section} (${student.school.name})`,
-          totalAmount
-        );
+      console.log("System Admins", systemAdmins);
+      await Promise.all(
+        systemAdmins.map(async (admin) => {
+          console.log("Admin", admin);
+          const systemAdminEmailData = newOrderAlertTemplate(
+            admin.name,
+            student.school.name,
+            order.id,
+            student.name,
+            `${student.class.name} - ${student.section} (${student.school.name})`,
+            totalAmount
+          );
 
-        sendEmail(
-          admin.email,
-          systemAdminEmailData.subject,
-          systemAdminEmailData.html
-        ).catch((err) =>
-          console.error("System Admin notification failed", err)
-        );
-      });
+          await sendEmail(admin.email, systemAdminEmailData.subject, systemAdminEmailData.html).catch(
+            (err) => console.error("System Admin notification failed", err)
+          );
+        })
+      );
     }
 
     return NextResponse.json({ success: true });
