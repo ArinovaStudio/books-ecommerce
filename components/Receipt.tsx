@@ -14,7 +14,7 @@ export default function Receipt({ order }: ReceiptProps) {
   );
   const total = subtotal;
   const parent = order?.students?.[0]?.student?.parent;
-  const students = Object.values(order?.students) ?? [];
+  const students = Object.values(order?.students ?? {}) ?? [];
   return (
     <Card
       id="receipt"
