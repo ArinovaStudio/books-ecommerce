@@ -162,7 +162,7 @@ export async function POST(req: NextRequest) {
       totalAmount,
       emailItems
     );
-    sendEmail(userEmail, userEmailData.subject, userEmailData.html).catch(
+    await sendEmail(userEmail, userEmailData.subject, userEmailData.html).catch(
       (err) => console.error("User email failed", err)
     );
 
@@ -192,23 +192,22 @@ export async function POST(req: NextRequest) {
     });
 
     if (systemAdmins.length > 0) {
-      systemAdmins.forEach((admin, index) => {
-        const systemAdminEmailData = newOrderAlertTemplate(
-          admin.name,
-          student.school.name,
-          order.id,
-          student.name,
-          `${student.class.name} - ${student.section} (${student.school.name})`,
-          totalAmount
-        );
-        sendEmail(
-          admin.email,
-          systemAdminEmailData.subject,
-          systemAdminEmailData.html
-        ).catch((err) =>
-          console.error("System Admin notification failed", err)
-        );
-      });
+       await Promise.all(
+        student.school.subAdmins.map(async (admin) => {
+          console.log("Admin", admin);
+          const adminEmailData = newOrderAlertTemplate(
+            admin.name,
+            student.school.name,
+            order.id,
+            student.name,
+            `${student.class.name} - ${student.section}`,
+            totalAmount
+          );
+          await sendEmail(admin.email, adminEmailData.subject, adminEmailData.html).catch(
+            (err) => console.error("Admin notification failed", err)
+          );
+        })
+      );
     }
 
     return NextResponse.json({ success: true });
