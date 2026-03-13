@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,7 +66,7 @@ export function GuardianForm() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [products, setProducts] = useState<Product[]>([]);
-  const [children, setChildren] = useState([]);
+  const [children, setChildren] = useState<any>([]);
   const [selectedProducts, setSelectedProducts] = useState<
     Record<string, { checked: boolean; quantity: number }>
   >({});
@@ -151,13 +151,19 @@ export function GuardianForm() {
       setLoading(false);
     }
   };
+  const selectedChildrens = children.filter((child: any) => child.selected);
+  
 
   const groupedByCategory = products.reduce((acc, product) => {
     const category = product.category as "TEXTBOOK" | "NOTEBOOK" | "STATIONARY";
+
     const selection = selectedProducts[product.id];
+    
     if (selection && selection.checked) {
+
       if (!acc[category]) acc[category] = [];
-      acc[category].push({ ...product, stock: selection.quantity });
+
+      acc[category].push({ ...product, stock: selection.quantity * selectedChildrens.length});
     }
     return acc;
   }, {} as Record<"TEXTBOOK" | "NOTEBOOK" | "STATIONARY", Product[]>);
@@ -176,6 +182,7 @@ export function GuardianForm() {
       STATIONARY: 0,
     }
   );
+
   const grandTotal = Object.values(categoryTotals).reduce(
     (sum, val) => sum + val,
     0
@@ -227,15 +234,13 @@ export function GuardianForm() {
       if (resData.success) {
         const { user: userData } = resData;
         setUser(userData);
-
-        const childData =
-          userData.children.length > 0
+        const childData = userData.children.length > 0
             ? userData.children.filter(
                 (child: any) =>
                   child.schoolId === schoolId &&
                   child.classId === classId &&
                   child.section === section
-              )
+              )?.map((child: any)=>({...child,selected: false}))
             : [];
         if (childData.length === 0) {
           toast.error(
@@ -257,7 +262,17 @@ export function GuardianForm() {
     fetchProducts();
     fetchSchool(schoolId as string);
   }, []);
-
+  const handleSelectChildren = (id: string)=>{
+    const index = children.findIndex((child: any)=>child.id===id); 
+      if(index===-1){
+        return;
+      }
+      setChildren((prev: any)=>{
+        return prev.map((child: any,i: number)=>{
+          return i===index ? {...child,selected: !child.selected}:{...child}
+        });
+      });
+  };
   //razorpay integration
   const startRazorpayPayment = async () => {
     const orderItems = products
@@ -266,13 +281,12 @@ export function GuardianForm() {
         productId: p.id,
         quantity: selectedProducts[p.id]?.quantity || p.stock,
       }));
-
     const res = await fetch("/api/razorpay/order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         amount: grandTotal,
-        studentId: user?.children[0].id,
+        childIds: selectedChildrens.map((child: any)=>child.id) ?? [],
         paymentMethod: "Razorpay",
         phone: formData.guardianPhone,
         landmark: formData.landmark,
@@ -290,7 +304,6 @@ export function GuardianForm() {
       toast.error("Razorpay SDK failed");
       return;
     }
-
     const options = {
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
       amount: data.order.amount,
@@ -299,7 +312,7 @@ export function GuardianForm() {
       description: "Stationery Order",
       order_id: data.order.id,
       handler: async function (response: any) {
-        await verifyAndPlaceOrder(response);
+        await verifyAndPlaceOrder(response,data.order.orderId,data.order.paymentId);
       },
       prefill: {
         name: formData.guardianName,
@@ -318,12 +331,12 @@ export function GuardianForm() {
     rzp.open();
   };
 
-  const verifyAndPlaceOrder = async (payment: any) => {
+  const verifyAndPlaceOrder = async (payment: any, orderId: string,paymentId: string) => {
     try {
       const verifyRes = await fetch("/api/razorpay/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payment, studentId: user?.children[0].id }),
+        body: JSON.stringify({ ...payment,orderId,paymentId, childIds: selectedChildrens.map((child: any)=>child.id) ?? [] }),
       });
 
       const verifyData = await verifyRes.json();
@@ -397,19 +410,22 @@ export function GuardianForm() {
               Child Info
             </Label>
             {children.length > 0 &&
-              children.map((items: any, index: number) => (
+              children.map((child: any, index: number) => (
                 <div
-                  key={index}
+                  key={child.id}
                   className="w-full flex justify-start items-center gap-3"
                 >
+                  <div className="bg-gray-200 border border-gray-400 text-gray-700 p-2 px-3 rounded-lg text-sm font-medium">
+                <input type="checkbox" value={child.selected} onChange={()=>handleSelectChildren(child.id)} className="scale-105"/>
+                  </div>
                   <p className="py-2 bg-gray-200 border border-gray-400 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
-                    NAME: {items.name}
+                    NAME: {child.name}
                   </p>
                   <p className="py-2 bg-gray-200 border border-gray-400 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
-                    ROLL NO: {items.rollNo}
+                    ROLL NO: {child.rollNo}
                   </p>
                   <p className="py-2 bg-gray-200 border border-gray-400 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
-                    SECTION: {items.section}
+                    SECTION: {child.section}
                   </p>
                 </div>
               ))}
@@ -530,7 +546,6 @@ export function GuardianForm() {
                   <Input
                     id="landmark"
                     type="text"
-                    required
                     placeholder="Enter Full Address with Landmark"
                     value={formData.landmark}
                     onChange={(e) =>
@@ -612,11 +627,6 @@ export function GuardianForm() {
                         <span>₹{product.price * product.stock}</span>
                       </div>
                     ))}
-
-                    {/* <div className="flex justify-between font-semibold text-sm border-t pt-1"> */}
-                    {/* <span>{category} Total</span> */}
-                    {/* <span>₹{categoryTotals[category as keyof typeof categoryTotals]}</span> */}
-                    {/* </div> */}
                   </div>
                 ))}
                 <div className="border-t pt-3 flex justify-between text-base font-bold">
@@ -632,7 +642,7 @@ export function GuardianForm() {
                     type="submit"
                     className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium cursor-pointer flex justify-center items-center bg-amber-400 hover:bg-amber-300 text-black"
                     size="lg"
-                    disabled={loading}
+                    disabled={loading || selectedChildrens.length===0}
                   >
                     {loading ? (
                       <LucideLoader2

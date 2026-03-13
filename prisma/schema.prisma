@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
 }
 
 enum UserRole {
@@ -114,7 +113,7 @@ model Student {
   class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
   sectionDetails Section? @relation(fields: [sectionId], references: [id])
 
-  orders Order[] @relation("StudentOrders") 
+  orders OrderStudent[] 
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -159,7 +158,7 @@ model Kit {
   type KitType
   classId String
   totalPrice Float
-  language String
+  language String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -208,7 +207,6 @@ enum OrderStatus{
 model Order {
   id String @id
   userId String
-  studentId String
   school String
   class String
   section String
@@ -220,11 +218,19 @@ model Order {
   totalAmount Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  student Student @relation("StudentOrders", fields: [studentId], references: [id], onDelete: Cascade)
-
+  students OrderStudent[]
   payment Payment[]
   items OrderItem[]
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+model OrderStudent {
+  orderId String
+  studentId String
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([orderId, studentId])
 }
 
 model OrderItem {
@@ -237,6 +243,8 @@ model OrderItem {
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
+
+
 
 model ContactQuery {
   id String @id @default(uuid())

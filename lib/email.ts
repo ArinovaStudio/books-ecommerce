@@ -12,7 +12,8 @@ const sendEmail = async (to: string, subject: string, html: string): Promise<boo
     try {
         const expression = /^[\w.+-]+@(?:gmail)\.com$/;
         if(!expression.test(to)){
-            throw Error("Email should only be gmail");
+            console.log("Email should only be gmail");
+            return false;
         }
         await transporter.sendMail({
             from: EMAIL_USER,

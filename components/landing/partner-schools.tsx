@@ -108,7 +108,7 @@ export default function PartnerSchools() {
             <SchoolSearch
               value={search}
               onChange={setSearch}
-              results={filteredSchools}
+              results={filteredSchools as any}
               placeholder="Search Schools..."
               className="w-[60%]"
             />

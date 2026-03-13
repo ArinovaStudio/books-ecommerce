@@ -50,7 +50,7 @@ export const POST = Wrapper(async(req: NextRequest) => {
 
         let totalPrice = 0;
         const productMap = new Map(existingProducts.map((product) => [product.id, product.price]));
-
+        
         for (const item of items){
             const price = productMap.get(item.productId);
             if (!price){

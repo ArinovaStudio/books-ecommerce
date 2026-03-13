@@ -56,11 +56,11 @@ type Order = {
   orderDate: string;
   totalAmount: number;
   createdAt: string;
-  student: {
+  students: {
     name: string;
     rollNo: number;
     parent: { email: string; phone: string; address: string };
-  };
+  }[];
   status: "ORDER_PLACED" | "PACKAGING_DONE" | "OUT_FOR_DELIVERY" | "DELIVERED";
 };
 
@@ -95,58 +95,56 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [receiptData, setReceiptData] = useState<Order | null>(null);
 
+  const handleReceipt = async (order: Order) => {
+    setReceiptData(order);
 
-const handleReceipt = async (order: Order) => {
-  setReceiptData(order);
-  
-  setTimeout(async () => {
-    const receipt = document.getElementById("receipt");
-    if (!receipt) return;
-    
-    const canvas = await html2canvas(receipt, {
-      useCORS: true,
-      backgroundColor: "#ffffff",
-      scale: 2,
-      scrollX: 0,
-      scrollY: 0,
-      windowWidth: receipt.scrollWidth,
-      windowHeight: receipt.scrollHeight,
-    });
-    
-    const imgData = canvas.toDataURL("image/png");
-    
-    // Get actual canvas dimensions
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
-    
-    // Define max PDF width (A4 width in mm)
-    const maxPdfWidth = 210;
-    
-    // Calculate PDF dimensions maintaining aspect ratio
-    // Convert pixels to mm (assuming 96 DPI: 1 inch = 25.4mm, 96px = 25.4mm)
-    const pxToMm = 25.4 / 96;
-    let pdfWidth = imgWidth * pxToMm / 2; // divide by 2 because we used scale: 2
-    let pdfHeight = imgHeight * pxToMm / 2;
-    
-    // If content is wider than A4, scale down proportionally
-    if (pdfWidth > maxPdfWidth) {
-      const scaleFactor = maxPdfWidth / pdfWidth;
-      pdfWidth = maxPdfWidth;
-      pdfHeight = pdfHeight * scaleFactor;
-    }
-    
-    // Create PDF with actual content dimensions
-    const pdf = new jspdf({
-      orientation: pdfHeight > pdfWidth ? "p" : "l",
-      unit: "mm",
-      format: [pdfWidth, pdfHeight],
-    });
-    
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`Receipt-${order.id}.pdf`);
-  }, 500);
-};
+    setTimeout(async () => {
+      const receipt = document.getElementById("receipt");
+      if (!receipt) return;
 
+      const canvas = await html2canvas(receipt, {
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        scale: 2,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: receipt.scrollWidth,
+        windowHeight: receipt.scrollHeight,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+
+      // Get actual canvas dimensions
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+
+      // Define max PDF width (A4 width in mm)
+      const maxPdfWidth = 210;
+
+      // Calculate PDF dimensions maintaining aspect ratio
+      // Convert pixels to mm (assuming 96 DPI: 1 inch = 25.4mm, 96px = 25.4mm)
+      const pxToMm = 25.4 / 96;
+      let pdfWidth = (imgWidth * pxToMm) / 2; // divide by 2 because we used scale: 2
+      let pdfHeight = (imgHeight * pxToMm) / 2;
+
+      // If content is wider than A4, scale down proportionally
+      if (pdfWidth > maxPdfWidth) {
+        const scaleFactor = maxPdfWidth / pdfWidth;
+        pdfWidth = maxPdfWidth;
+        pdfHeight = pdfHeight * scaleFactor;
+      }
+
+      // Create PDF with actual content dimensions
+      const pdf = new jspdf({
+        orientation: pdfHeight > pdfWidth ? "p" : "l",
+        unit: "mm",
+        format: [pdfWidth, pdfHeight],
+      });
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Receipt-${order.id}.pdf`);
+    }, 500);
+  };
 
   // const handleReceipt = async (order: Order) => {
   //   setReceiptData(order);
@@ -309,20 +307,26 @@ const handleReceipt = async (order: Order) => {
           {!loading && filteredOrders.length > 0 && (
             <div className="space-y-4">
               {filteredOrders.map((order) => (
-                <Card key={order.id}>
+                <Card key={order.id} className="gap-1">
                   <CardHeader>
                     <div className="max-md:flex-col flex gap-3 justify-between">
-                      <div>
-                        <CardTitle className="text-base">
-                          {order.student.name}
-                        </CardTitle>
-                        <p className="text-sm">
-                          Roll No: {order.student.rollNo} • {order.class}
-                        </p>
+                      <div className="space-y-1">
+                        {order?.students?.length ? order?.students?.map(({student}: any) => {
+                          return (
+                            <div className="space-y-1" key={student.id}>
+                              <div className="text-base">
+                                <span className="font-semibold">Name: </span>{student.name}
+                              </div>
+                              <p className="text-sm">
+                                <span className="font-semibold">Roll No: </span> {student.rollNo} • {order.class}
+                              </p>
+                            </div>
+                          );
+                        }):<div>No Student Info Found!</div>}
                         <CardDescription>
-                          {order?.student.parent.email}{" "}
-                          {order?.student.parent.phone &&
-                            `• ${order?.student.parent.phone}`}
+                          {order?.students?.[0]?.parent?.email}{" "}
+                          {order?.students?.[0]?.parent?.phone &&
+                            `• ${order?.students?.[0]?.parent?.phone}`}
                         </CardDescription>
                       </div>
                       <div className="grid gap-2">
@@ -390,7 +394,10 @@ const handleReceipt = async (order: Order) => {
                   <CardContent className="flex justify-between">
                     <div>
                       <p className="text-sm">
-                        Order Placed on: {new Date(order.createdAt.split("T")[0]).toLocaleDateString()}
+                        Order Placed on:{" "}
+                        {new Date(
+                          order.createdAt.split("T")[0]
+                        ).toLocaleDateString()}
                       </p>
                       <p className="text-sm">Address: {order.landmark}</p>
                       <p className="text-sm">Pincode: {order.pincode}</p>

@@ -246,8 +246,12 @@ await prisma.$transaction(async (tx) => {
   // 1. Delete orders linked to students of this school
   await tx.order.deleteMany({
     where: {
-      student: {
-        schoolId: schoolId,
+      students:{
+        some:{
+            student:{
+                schoolId: schoolId
+            }
+        }
       },
     },
   });

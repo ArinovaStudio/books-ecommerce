@@ -193,7 +193,7 @@ export const schoolAdminCreatedTemplate = (
 export const orderReceiptTemplate = (
   userName: string,
   orderId: string,
-  studentName: string,
+  studentNames: string[],
   className: string,
   schoolName: string,
   sectionName: string,
@@ -206,14 +206,25 @@ export const orderReceiptTemplate = (
         `<tr style="border-bottom: 1px solid #f3f4f6; background-color: ${
           index % 2 === 0 ? "#ffffff" : "#f9fafb"
         };">
+
             <td style="padding: 12px; color: #374151;">${item.name}</td>
-            <td style="padding: 12px; text-align: center; color: #374151;">${
-              item.quantity
-            }</td>
-            <td style="padding: 12px; text-align: right; color: #374151;">₹${
-              item.quantity * item.price
-            }</td>
+
+            <td style="padding: 12px; text-align: center; color: #374151;">
+              ${item.quantity}
+            </td>
+
+            <td style="padding: 12px; text-align: right; color: #374151;">
+              ₹${item.quantity * item.price}
+            </td>
+
         </tr>`
+    )
+    .join("");
+
+  const studentsList = studentNames
+    .map(
+      (name) =>
+        `<span style="display:block; color:#374151; margin:2px 0;">${name}</span>`
     )
     .join("");
 
@@ -225,19 +236,42 @@ export const orderReceiptTemplate = (
                     <div style="${headerStyle}">
                         <span style="${logoStyle}">Glow Nest</span>
                     </div>
+
                     <div style="padding: 30px;">
                         <div style="text-align: center; margin-bottom: 30px;">
-                        <h2 style="color: #111827; margin: 0;">Order Confirmed</h2>
-                        <p style="color: #06b6d4; font-weight: bold; margin-top: 5px;">#${orderId}</p>
-                            </div>
-                        
+                            <h2 style="color: #111827; margin: 0;">Order Confirmed</h2>
+                            <p style="color: #06b6d4; font-weight: bold; margin-top: 5px;">#${orderId}</p>
+                        </div>
+
                         <p style="color: #4b5563;">Hi ${userName},</p>
-                        <p style="color: #4b5563;">Thank you for your purchase for <strong>${studentName}</strong>. Here is your receipt.</p>
-                                    <div style="margin: 20px 0; padding: 15px; background-color: #f9fafb; border-radius: 8px;">
-              <p style="margin: 5px 0; color: #374151;"><strong>School:</strong> ${schoolName}</p>
-              <p style="margin: 5px 0; color: #374151;"><strong>Class:</strong> ${className}</p>
-              <p style="margin: 5px 0; color: #374151;"><strong>Section:</strong> ${sectionName}</p>
-            </div>
+
+                        <p style="color: #4b5563;">
+                          Thank you for your purchase for 
+                          <strong>${studentNames.join(", ")}</strong>. 
+                          Here is your receipt.
+                        </p>
+
+                        <div style="margin: 20px 0; padding: 15px; background-color: #f9fafb; border-radius: 8px;">
+              
+                          <p style="margin: 5px 0; color: #374151;">
+                            <strong>Students:</strong>
+                            ${studentsList}
+                          </p>
+
+                          <p style="margin: 5px 0; color: #374151;">
+                            <strong>School:</strong> ${schoolName}
+                          </p>
+
+                          <p style="margin: 5px 0; color: #374151;">
+                            <strong>Class:</strong> ${className}
+                          </p>
+
+                          <p style="margin: 5px 0; color: #374151;">
+                            <strong>Section:</strong> ${sectionName}
+                          </p>
+
+                        </div>
+
                         <table style="width: 100%; border-collapse: collapse; margin: 25px 0; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
                             <thead>
                                 <tr style="background-color: #f3f4f6;">
@@ -246,22 +280,33 @@ export const orderReceiptTemplate = (
                                     <th style="padding: 12px; text-align: right; color: #4b5563; font-size: 14px;">Price</th>
                                 </tr>
                             </thead>
+
                             <tbody>
                                 ${itemsList}
                             </tbody>
+
                             <tfoot>
                                 <tr style="background-color: #111827; color: #ffffff;">
-                                    <td colspan="2" style="padding: 15px; text-align: right; font-weight: bold;">Total Amount</td>
-                                    <td style="padding: 15px; text-align: right; font-weight: bold; font-size: 18px;">₹${totalAmount}</td>
+                                    <td colspan="2" style="padding: 15px; text-align: right; font-weight: bold;">
+                                      Total Amount
+                                    </td>
+
+                                    <td style="padding: 15px; text-align: right; font-weight: bold; font-size: 18px;">
+                                      ₹${totalAmount}
+                                    </td>
                                 </tr>
                             </tfoot>
                         </table>
 
-                        <p style="font-size: 0.9em; color: #6b7280; text-align: center;">If you have questions about your order, reply to this email.</p>
+                        <p style="font-size: 0.9em; color: #6b7280; text-align: center;">
+                          If you have questions about your order, reply to this email.
+                        </p>
                     </div>
+
                     <div style="${footerStyle}">
                         &copy; Glow Nest School Supplies
                     </div>
+
                 </div>
             </div>
         `,

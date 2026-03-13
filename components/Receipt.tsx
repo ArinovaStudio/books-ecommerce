@@ -13,6 +13,8 @@ export default function Receipt({ order }: ReceiptProps) {
     0
   );
   const total = subtotal;
+  const parent = order?.students?.[0]?.student?.parent;
+  const students = Object.values(order?.students) ?? [];
   return (
     <Card
       id="receipt"
@@ -53,12 +55,12 @@ export default function Receipt({ order }: ReceiptProps) {
         <Separator />
 
         {/* Recipient */}
-        <div>
-          <p className="text-sm font-semibold mb-1">RECIPIENT:</p>
+        <div className="space-y-2">
+          <p className="text-sm font-semibold uppercase mb-1">RECIPIENT:</p>
 
           <div className="text-sm space-y-1">
             <p className="text-xl font-semibold">
-              {order?.student.parent.name ?? NOT_AVAILABLE}
+              {parent?.name ?? NOT_AVAILABLE}
             </p>
 
             <p>
@@ -85,6 +87,14 @@ export default function Receipt({ order }: ReceiptProps) {
               <span className="font-medium">Pincode:</span>{" "}
               {order?.pincode ?? NOT_AVAILABLE}
             </p>
+          </div>
+          <p className="text-sm font-semibold mb-1 uppercase">Children Info:</p>
+          <div className="text-sm space-y-1">
+                {
+                  students?.map(({student}:any)=>{
+                    return <p key={student.id} className="text-sm font-medium"> {student?.name ?? NOT_AVAILABLE} • {student?.rollNo ?? NOT_AVAILABLE} </p>
+                  })
+                }
           </div>
         </div>
 
@@ -123,14 +133,6 @@ export default function Receipt({ order }: ReceiptProps) {
         {/* Totals */}
         <div className="flex justify-end">
           <div className="w-full max-w-sm space-y-2 text-sm">
-            {/* <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>₹{subtotal?.toFixed(2)}</span>
-            </div> */}
-            {/* <div className="flex justify-between">
-              <span>Tax ({taxPercent}%)</span>
-              <span>₹{tax?.toFixed(2)}</span>
-            </div> */}
             <Separator />
             <div className="flex justify-between font-semibold text-base">
               <span>Total</span>

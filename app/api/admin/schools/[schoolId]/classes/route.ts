@@ -65,7 +65,7 @@ export const GET = Wrapper(async (req: NextRequest, { params }: { params: Promis
                     id: true,
                     name: true,
                     sectionDetails: {
-                        where: { id: { in: allowedSectionIds } },
+                        where: { id: { in: allowedSectionIds as string[] } },
                         select: { id: true, name: true, language: true }
                     }
                 },

@@ -17,7 +17,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
     const orders = await prisma.order.findMany({ 
         where: { userId }, 
         include: { 
-            student: { select: { name: true, rollNo: true } }, 
+            students: true, 
             payment: { select: { amount: true, status: true, method: true }},
             items: { 
                 include: { 

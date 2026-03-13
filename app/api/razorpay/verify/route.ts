@@ -5,6 +5,7 @@ import crypto from "crypto";
 import { NextResponse, NextRequest } from "next/server";
 import sendEmail from "@/lib/email";
 
+const secret = process.env.RAZORPAY_KEY_SECRET!;
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const auth = await verifyUser(req);
@@ -14,7 +15,6 @@ export async function POST(req: NextRequest) {
       { status: auth.status }
     );
   }
-
   const userId = auth.user.id;
   const userName = auth.user.name;
   const userEmail = auth.user.email;
@@ -22,30 +22,19 @@ export async function POST(req: NextRequest) {
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature,
-    studentId,
+    orderId,
+    childIds,
+    paymentId,
   } = body;
-
-  const secret = process.env.RAZORPAY_KEY_SECRET!;
 
   const generatedSignature = crypto
     .createHmac("sha256", secret)
     .update(razorpay_order_id + "|" + razorpay_payment_id)
     .digest("hex");
-
-  if (generatedSignature === razorpay_signature) {
+  const childsInfo = [];
+  for (let childId of childIds) {
     const student = await prisma.student.findUnique({
-      where: { id: studentId },
-      include: {
-        class: true,
-        school: {
-          include: {
-            subAdmins: {
-              where: { role: "SUB_ADMIN", status: "ACTIVE" },
-              select: { email: true, name: true },
-            },
-          },
-        },
-      },
+      where: { id: childId },
     });
 
     if (!student) {
@@ -68,20 +57,41 @@ export async function POST(req: NextRequest) {
         { status: 403 }
       );
     }
-    const order = await prisma.order.findUnique({
-      where: {
-        id: razorpay_order_id,
+    childsInfo.push(student.name);
+  }
+  const student = await prisma.student.findUnique({
+    where: {
+      id: childIds[0],
+    },
+    include: {
+      class: true,
+      school: {
+        include: {
+          subAdmins: {
+            where: { role: "SUB_ADMIN", status: "ACTIVE" },
+            select: { email: true, name: true },
+          },
+        },
       },
-      include: {
-        items: true,
-      },
-    });
-    if (!order) {
-      return NextResponse.json(
-        { success: false, message: "Order Not Found!" },
-        { status: 403 }
-      );
-    }
+    },
+  });
+  if (!student) throw Error("No Children Found!");
+  const order = await prisma.order.findUnique({
+    where: {
+      id: orderId,
+    },
+    include: {
+      items: true,
+      payment: true,
+    },
+  });
+  if (!order) {
+    return NextResponse.json(
+      { success: false, message: "Order Not Found!" },
+      { status: 403 }
+    );
+  }
+  if (generatedSignature === razorpay_signature) {
     const items = order.items;
     // Validate Products & Calculate Total
     const productIds = items.map((i) => i.productId);
@@ -130,7 +140,7 @@ export async function POST(req: NextRequest) {
     // Transaction
     await prisma.payment.update({
       where: {
-        id: order.id,
+        id: paymentId,
         orderId: order.id,
       },
       data: {
@@ -145,7 +155,7 @@ export async function POST(req: NextRequest) {
     const userEmailData = orderReceiptTemplate(
       userName,
       order.id,
-      student.name,
+      childsInfo,
       student.class.name,
       student.school.name,
       student.section,
@@ -158,7 +168,7 @@ export async function POST(req: NextRequest) {
 
     // send mail to sub admins
     if (student.school.subAdmins.length > 0) {
-      student.school.subAdmins.forEach((admin) => {
+      student.school.subAdmins.forEach((admin, index) => {
         const adminEmailData = newOrderAlertTemplate(
           admin.name,
           student.school.name,
@@ -182,7 +192,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (systemAdmins.length > 0) {
-      systemAdmins.forEach((admin) => {
+      systemAdmins.forEach((admin, index) => {
         const systemAdminEmailData = newOrderAlertTemplate(
           admin.name,
           student.school.name,
@@ -191,7 +201,6 @@ export async function POST(req: NextRequest) {
           `${student.class.name} - ${student.section} (${student.school.name})`,
           totalAmount
         );
-
         sendEmail(
           admin.email,
           systemAdminEmailData.subject,

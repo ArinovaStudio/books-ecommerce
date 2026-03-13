@@ -18,61 +18,44 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = auth.user.id;
-    const userName = auth.user.name;
-    const userEmail = auth.user.email;
 
-    const {
-      amount,
-      studentId,
-      items,
-      paymentMethod,
-      phone,
-      landmark,
-      pincode,
-    } = await req.json();
-
-    const student = await prisma.student.findUnique({
-      where: { id: studentId },
-      include: {
-        class: true,
-        school: {
-          include: {
-            subAdmins: {
-              where: { role: "SUB_ADMIN", status: "ACTIVE" },
-              select: { email: true, name: true },
-            },
-          },
+    const { amount, childIds, items, paymentMethod, phone, landmark, pincode } =
+      await req.json();
+    if (!childIds || childIds.length === 0) {
+      return NextResponse.json({
+        success: false,
+        message: "No Valid Child Id's were passed!",
+      });
+    }
+    for (let childId of childIds) {
+      const student = await prisma.student.findUnique({
+        where: {
+          id: childId,
         },
-      },
-    });
+      });
+      if (!student) throw Error(`Student with id ${childId} Not Found!`);
+      if (student.parentId !== userId) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `student with id ${childId} does not belong to you`,
+          },
+          { status: 403 }
+        );
+      }
 
-    if (!student) {
-      return NextResponse.json(
-        { success: false, message: "Student not found" },
-        { status: 404 }
-      );
+      if (student.isActive === false) {
+        return NextResponse.json(
+          { success: false, message: `student: ${student.name} is inactive` },
+          { status: 403 }
+        );
+      }
     }
 
-    if (student.parentId !== userId) {
-      return NextResponse.json(
-        { success: false, message: "This student does not belong to you" },
-        { status: 403 }
-      );
-    }
-
-    if (student.isActive === false) {
-      return NextResponse.json(
-        { success: false, message: "This student is inactive" },
-        { status: 403 }
-      );
-    }
-
-    // Validate Products & Calculate Total
     const productIds = items.map((i: any) => i.productId);
     const dbProducts = await prisma.product.findMany({
       where: { id: { in: productIds } },
     });
-
     let totalAmount = 0;
     const productMap = new Map(dbProducts.map((p) => [p.id, p]));
     const validOrderItems: {
@@ -80,7 +63,6 @@ export async function POST(req: NextRequest) {
       quantity: number;
       price: number;
     }[] = [];
-    const emailItems: { name: string; quantity: number; price: number }[] = [];
 
     for (const item of items) {
       const product = productMap.get(item.productId);
@@ -95,18 +77,12 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const lineTotal = product.price * item.quantity;
+      const lineTotal = product.price * (item.quantity * childIds.length);
       totalAmount += lineTotal;
 
       validOrderItems.push({
         productId: item.productId,
-        quantity: item.quantity,
-        price: product.price,
-      });
-
-      emailItems.push({
-        name: product.name,
-        quantity: item.quantity,
+        quantity: item.quantity * childIds.length,
         price: product.price,
       });
     }
@@ -116,17 +92,40 @@ export async function POST(req: NextRequest) {
       currency: "INR",
       receipt: "receipt_" + Date.now(),
     });
+    const student = await prisma.student.findUnique({
+      where: {
+        id: childIds[0],
+      },
+      include: {
+        school: true,
+        class: true,
+        sectionDetails: true,
+      },
+    });
     // Transaction
-    const orderId = await prisma.$transaction(async (tx) => {
+    const OrderPaymentInfo = await prisma.$transaction(async (tx) => {
+      const ordId = generateOrderId();
+      console.log(ordId);
+      const childIdsQuery = childIds.map((id: string) => {
+        return {
+          student: {
+            connect: {
+              id: id,
+            },
+          },
+        };
+      });
       const order = await tx.order.create({
         data: {
-          id: razorPayOrder.id,
+          id: ordId,
           userId,
-          studentId,
-          school: student.school.name,
-          class: student.class.name,
-          section: student.section,
-          academicYear: student.class.academicYear,
+          students: {
+            create: childIdsQuery,
+          },
+          academicYear: student!.class.academicYear,
+          class: student!.class.name,
+          section: student!.section,
+          school: student!.school.name,
           status: "ORDER_PLACED",
           totalAmount: totalAmount,
           phone,
@@ -146,19 +145,21 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      await tx.payment.create({
+      const payment = await tx.payment.create({
         data: {
-          id: razorPayOrder.id,
-          orderId: razorPayOrder.id,
+          orderId: order.id,
           amount: totalAmount,
           method: paymentMethod,
           status: "PENDING",
         },
       });
 
-      return order.id;
+      return { orderId: order.id, paymentId: payment.id };
     });
-    return NextResponse.json({ success: true, order: razorPayOrder });
+    return NextResponse.json({
+      success: true,
+      order: { ...razorPayOrder, ...OrderPaymentInfo },
+    });
   } catch (error) {
     console.error("Razorpay order error", error);
     return NextResponse.json(

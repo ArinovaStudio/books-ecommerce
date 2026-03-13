@@ -45,7 +45,8 @@ type Props = {
     onOpenChange: (open: boolean) => void
     bundle?: Bundle
     mode: "create" | "update"
-    onSave: (bundle: Bundle) => void
+    onSave: (bundle?: Bundle) => void
+    updateBundle?: any
 }
 
 export function BundleModal({ open, onOpenChange, bundle, mode, onSave }: Props) {
@@ -179,7 +180,7 @@ export function BundleModal({ open, onOpenChange, bundle, mode, onSave }: Props)
                 }))
             };
 
-            const res = await fetch(`/api/admin/kits/${bundle.id}`, {
+            const res = await fetch(`/api/admin/kits/${(bundle as any).id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
