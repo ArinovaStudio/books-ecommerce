@@ -144,7 +144,7 @@ const ProfilePage = () => {
             <div className="flex justify-between items-center">
               <h2 className="text-base sm:text-lg font-bold text-gray-800 flex items-center gap-2 px-1">
                 <Baby size={20} className="text-blue-600" />
-                Registered Students ({profile?.children.length})
+                Registered Students ({profile?.children?.length})
               </h2>
               <Button
                 onClick={() => setModalOpen(true)}
@@ -154,7 +154,7 @@ const ProfilePage = () => {
               </Button>
             </div>
             <div className="space-y-4 lg:overflow-y-auto lg:pr-2 scrollbar-thin scrollbar-thumb-gray-200">
-              {profile?.children.map((student) => (
+              {profile?.children?.map((student) => (
                 <Card
                   key={student.id}
                   className="rounded-2xl border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 group border-l-4 border-l-transparent hover:border-l-blue-600"

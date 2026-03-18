@@ -18,8 +18,9 @@ export default function Receipt({ order }: ReceiptProps) {
   return (
     <Card
       id="receipt"
-      className="absolute -left-[9999px] w-full max-w-4xl mx-auto rounded-xl shadow-sm"
+      className=" w-full max-w-4xl mx-auto rounded-xl shadow-sm"
     >
+      {/* absolute -left-[9999px] */}
       <CardContent className="p-6 md:p-10 space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -63,19 +64,9 @@ export default function Receipt({ order }: ReceiptProps) {
               {parent?.name ?? NOT_AVAILABLE}
             </p>
 
-            <p>
-              <span className="font-medium">School:</span>{" "}
-              {order?.school ?? NOT_AVAILABLE}
-            </p>
-
-            <p>
-              <span className="font-medium">Class:</span>{" "}
-              {order?.class ?? NOT_AVAILABLE}
-            </p>
-
-            <p>
-              <span className="font-medium">Section:</span>{" "}
-              {order?.section ?? NOT_AVAILABLE}
+            <p className="font-medium">
+              <span className="font-bold">School:</span>{" "}
+              {order?.school ?? NOT_AVAILABLE} • {order?.class ?? NOT_AVAILABLE} • Section {order?.section ?? NOT_AVAILABLE}
             </p>
 
             <p>
@@ -91,8 +82,8 @@ export default function Receipt({ order }: ReceiptProps) {
           <p className="text-sm font-semibold mb-1 uppercase">Children Info:</p>
           <div className="text-sm space-y-1">
                 {
-                  students?.map(({student}:any)=>{
-                    return <p key={student.id} className="text-sm font-medium"> {student?.name ?? NOT_AVAILABLE} • {student?.rollNo ?? NOT_AVAILABLE} </p>
+                  students?.map(({student}:any,index)=>{
+                    return <p key={student.id} className="text-sm font-medium">{index+1}. {student?.name ?? NOT_AVAILABLE} • {student?.rollNo ?? NOT_AVAILABLE} </p>
                   })
                 }
           </div>
@@ -145,7 +136,7 @@ export default function Receipt({ order }: ReceiptProps) {
         <div className="text-xs text-muted-foreground flex justify-between items-center pt-4">
           <p>Thanks for placing your order!</p>
 
-          <p className="text-[#000000]">Order will not be taken back</p>
+          <p className="text-[#000000] font-bold">Order will not be taken back</p>
 
           <p>Powered by {COMPANY}</p>
         </div>
