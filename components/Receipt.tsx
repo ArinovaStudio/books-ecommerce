@@ -18,9 +18,9 @@ export default function Receipt({ order }: ReceiptProps) {
   return (
     <Card
       id="receipt"
-      className="w-full max-w-4xl mx-auto rounded-xl shadow-sm"
+      className="absolute -left-[9999px] w-full max-w-4xl mx-auto rounded-xl shadow-sm"
     >
-      {/* absolute -left-[9999px] */}
+      {/*  */}
       <CardContent className="p-6 md:p-10 space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
