@@ -18,7 +18,7 @@ export default function Receipt({ order }: ReceiptProps) {
   return (
     <Card
       id="receipt"
-      className="absolute -left-[9999px] w-full max-w-4xl mx-auto rounded-xl shadow-sm"
+      className="w-full max-w-4xl mx-auto rounded-xl shadow-sm"
     >
       {/* absolute -left-[9999px] */}
       <CardContent className="p-6 md:p-10 space-y-8">
@@ -78,12 +78,17 @@ export default function Receipt({ order }: ReceiptProps) {
               <span className="font-medium">Pincode:</span>{" "}
               {order?.pincode ?? NOT_AVAILABLE}
             </p>
+
+            <p>
+              <span className="font-medium">Phone:</span>{" "}
+              {order?.phone ?? NOT_AVAILABLE}
+            </p>
           </div>
           <p className="text-sm font-semibold mb-1 uppercase">Children Info:</p>
           <div className="text-sm space-y-1">
                 {
                   students?.map(({student}:any,index)=>{
-                    return <p key={student.id} className="text-sm font-medium">{index+1}. {student?.name ?? NOT_AVAILABLE} • {student?.rollNo ?? NOT_AVAILABLE} </p>
+                    return <p key={student.id} className="text-sm font-medium">{index+1}.  {student?.name ?? NOT_AVAILABLE} </p>
                   })
                 }
           </div>
