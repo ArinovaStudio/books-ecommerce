@@ -167,23 +167,23 @@ export async function POST(req: NextRequest) {
     );
 
     // send mail to sub admins
-    if (student.school.subAdmins.length > 0) {
-      student.school.subAdmins.forEach((admin, index) => {
-        const adminEmailData = newOrderAlertTemplate(
-          admin.name,
-          student.school.name,
-          order.id,
-          student.name,
-          `${student.class.name} - ${student.section}`,
-          totalAmount
-        );
-        sendEmail(
-          admin.email,
-          adminEmailData.subject,
-          adminEmailData.html
-        ).catch((err) => console.error("Admin notification failed", err));
-      });
-    }
+    // if (student.school.subAdmins.length > 0) {
+    //   student.school.subAdmins.forEach((admin, index) => {
+    //     const adminEmailData = newOrderAlertTemplate(
+    //       admin.name,
+    //       student.school.name,
+    //       order.id,
+    //       student.name,
+    //       `${student.class.name} - ${student.section}`,
+    //       totalAmount
+    //     );
+    //     sendEmail(
+    //       admin.email,
+    //       adminEmailData.subject,
+    //       adminEmailData.html
+    //     ).catch((err) => console.error("Admin notification failed", err));
+    //   });
+    // }
 
     // send mail to all admins
     const systemAdmins = await prisma.user.findMany({
