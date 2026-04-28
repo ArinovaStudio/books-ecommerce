@@ -38,13 +38,15 @@ export const GET = Wrapper(async (req: NextRequest) => {
     const orders = await prisma.order.findMany({
       where: {
         payment: {
+          some: { status: "SUCCESS" },
+        },
+        students: {
           some: {
-            status: "SUCCESS",
-          },
-        },
-        user: {
-          schoolId: schoolId,
-        },
+            student: {
+              schoolId: schoolId
+            }
+          }
+        }
       },
       include: {
         students: {

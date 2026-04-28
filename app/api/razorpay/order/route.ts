@@ -3,10 +3,28 @@ import { razorpay } from "@/lib/razorpay";
 import prisma from "@/lib/prisma";
 import { customAlphabet } from "nanoid";
 import { verifyUser } from "@/lib/verify";
+import z from "zod";
+
+
 const generateOrderId = customAlphabet(
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
   12
 );
+
+const orderSchema = z.object({
+  amount: z.number().positive("Amount must be greater than 0"),
+  childIds: z.array(z.string()).min(1, "No Valid Child Id's were passed!"),
+  items: z.array(z.object({
+    productId: z.string(),
+    quantity: z.number().int().positive()
+  })).min(1, "Cart is empty"),
+  paymentMethod: z.string().min(1, "Payment method is required"),
+  phone: z.string().regex(/^[0-9]{10}$/, "Invalid 10-digit phone number"),
+  landmark: z.string().min(1, "Landmark is required"),
+  pincode: z.string().regex(/^[0-9]{6}$/, "Invalid 6-digit pincode")
+});
+
+
 export async function POST(req: NextRequest) {
   try {
     const auth = await verifyUser(req);
@@ -19,14 +37,19 @@ export async function POST(req: NextRequest) {
 
     const userId = auth.user.id;
 
-    const { amount, childIds, items, paymentMethod, phone, landmark, pincode } =
-      await req.json();
-    if (!childIds || childIds.length === 0) {
-      return NextResponse.json({
-        success: false,
-        message: "No Valid Child Id's were passed!",
-      });
+    const body = await req.json();
+    const validation = orderSchema.safeParse(body);
+    
+    if (!validation.success) {
+      return NextResponse.json({ success: false, message: validation.error.errors[0].message }, { status: 400 });
     }
+
+    const { amount, childIds, items, paymentMethod, phone, landmark, pincode } = validation.data;
+
+    if (!childIds || childIds.length === 0) {
+      return NextResponse.json({ success: false, message: "No Valid Child Id's were passed!" });
+    }
+    
     for (let childId of childIds) {
       const student = await prisma.student.findUnique({
         where: {
