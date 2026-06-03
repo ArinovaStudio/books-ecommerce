@@ -60,7 +60,6 @@ export function AddChildrenModal({ open, onOpenChange, schoolId,refreshUser }: P
             }
           }
           setClasses(updatedClasses);
-          console.log(updatedClasses);
       };
       ArrangeClasses();
     }, [data]);

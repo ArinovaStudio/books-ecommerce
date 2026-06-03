@@ -16,8 +16,7 @@ function getClassNames(range: string): string[] {
 
 export async function GET(req: NextRequest) {
     try {
-        console.log("--- Starting Seeding Process ---");
-
+       
         const commonAdminPass = await bcrypt.hash("admin123", 12);
         const commonSchoolPass = await bcrypt.hash("school123", 12);
         

@@ -300,19 +300,19 @@ export function GuardianForm() {
     const isLoaded = await import("@/lib/loadRazorpay").then((m) =>
       m.loadRazorpay()
     );
-    if (!isLoaded) {
-      toast.error("Razorpay SDK failed");
-      return;
-    }
+    // if (!isLoaded) {
+    //   toast.error("Razorpay SDK failed");
+    //   return;
+    // }
     const options = {
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      amount: data.order.amount,
+      amount: data.order?.amount,
       currency: "INR",
       name: "School Stationery",
       description: "Stationery Order",
-      order_id: data.order.id,
+      order_id: data.order?.id,
       handler: async function (response: any) {
-        await verifyAndPlaceOrder(response,data.order.orderId,data.order.paymentId);
+        await verifyAndPlaceOrder(response,data.order?.orderId,data.order?.paymentId);
       },
       prefill: {
         name: formData.guardianName,
@@ -348,7 +348,7 @@ export function GuardianForm() {
       toast.success("Payment Done and Order placed successfully 🎉");
       setTimeout(() => {
         window.location.replace("/");
-      }, 2000);
+      }, 1000);
     } catch (error: any) {
       toast.error(error.message);
     } finally {

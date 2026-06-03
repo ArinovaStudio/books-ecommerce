@@ -58,7 +58,6 @@ export const POST = Wrapper(async (req: NextRequest) => {
       );
     }
     const user = auth.user;
-    console.log(user);
     return NextResponse.json({
       success: true,
       message: "Children Added Successfully",

@@ -128,7 +128,6 @@ export async function POST(req: NextRequest) {
     // Transaction
     const OrderPaymentInfo = await prisma.$transaction(async (tx) => {
       const ordId = generateOrderId();
-      console.log(ordId);
       const childIdsQuery = childIds.map((id: string) => {
         return {
           student: {
