@@ -2,6 +2,10 @@ import { Wrapper } from "@/lib/api-handler";
 import prisma from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/verify";
 import { NextRequest, NextResponse } from "next/server";
+type PaymentHistory = {
+  createdAt: Date;
+  amount: number;
+};
 
 export const GET = Wrapper(async (req: NextRequest) => {
   try {
@@ -70,7 +74,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
     fillMap(usersHistory, 'users');
     fillMap(schoolsHistory, 'schools');
 
-    ordersHistory.forEach(payment => {
+    ordersHistory.forEach((payment: PaymentHistory) => {
         const m = monthNames[new Date(payment.createdAt).getMonth()];
         if (analyticsMap.has(m)) {
             const entry = analyticsMap.get(m)!;
