@@ -28,7 +28,7 @@ const SignInPage = () => {
   const goBack = useGoBack();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
+    console.log("handleChange", name, value);
     setFormData((prev) => ({ ...prev, [name]: value.replace(/\s/g, ""), }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
