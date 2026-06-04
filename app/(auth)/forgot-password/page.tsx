@@ -150,14 +150,14 @@ const page = () => {
         }
     };
 
-     const handleChangees = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChangees = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value.replace(/\s/g, ""), }));
         if (errors[name]) {
-          setErrors((prev) => ({ ...prev, [name]: "" }));
+            setErrors((prev) => ({ ...prev, [name]: "" }));
         }
-      };
-    
+    };
+
 
     return (
         <div>
@@ -207,6 +207,12 @@ const page = () => {
                             {errors.email && (
                                 <p className="text-xs text-red-500 mt-1 ml-1">{errors.email}</p>
                             )}
+                        </div>
+                        <div className="flex items-center justify-between p-x-8">
+                            <div></div>
+                            <div className="-mt-5">
+                                <button onClick={handleSendOtp} className={`text-gray-600 cursor-pointer text-sm ${!otpSent ? "hidden" : ""}`}>resend otp</button>
+                            </div>
                         </div>
 
                         {/* OTP */}
