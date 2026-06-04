@@ -204,17 +204,17 @@ const SignInPage = () => {
           </Button>
 
           {/* Footer Link */}
-          {/* <div className="text-center pt-2">
+          <div className="text-center pt-2">
                         <p className="text-sm text-gray-600">
-                            Don&apos;t have an account?{' '}
+                            Cant&apos;t access your account?{' '}
                             <Link
-                                href="/signup"
+                                href="/forgot-password"
                                 className="text-blue-600 hover:underline font-bold"
                             >
-                                Create account
+                                Forgot Password
                             </Link>
                         </p>
-                    </div>*/}
+                    </div>
         </form>
       </div>
     </div>
