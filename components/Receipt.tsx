@@ -15,6 +15,21 @@ export default function Receipt({ order }: ReceiptProps) {
   const total = subtotal;
   const parent = order?.students?.[0]?.student?.parent;
   const students = Object.values(order?.students ?? {}) ?? [];
+
+  const categoryOrder = {
+  NOTEBOOK: 1,
+  TEXTBOOK: 2,
+  STATIONARY: 3,
+  OTHER: 4,
+};
+
+const sortedItems = [...(order?.items ?? [])].sort((a, b) => {
+  return (
+    categoryOrder[a.product.category as keyof typeof categoryOrder] -
+    categoryOrder[b.product.category as keyof typeof categoryOrder]
+  );
+});
+
   return (
     <Card
       id="receipt"
@@ -40,7 +55,7 @@ export default function Receipt({ order }: ReceiptProps) {
             </p>
           </div>
 
-          <div className="bg-blue-500 text-white px-5 py-3 text-sm w-fit">
+          <div className="text-white px-5 py-3 text-sm w-fit">
             <p className="font-semibold">
               Receipt for #{order?.id ?? NOT_AVAILABLE}
             </p>
@@ -108,10 +123,10 @@ export default function Receipt({ order }: ReceiptProps) {
               </tr>
             </thead>
             <tbody>
-              {order?.items?.map((item: any, i: number) => (
+              {sortedItems.map((item: any, i: number) => (
                 <tr key={i} className="border-b last:border-none">
                   <td className="align-top p-3 font-medium">
-                    {item.product.name}
+                    {item.product.name.toUpperCase()}
                   </td>
                   <td className="align-top p-3 pb-0 max-md:hidden md:table-cell md:line-clamp-2! text-muted-foreground">
                     {item?.product?.description || "No description available"}
