@@ -55,7 +55,7 @@ const sortedItems = [...(order?.items ?? [])].sort((a, b) => {
             </p>
           </div>
 
-          <div className="text-white px-5 py-3 text-sm w-fit">
+          <div className="px-5 py-3 text-sm w-fit">
             <p className="font-semibold">
               Receipt for #{order?.id ?? NOT_AVAILABLE}
             </p>
