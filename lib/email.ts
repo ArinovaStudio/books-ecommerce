@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
 
 const sendEmail = async (to: string, subject: string, html: string): Promise<boolean> => {
     try {
-        const expression = /^[\w.+-]+@(?:gmail)\.com$/;
+        const expression = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if(!expression.test(to)){
             console.log("Email should only be gmail");
             return false;
