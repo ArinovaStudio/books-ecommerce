@@ -18,27 +18,27 @@ enum UserStatus {
 }
 
 model User {
-  id String @id @default(uuid())
-  email String @unique
-  phone String? @unique
-  name String
-  password String
-  address String?
-  pincode  String?
-  role UserRole @default(USER)
-  status UserStatus @default(ACTIVE)
-  schoolId String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  school School? @relation(fields: [schoolId], references: [id])
-  children Student[] @relation("ParentStudents")
-  orders Order[] 
+  id        String     @id @default(uuid())
+  email     String     @unique
+  phone     String?    @unique
+  name      String
+  password  String
+  address   String?
+  pincode   String?
+  role      UserRole   @default(USER)
+  status    UserStatus @default(ACTIVE)
+  schoolId  String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  school    School?    @relation(fields: [schoolId], references: [id])
+  children  Student[]  @relation("ParentStudents")
+  orders    Order[]
 }
 
 model Otp {
-  id String @id @default(uuid())
-  email String 
-  otp String
+  id        String   @id @default(uuid())
+  email     String
+  otp       String
   expiredAt DateTime
   createdAt DateTime @default(now())
 }
@@ -49,74 +49,74 @@ enum SchoolStatus {
 }
 
 model School {
-  id String @id @default(uuid())
-  name String
-  email String @unique
-  address String?
-  languages String[]
-  classRange String
-  image String
-  board String?
-  status SchoolStatus @default(ACTIVE)
-  numberOfClasses Int @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  subAdmins User[]
-  classes Class[]
-  students Student[]
+  id              String       @id @default(uuid())
+  name            String
+  email           String       @unique
+  address         String?
+  languages       String[]
+  classRange      String
+  image           String
+  board           String?
+  status          SchoolStatus @default(ACTIVE)
+  numberOfClasses Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  subAdmins       User[]
+  classes         Class[]
+  students        Student[]
 }
 
 model Class {
-  id String @id @default(uuid())
-  schoolId String
-  name String
-  sections String[]
-  academicYear String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  id             String    @id @default(uuid())
+  schoolId       String
+  name           String
+  sections       String[]
+  academicYear   String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  school         School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   sectionDetails Section[]
-  kits Kit[]
-  students Student[]
-  products Product[]
+  kits           Kit[]
+  students       Student[]
+  products       Product[]
 }
 
 model Section {
-  id String @id @default(uuid())
-  name String 
+  id       String @id @default(uuid())
+  name     String
   language String
-  classId String
+  classId  String
 
-  class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  class    Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
   students Student[]
 }
 
 model Student {
-  id String @id @default(uuid())
-  parentId String?
-  schoolId String
-  classId String
-  sectionId String?
-  name String
-  rollNo String
-  section String
-  dob DateTime?
-  gender String?
-  bloodGroup String?
-  address String?
+  id            String    @id @default(uuid())
+  parentId      String?
+  schoolId      String
+  classId       String
+  sectionId     String?
+  name          String
+  rollNo        String
+  section       String
+  dob           DateTime?
+  gender        String?
+  bloodGroup    String?
+  address       String?
   firstLanguage String?
-  parentEmail String
-  isActive Boolean @default(false) 
+  parentEmail   String
+  isActive      Boolean   @default(false)
 
-  parent User? @relation("ParentStudents", fields: [parentId], references: [id])
-  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  parent         User?    @relation("ParentStudents", fields: [parentId], references: [id])
+  school         School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  class          Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
   sectionDetails Section? @relation(fields: [sectionId], references: [id])
 
-  orders OrderStudent[] 
+  orders OrderStudent[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum ProductCategory {
@@ -127,24 +127,24 @@ enum ProductCategory {
 }
 
 model Product {
-  id String @id @default(uuid())
-  name String
+  id          String          @id @default(uuid())
+  name        String
   description String
-  price Float
-  category ProductCategory
-  stock Int
-  minQuantity Int @default(1)
-  brand String?
-  type String?
-  hsncode String?
-  image String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  kitItems KitItem[]
-  orderItems OrderItem[]
-  language String? @default("ALL")
-  classId String
-  class Class @relation(fields:[classId],references: [id],onDelete: Cascade)
+  price       Float
+  category    ProductCategory
+  stock       Int
+  minQuantity Int             @default(1)
+  brand       String?
+  type        String?
+  hsncode     String?
+  image       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  kitItems    KitItem[]
+  orderItems  OrderItem[]
+  language    String?         @default("ALL")
+  classId     String
+  class       Class           @relation(fields: [classId], references: [id], onDelete: Cascade)
 }
 
 enum KitType {
@@ -154,13 +154,13 @@ enum KitType {
 }
 
 model Kit {
-  id String @id @default(uuid())
-  type KitType
-  classId String
+  id         String   @id @default(uuid())
+  type       KitType
+  classId    String
   totalPrice Float
-  language String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  language   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
 
@@ -168,14 +168,14 @@ model Kit {
 }
 
 model KitItem {
-  id String @id @default(uuid())
-  kitId String
+  id        String   @id @default(uuid())
+  kitId     String
   productId String
-  quantity Int
+  quantity  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  kit Kit @relation(fields: [kitId], references: [id], onDelete: Cascade)
+  kit     Kit     @relation(fields: [kitId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
@@ -186,78 +186,79 @@ enum PaymentStatus {
 }
 
 model Payment {
-  id String @id @default(uuid())
-  orderId String
-  amount Float
-  status PaymentStatus @default(PENDING)
-  method String
-  razorpayOrderId String?
+  id                String        @id @default(uuid())
+  orderId           String
+  amount            Float
+  status            PaymentStatus @default(PENDING)
+  method            String
+  razorpayOrderId   String?
   razorpayPaymentId String?
   razorpaySignature String?
-  createdAt DateTime @default(now())
+  createdAt         DateTime      @default(now())
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
-enum OrderStatus{
+
+enum OrderStatus {
   ORDER_PLACED
   PACKAGING_DONE
   OUT_FOR_DELIVERY
   DELIVERED
 }
+
 model Order {
-  id String @id
-  userId String
-  school String
-  class String
-  section String
+  id           String         @id
+  userId       String
+  school       String
+  class        String
+  section      String
   academicYear String
-  phone String
-  landmark String
-  pincode String
-  status OrderStatus @default(ORDER_PLACED)
-  totalAmount Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  students OrderStudent[]
-  payment Payment[]
-  items OrderItem[]
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone        String
+  landmark     String
+  pincode      String
+  status       OrderStatus    @default(ORDER_PLACED)
+  totalAmount  Float
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  students     OrderStudent[]
+  payment      Payment[]
+  items        OrderItem[]
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
 model OrderStudent {
-  orderId String
+  orderId   String
   studentId String
 
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@id([orderId, studentId])
 }
 
 model OrderItem {
-  id String @id @default(uuid())
-  orderId String
+  id        String @id @default(uuid())
+  orderId   String
   productId String
-  quantity Int
-  price Float
+  quantity  Int
+  price     Float
 
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
-
-
 model ContactQuery {
-  id String @id @default(uuid())
-  name String
-  email String
-  phone String?
-  address String?
-  message String
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  address   String?
+  message   String
   createdAt DateTime @default(now())
 }
 
 model ApiTraffic {
-  id String @id @default(uuid())
-  hour DateTime @unique
-  count Int @default(1)
+  id    String   @id @default(uuid())
+  hour  DateTime @unique
+  count Int      @default(1)
 }

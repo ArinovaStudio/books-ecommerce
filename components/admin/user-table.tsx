@@ -45,23 +45,38 @@ const ORDER_STATUS = [
 
 type Order = {
   id: string;
-  userName: string;
-  email: string;
   phone: string;
   landmark: string;
   pincode: string;
   class: string;
-  bundleName: string;
-  orderNumber: string;
-  orderDate: string;
   totalAmount: number;
   createdAt: string;
-  students: {
-    name: string;
-    rollNo: number;
-    parent: { email: string; phone: string; address: string };
-  }[];
   status: "ORDER_PLACED" | "PACKAGING_DONE" | "OUT_FOR_DELIVERY" | "DELIVERED";
+
+  user?: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+
+  students: {
+    student: {
+      id: string;
+      name: string;
+      rollNo: number;
+      parent: {
+        email: string;
+        phone: string;
+        address: string;
+      };
+    };
+  }[];
+
+  items?: {
+    product?: {
+      name: string;
+    };
+  }[];
 };
 
 type Props = {
@@ -207,13 +222,50 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
   };
 
   /* ================= FILTERED ORDERS ================= */
-  const filteredOrders = orders.filter((order) => {
-    const q = search.toLowerCase();
+  // const filteredOrders = orders.filter((order) => {
+  //   const q = search.toLowerCase();
+  //   console.log(order);
+
+  //   return (
+  //     order?.userName?.toLowerCase().includes(q) ||
+  //     order?.email?.toLowerCase().includes(q) ||
+  //     order?.orderNumber?.toLowerCase().includes(q) ||
+  //     order?.status?.toLowerCase().includes(q)
+  //   );
+  // });
+
+  const filteredOrders = orders.filter((order: any) => {
+    const q = search.trim().toLowerCase();
+
+    if (!q) return true;
+
+    const studentMatch = order.students?.some(
+      ({ student }: any) =>
+        student?.name?.toLowerCase()?.includes(q) ||
+        student?.rollNo?.toString()?.includes(q)
+    );
+
+    const productMatch = order.items?.some(
+      (item: any) =>
+        item?.product?.name?.toLowerCase()?.includes(q)
+    );
+
     return (
-      order?.userName?.toLowerCase().includes(q) ||
-      order?.email?.toLowerCase().includes(q) ||
-      order?.orderNumber?.toLowerCase().includes(q) ||
-      order?.status?.toLowerCase().includes(q)
+      studentMatch ||
+      productMatch ||
+
+      order?.id?.toLowerCase()?.includes(q) ||
+      order?.status?.toLowerCase()?.includes(q) ||
+      order?.phone?.toLowerCase()?.includes(q) ||
+      order?.school?.toLowerCase()?.includes(q) ||
+      order?.class?.toLowerCase()?.includes(q) ||
+      order?.section?.toLowerCase()?.includes(q) ||
+      order?.pincode?.toLowerCase()?.includes(q) ||
+      order?.landmark?.toLowerCase()?.includes(q) ||
+
+      order?.user?.name?.toLowerCase()?.includes(q) ||
+      order?.user?.email?.toLowerCase()?.includes(q) ||
+      order?.user?.phone?.toLowerCase()?.includes(q)
     );
   });
 
@@ -283,8 +335,9 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
           {/* 🔍 Search Orders */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+
             <Input
-              placeholder="Search by name, email, order number or status..."
+              placeholder="Search by student, parent, email, phone, order ID, roll no, product, status..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-md pl-10"
@@ -311,7 +364,7 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
                   <CardHeader>
                     <div className="max-md:flex-col flex gap-3 justify-between">
                       <div className="space-y-1">
-                        {order?.students?.length ? order?.students?.map(({student}: any) => {
+                        {order?.students?.length ? order?.students?.map(({ student }: any) => {
                           return (
                             <div className="space-y-1" key={student.id}>
                               <div className="text-base">
@@ -322,11 +375,11 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
                               </p>
                             </div>
                           );
-                        }):<div>No Student Info Found!</div>}
+                        }) : <div>No Student Info Found!</div>}
                         <CardDescription>
-                          {order?.students?.[0]?.parent?.email}{" "}
-                          {order?.students?.[0]?.parent?.phone &&
-                            `• ${order?.students?.[0]?.parent?.phone}`}
+                          {order?.students?.[0]?.student?.parent?.email}
+                          {order?.students?.[0]?.student?.parent?.phone &&
+                            ` • ${order?.students?.[0]?.student?.parent?.phone}`}
                         </CardDescription>
                       </div>
                       <div className="grid gap-2">

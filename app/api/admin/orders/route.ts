@@ -49,6 +49,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
         }
       },
       include: {
+        user: true,
         students: {
           include: {
             student: {
