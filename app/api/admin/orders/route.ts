@@ -76,6 +76,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
                 name: true,
                 image: true,
                 description: true,
+                category: true
               },
             },
           },

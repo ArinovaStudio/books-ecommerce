@@ -30,6 +30,7 @@ const sortedItems = [...(order?.items ?? [])].sort((a, b) => {
   );
 });
 
+
   return (
     <Card
       id="receipt"

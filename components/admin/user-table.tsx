@@ -161,29 +161,6 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
     }, 500);
   };
 
-  // const handleReceipt = async (order: Order) => {
-  //   setReceiptData(order);
-
-  //   setTimeout(() => {
-  //     const receipt = document.getElementById("receipt");
-  //     html2canvas(receipt!, {
-  //       useCORS: true,
-  //       backgroundColor: "#ffffff",
-  //       scale: 2,
-  //       windowWidth: 794,
-  //       scrollX: 0,
-  //       scrollY: 0,
-  //     }).then((canvas) => {
-  //       const imgData = canvas.toDataURL("image/png");
-  //       const pdf = new jspdf("p", "mm", "a4"); // 'p' for portrait, 'mm' for units, 'a4' for size
-  //       const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
-  //       const imgHeight = (canvas.height * pageWidth) / canvas.width;
-
-  //       pdf.addImage(imgData, "PNG", 0, 0, pageWidth, imgHeight);
-  //       pdf.save(`Receipt-${order.id}.pdf`);
-  //     });
-  //   }, 2000);
-  // };
   /* ================= FETCH SCHOOLS ================= */
   const fetchSchools = async () => {
     if (role === "SUB_ADMIN") return;
@@ -209,8 +186,6 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
       const res = await fetch(`/api/admin/orders?schoolId=${school.id}`);
       const data = await res.json();
       if (data.success) {
-        // console.log(data.orders);
-
         setOrders(data.orders);
       } else setOrders([]);
     } catch (err) {
