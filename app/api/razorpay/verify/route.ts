@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { customAlphabet } from "nanoid";
 import { verifyUser } from "@/lib/verify";
 import sendEmail from "@/lib/email";
-import { mailTemplate } from "@/lib/mailTemplate";
+import { emailTemplate, mailTemplate } from "@/lib/mailTemplate";
 import { sendToGoogleSheet } from "@/lib/google-sheet";
 
 const generateOrderId = customAlphabet(
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
         { status: 404 },
       );
     }
-    let createdOrder;
+
     await prisma.$transaction(async (tx) => {
       const orderId = generateOrderId();
 
@@ -92,36 +92,6 @@ export async function POST(req: NextRequest) {
           pincode,
         },
       });
-      if (createdOrder) {
-        sendToGoogleSheet({
-          orderId: createdOrder.id,
-          paymentId: razorpay_payment_id,
-          parentName: student.name,
-          parentEmail: student.parentEmail,
-          phone,
-          school: student.school.name,
-          className: student.class.name,
-          section: student.section,
-          students: childIds.length,
-          amount: serverTotal,
-          landmark,
-          pincode,
-        }).catch(console.error);
-
-        sendEmail("glownestserv@gmail.com", "A New Order Received", html).catch(
-          console.error,
-        );
-      }
-      const html = mailTemplate
-        .replace("{{orderId}}", order.id)
-        .replace("{{parentName}}", student.name)
-        .replace("{{phone}}", phone)
-        .replace("{{school}}", student.school.name)
-        .replace("{{class}}", student.class.name)
-        .replace("{{section}}", student.section)
-        .replace("{{landmark}}", landmark)
-        .replace("{{pincode}}", pincode)
-        .replace("{{totalAmount}}", serverTotal.toString());
 
       await tx.orderItem.createMany({
         data: validatedItems.map((item: any) => ({
@@ -132,7 +102,7 @@ export async function POST(req: NextRequest) {
         })),
       });
 
-      await tx.payment.create({
+      const payment = await tx.payment.create({
         data: {
           orderId: order.id,
           amount: serverTotal,
@@ -156,7 +126,27 @@ export async function POST(req: NextRequest) {
         landmark,
         pincode,
       });
+            const html = mailTemplate
+        .replace("{{orderId}}", order.id)
+        .replace("{{parentName}}", student.name)
+        .replace("{{phone}}", phone)
+        .replace("{{school}}", student.school.name)
+        .replace("{{class}}", student.class.name)
+        .replace("{{section}}", student.section)
+        .replace("{{landmark}}", landmark)
+        .replace("{{pincode}}", pincode)
+        .replace("{{totalAmount}}", serverTotal.toString());
+
+      const userHtml = emailTemplate
+        .replace(/{{CUSTOMER_NAME}}/g, student.name)
+        .replace(/{{ORDER_ID}}/g, order.id)
+        .replace(/{{RAZORPAY_ID}}/g, payment.razorpayOrderId as string)
+        .replace(/{{AMOUNT}}/g, serverTotal);
+
+        
+
       await sendEmail("glownestserv@gmail.com", "A new order recevied", html);
+      await sendEmail(student.parentEmail, "Glow Nest - We have recevied your order", userHtml);
     });
 
     return NextResponse.json({ success: true });

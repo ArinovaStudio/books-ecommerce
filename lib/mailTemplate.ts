@@ -86,3 +86,66 @@ export const mailTemplate = `<!DOCTYPE html>
     </table>
   </body>
 </html>`
+
+export const emailTemplate = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Order Confirmation</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f8f8f8; padding: 20px;">
+    <table width="600" align="center" bgcolor="#ffffff" cellpadding="0" cellspacing="0" style="border-radius: 8px; overflow: hidden;">
+        <tr>
+            <td style="background-color: #000000; color: #ffffff; padding: 20px; text-align: center;">
+                <h1>GlowNest</h1>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="padding: 30px;">
+                <h2>Order Confirmation</h2>
+
+                <p>Hi {{CUSTOMER_NAME}},</p>
+
+                <p>Thank you for shopping with GlowNest!</p>
+
+                <p>Your payment has been successfully received and your order has been confirmed.</p>
+
+                <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse: collapse;">
+                    <tr>
+                        <td><strong>Order ID</strong></td>
+                        <td>{{ORDER_ID}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Razorpay Payment ID</strong></td>
+                        <td>{{RAZORPAY_ID}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Amount Paid</strong></td>
+                        <td>₹{{AMOUNT}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Payment Status</strong></td>
+                        <td style="color: green;">Successful</td>
+                    </tr>
+                </table>
+
+                <p style="margin-top:20px;">
+                    We are now preparing your order for shipment. You'll receive tracking details once your order is dispatched.
+                </p>
+
+                <p>
+                    Thank you for choosing GlowNest.
+                </p>
+
+                <p>
+                    Regards,<br>
+                    Team GlowNest
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+`;
