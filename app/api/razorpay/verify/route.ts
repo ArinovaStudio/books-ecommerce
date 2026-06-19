@@ -1,11 +1,16 @@
+// app\api\razorpay\verify\route.ts
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { customAlphabet } from "nanoid";
 import { verifyUser } from "@/lib/verify";
 import sendEmail from "@/lib/email";
 import { mailTemplate } from "@/lib/mailTemplate";
+import { sendToGoogleSheet } from "@/lib/google-sheet";
 
-const generateOrderId = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", 12);
+const generateOrderId = customAlphabet(
+  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  12,
+);
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,7 +18,7 @@ export async function POST(req: NextRequest) {
     if (!auth.success) {
       return NextResponse.json(
         { success: false, message: auth.message || "Unauthorized" },
-        { status: auth.status }
+        { status: auth.status },
       );
     }
 
@@ -23,16 +28,24 @@ export async function POST(req: NextRequest) {
     if (!razorpay_order_id || !razorpay_payment_id || !orderPayload) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { userId, childIds, validatedItems, serverTotal, phone, landmark, pincode } = orderPayload;
+    const {
+      userId,
+      childIds,
+      validatedItems,
+      serverTotal,
+      phone,
+      landmark,
+      pincode,
+    } = orderPayload;
 
     if (userId !== auth.user.id) {
       return NextResponse.json(
         { success: false, message: "User mismatch" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -52,10 +65,10 @@ export async function POST(req: NextRequest) {
     if (!student) {
       return NextResponse.json(
         { success: false, message: "Student not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
-
+    let createdOrder;
     await prisma.$transaction(async (tx) => {
       const orderId = generateOrderId();
 
@@ -79,18 +92,36 @@ export async function POST(req: NextRequest) {
           pincode,
         },
       });
+      if (createdOrder) {
+        sendToGoogleSheet({
+          orderId: createdOrder.id,
+          paymentId: razorpay_payment_id,
+          parentName: student.name,
+          parentEmail: student.parentEmail,
+          phone,
+          school: student.school.name,
+          className: student.class.name,
+          section: student.section,
+          students: childIds.length,
+          amount: serverTotal,
+          landmark,
+          pincode,
+        }).catch(console.error);
 
-          const html = mailTemplate
-  .replace("{{orderId}}", order.id)
-  .replace("{{parentName}}", student.name)
-  .replace("{{phone}}", phone)
-  .replace("{{school}}", student.school.name)
-  .replace("{{class}}", student.class.name)
-  .replace("{{section}}", student.section)
-  .replace("{{landmark}}", landmark)
-  .replace("{{pincode}}", pincode)
-  .replace("{{totalAmount}}", serverTotal.toString());
-
+        sendEmail("glownestserv@gmail.com", "A New Order Received", html).catch(
+          console.error,
+        );
+      }
+      const html = mailTemplate
+        .replace("{{orderId}}", order.id)
+        .replace("{{parentName}}", student.name)
+        .replace("{{phone}}", phone)
+        .replace("{{school}}", student.school.name)
+        .replace("{{class}}", student.class.name)
+        .replace("{{section}}", student.section)
+        .replace("{{landmark}}", landmark)
+        .replace("{{pincode}}", pincode)
+        .replace("{{totalAmount}}", serverTotal.toString());
 
       await tx.orderItem.createMany({
         data: validatedItems.map((item: any) => ({
@@ -111,7 +142,21 @@ export async function POST(req: NextRequest) {
           razorpayPaymentId: razorpay_payment_id,
         },
       });
-    await sendEmail("glownestserv@gmail.com", "A new order recevied", html)
+      await sendToGoogleSheet({
+        orderId: order.id,
+        paymentId: razorpay_payment_id,
+        parentName: student.name,
+        parentEmail: student.parentEmail,
+        phone,
+        school: student.school.name,
+        className: student.class.name,
+        section: student.section,
+        students: childIds.length,
+        amount: serverTotal,
+        landmark,
+        pincode,
+      });
+      await sendEmail("glownestserv@gmail.com", "A new order recevied", html);
     });
 
     return NextResponse.json({ success: true });
@@ -119,7 +164,7 @@ export async function POST(req: NextRequest) {
     console.error("Razorpay verify error", error);
     return NextResponse.json(
       { success: false, message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
