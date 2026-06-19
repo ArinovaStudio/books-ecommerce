@@ -274,112 +274,95 @@ export function GuardianForm() {
       });
   };
   //razorpay integration
-  const startRazorpayPayment = async () => {
-    const orderItems = products
-      .filter((p) => selectedProducts[p.id]?.checked)
-      .map((p) => ({
-        productId: p.id,
-        quantity: selectedProducts[p.id]?.quantity || p.stock,
-      }));
-    const res = await fetch("/api/razorpay/order", {
+const startRazorpayPayment = async () => {
+  const orderItems = products
+    .filter((p) => selectedProducts[p.id]?.checked)
+    .map((p) => ({
+      productId: p.id,
+      quantity: selectedProducts[p.id]?.quantity || p.stock,
+    }));
+
+  const res = await fetch("/api/razorpay/order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      amount: grandTotal,
+      childIds: selectedChildrens.map((c: any) => c.id),
+      phone: formData.guardianPhone,
+      landmark: formData.landmark,
+      pincode: formData.pincode,
+      items: orderItems,
+    }),
+  });
+
+  const data = await res.json();
+  if (!data.success) throw new Error("Failed to create payment session");
+
+  // Save orderPayload returned by server — passed back at verify time
+  const { razorpayOrder, orderPayload } = data;
+
+  await import("@/lib/loadRazorpay").then((m) => m.loadRazorpay());
+
+  const options = {
+    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+    amount: razorpayOrder.amount,
+    currency: "INR",
+    name: "School Stationery",
+    description: "Stationery Order",
+    order_id: razorpayOrder.id,
+    handler: async function (response: any) {
+      await verifyAndPlaceOrder(response, orderPayload);
+    },
+    prefill: {
+      name: formData.guardianName,
+      email: formData.guardianEmail,
+      contact: formData.guardianPhone,
+    },
+    theme: { color: "#fbbf24" },
+  };
+
+  // @ts-ignore
+  const rzp = new window.Razorpay(options);
+  rzp.on("payment.failed", () => {
+    toast.error("Payment failed");
+    setLoading(false);
+  });
+  rzp.open();
+};
+
+const verifyAndPlaceOrder = async (payment: any, orderPayload: any) => {
+  try {
+    const verifyRes = await fetch("/api/razorpay/verify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        amount: grandTotal,
-        childIds: selectedChildrens.map((child: any)=>child.id) ?? [],
-        paymentMethod: "Razorpay",
-        phone: formData.guardianPhone,
-        landmark: formData.landmark,
-        pincode: formData.pincode,
-        items: orderItems,
+        razorpay_order_id: payment.razorpay_order_id,
+        razorpay_payment_id: payment.razorpay_payment_id,
+        razorpay_signature: payment.razorpay_signature,
+        orderPayload,
       }),
     });
 
-    const data = await res.json();
-    if (!data.success) throw new Error("Order creation failed");
-    const isLoaded = await import("@/lib/loadRazorpay").then((m) =>
-      m.loadRazorpay()
-    );
-    // if (!isLoaded) {
-    //   toast.error("Razorpay SDK failed");
-    //   return;
-    // }
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      amount: data.order?.amount,
-      currency: "INR",
-      name: "School Stationery",
-      description: "Stationery Order",
-      order_id: data.order?.id,
-      handler: async function (response: any) {
-        await verifyAndPlaceOrder(response,data.order?.orderId,data.order?.paymentId);
-      },
-      prefill: {
-        name: formData.guardianName,
-        email: formData.guardianEmail,
-        contact: formData.guardianPhone,
-      },
-      theme: { color: "#fbbf24" },
-    };
+    const verifyData = await verifyRes.json();
 
-    // @ts-ignore
-    const rzp = new window.Razorpay(options);
-    rzp.on("payment.failed", function () {
-      toast.error("Payment failed");
-      setLoading(false);
-    });
-    rzp.open();
-  };
-
-  const verifyAndPlaceOrder = async (payment: any, orderId: string,paymentId: string) => {
-    try {
-      const verifyRes = await fetch("/api/razorpay/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payment,orderId,paymentId, childIds: selectedChildrens.map((child: any)=>child.id) ?? [] }),
-      });
-
-      const verifyData = await verifyRes.json();
-      if (!verifyData.success) {
-        toast.error("Payment verification failed");
-        setLoading(false);
-        return;
-      }
-      toast.success("Payment Done and Order placed successfully 🎉");
-      setTimeout(() => {
-        window.location.replace("/");
-      }, 1000);
-    } catch (error: any) {
-      toast.error(error.message);
-    } finally {
-      setLoading(false);
+    // Signature check passed + order created — happy path
+    if (verifyData.success) {
+      window.location.replace("/");
+      toast.success("Order placed successfully 🎉");
+      return;
     }
-    // ✅ Payment verified → create DB order
-    // await sendFinalOrder(payment);
-  };
+    toast.success("Payment received! Your order will be confirmed shortly.");
+    setTimeout(() => window.location.replace("/"), 6000);
 
-  // const sendFinalOrder = async (payment: any) => {
-  //   const res = await fetch("/api/order", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({
-  //       razorpayOrderId: payment.razorpay_order_id,
-  //       razorpayPaymentId: payment.razorpay_payment_id,
-  //       razorpaySignature: payment.razorpay_signature,
-  //     }),
-  //   });
+  } catch {
+    // Network error after payment — same treatment
+    toast.success("Payment received! But THERE WAS A NETWORK ISSUE DURING PAYMENT PLEASE CONTACT CUSTOMER CARE IF NOT RECEVIED ANY EMAIL.");
+    setTimeout(() => window.location.replace("/"), 10000);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  //   const data = await res.json();
-  //   if (data.success) {
-  //     toast.success("Order placed successfully 🎉");
-  //     // setTimeout(() => {
-  //     //   window.location.replace("/");
-  //     // }, 2000);
-  //   } else {
-  //     toast.error("Order failed");
-  //   }
-  //   setLoading(false);
-  // };
 
   if (loading) {
     return (

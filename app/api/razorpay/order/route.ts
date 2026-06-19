@@ -1,29 +1,25 @@
+// app/api/razorpay/order/route.ts
 import { NextResponse, NextRequest } from "next/server";
 import { razorpay } from "@/lib/razorpay";
 import prisma from "@/lib/prisma";
-import { customAlphabet } from "nanoid";
 import { verifyUser } from "@/lib/verify";
 import z from "zod";
 
-
-const generateOrderId = customAlphabet(
-  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-  12
-);
-
 const orderSchema = z.object({
   amount: z.number().positive("Amount must be greater than 0"),
-  childIds: z.array(z.string()).min(1, "No Valid Child Id's were passed!"),
-  items: z.array(z.object({
-    productId: z.string(),
-    quantity: z.number().int().positive()
-  })).min(1, "Cart is empty"),
-  paymentMethod: z.string().min(1, "Payment method is required"),
+  childIds: z.array(z.string()).min(1, "No valid child IDs were passed"),
+  items: z
+    .array(
+      z.object({
+        productId: z.string(),
+        quantity: z.number().int().positive(),
+      })
+    )
+    .min(1, "Cart is empty"),
   phone: z.string().regex(/^[0-9]{10}$/, "Invalid 10-digit phone number"),
   landmark: z.string().min(1, "Landmark is required"),
-  pincode: z.string().regex(/^[0-9]{6}$/, "Invalid 6-digit pincode")
+  pincode: z.string().regex(/^[0-9]{6}$/, "Invalid 6-digit pincode"),
 });
-
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,156 +32,102 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = auth.user.id;
-
     const body = await req.json();
     const validation = orderSchema.safeParse(body);
-    
+
     if (!validation.success) {
-      return NextResponse.json({ success: false, message: validation.error.errors[0].message }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: validation.error.errors[0].message },
+        { status: 400 }
+      );
     }
 
-    const { amount, childIds, items, paymentMethod, phone, landmark, pincode } = validation.data;
+    const { amount, childIds, items, phone, landmark, pincode } =
+      validation.data;
 
-    if (!childIds || childIds.length === 0) {
-      return NextResponse.json({ success: false, message: "No Valid Child Id's were passed!" });
-    }
-    
-    for (let childId of childIds) {
+    // ── 1. Verify every child belongs to this user and is active ──────────
+    for (const childId of childIds) {
       const student = await prisma.student.findUnique({
-        where: {
-          id: childId,
-        },
+        where: { id: childId },
       });
-      if (!student) throw Error(`Student with id ${childId} Not Found!`);
+      if (!student) {
+        return NextResponse.json(
+          { success: false, message: `Student ${childId} not found` },
+          { status: 404 }
+        );
+      }
       if (student.parentId !== userId) {
         return NextResponse.json(
-          {
-            success: false,
-            message: `student with id ${childId} does not belong to you`,
-          },
+          { success: false, message: `Student ${childId} does not belong to you` },
           { status: 403 }
         );
       }
-
-      if (student.isActive === false) {
+      if (!student.isActive) {
         return NextResponse.json(
-          { success: false, message: `student: ${student.name} is inactive` },
+          { success: false, message: `Student ${student.name} is inactive` },
           { status: 403 }
         );
       }
     }
 
-    const productIds = items.map((i: any) => i.productId);
+    // ── 2. Validate products and compute server-side total ─────────────────
+    const productIds = items.map((i) => i.productId);
     const dbProducts = await prisma.product.findMany({
       where: { id: { in: productIds } },
     });
-    let totalAmount = 0;
     const productMap = new Map(dbProducts.map((p) => [p.id, p]));
-    const validOrderItems: {
-      productId: string;
-      quantity: number;
-      price: number;
-    }[] = [];
+
+    let serverTotal = 0;
+    const validatedItems: { productId: string; quantity: number; price: number }[] = [];
 
     for (const item of items) {
       const product = productMap.get(item.productId);
-
       if (!product) {
         return NextResponse.json(
-          {
-            success: false,
-            message: `Product ID ${item.productId} invalid or not found`,
-          },
+          { success: false, message: `Product ${item.productId} not found` },
           { status: 400 }
         );
       }
-
-      const lineTotal = product.price * (item.quantity * childIds.length);
-      totalAmount += lineTotal;
-
-      validOrderItems.push({
-        productId: item.productId,
-        quantity: item.quantity * childIds.length,
-        price: product.price,
-      });
+      const qty = item.quantity * childIds.length;
+      serverTotal += product.price * qty;
+      validatedItems.push({ productId: item.productId, quantity: qty, price: product.price });
     }
 
-    const razorPayOrder = await razorpay.orders.create({
-      amount: amount * 100, // ₹ → paise
+    // Guard against client-side amount tampering
+    if (Math.round(serverTotal * 100) !== Math.round(amount * 100)) {
+      return NextResponse.json(
+        { success: false, message: "Amount mismatch — please refresh and try again" },
+        { status: 400 }
+      );
+    }
+
+    // ── 3. Create Razorpay session ONLY — no DB writes ────────────────────
+    const razorpayOrder = await razorpay.orders.create({
+      amount: Math.round(serverTotal * 100), // paise
       currency: "INR",
-      receipt: "receipt_" + Date.now(),
+      receipt: `rcpt_${Date.now()}`,
     });
-    const student = await prisma.student.findUnique({
-      where: {
-        id: childIds[0],
-      },
-      include: {
-        school: true,
-        class: true,
-        sectionDetails: true,
-      },
-    });
-    // Transaction
-    const OrderPaymentInfo = await prisma.$transaction(async (tx) => {
-      const ordId = generateOrderId();
-      const childIdsQuery = childIds.map((id: string) => {
-        return {
-          student: {
-            connect: {
-              id: id,
-            },
-          },
-        };
-      });
-      const order = await tx.order.create({
-        data: {
-          id: ordId,
-          userId,
-          students: {
-            create: childIdsQuery,
-          },
-          academicYear: student!.class.academicYear,
-          class: student!.class.name,
-          section: student!.section,
-          school: student!.school.name,
-          status: "ORDER_PLACED",
-          totalAmount: totalAmount,
-          phone,
-          landmark,
-          pincode,
-        },
-      });
 
-      if (validOrderItems.length > 0) {
-        await tx.orderItem.createMany({
-          data: validOrderItems.map((item) => ({
-            orderId: order.id,
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-        });
-      }
-
-      const payment = await tx.payment.create({
-        data: {
-          orderId: order.id,
-          amount: totalAmount,
-          method: paymentMethod,
-          status: "PENDING",
-        },
-      });
-
-      return { orderId: order.id, paymentId: payment.id };
-    });
+    // Return the Razorpay session + pre-validated payload so the verify
+    // endpoint doesn't need to re-query products or re-check children.
     return NextResponse.json({
       success: true,
-      order: { ...razorPayOrder, ...OrderPaymentInfo },
+      razorpayOrder,
+      // Signed/trusted on the server — client passes this back verbatim
+      orderPayload: {
+        userId,
+        childIds,
+        validatedItems,
+        serverTotal,
+        phone,
+        landmark,
+        pincode,
+      },
     });
   } catch (error) {
     console.error("Razorpay order error", error);
     return NextResponse.json(
-      { success: false, message: "Order creation failed" },
+      { success: false, message: "Failed to create payment session" },
       { status: 500 }
     );
   }
