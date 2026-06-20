@@ -11,7 +11,7 @@ import { Wrapper } from "@/lib/api-handler";
 
 const bulkStudentRowSchema = z.object({
     name: z.string({ required_error: "Student Name is required" }).min(1),
-    rollNo: z.string({ required_error: "Roll Number is required" }).min(1),
+    rollNo: z.string().optional(),
     parentName: z.string({ required_error: "Parent Name is required" }).min(1),
     parentEmail: z.string({ required_error: "Parent Email is required" }).min(1).email("Invalid Parent Email"),
     firstLanguage: z.string({ required_error: "First Language is required" }).min(1),
@@ -110,14 +110,6 @@ export const POST = Wrapper(async (req: NextRequest) => {
                     }
 
                     // Check for duplicate student
-                    const existingStudent = await prisma.student.findFirst({
-                        where: {
-                            classId,
-                            sectionId: targetSection.id,
-                            rollNo: data.rollNo
-                        }
-                    });
-                    if (existingStudent) throw new Error(`Roll No ${data.rollNo} already exists in section ${targetSection.name}`);
 
                     await prisma.$transaction(async (tx) => {
 
@@ -155,7 +147,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
                         await tx.student.create({
                             data: {
                                 name: data.name,
-                                rollNo: data.rollNo,
+                                rollNo: data.rollNo || "Not Provided",
                                 classId: classId,
                                 sectionId: targetSection.id,
                                 section: targetSection.name,

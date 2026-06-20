@@ -82,26 +82,6 @@ export const PUT = Wrapper(async( req: NextRequest, { params }: { params: Promis
         
     }
 
-    // Duplicate Roll No Check
-    if (rollNo || classId || sectionId) {
-        const targetClass = classId || existingStudent.classId;
-        const targetRoll = rollNo || existingStudent.rollNo;
-
-        const duplicate = await prisma.student.findFirst({
-            where: {
-                schoolId: existingStudent.schoolId,
-                classId: targetClass,
-                sectionId: sectionId || existingStudent.sectionId,
-                rollNo: targetRoll,
-                id: { not: studentId }
-            }
-        });
-
-        if (duplicate) {
-             return NextResponse.json({ success: false, message: `Another student already has Roll No '${targetRoll}' in this section` }, { status: 409 });
-        }
-    }
-
     // Parent Update Logic (Link Existing or Create New)
     let newParentId = existingStudent.parentId;
     let isNewParentCreated = false;

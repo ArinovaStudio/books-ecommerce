@@ -79,11 +79,6 @@ export const POST = Wrapper(async (req: NextRequest) => {
     if (!sectionInfo) {
       throw new Error(`Section With Given Id Does Not Exist`);
     }
-    // if (duplicate) {
-    //   throw new Error(
-    //     `Roll No ${rollNo} already exists in section ${sectionInfo.name}`
-    //   );
-    // }
 
     const newStudent = await prisma.student.create({
       data: {

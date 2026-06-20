@@ -88,33 +88,19 @@ export const POST = Wrapper(async (req: NextRequest) => {
             sectionDetails: { some: { id: student.sectionId } },
           },
         });
-        // console.log(classInfo);
 
         if (!classInfo) {
           throw new Error(`Class Or Section Id Does not exist!`);
         }
 
-        // Duplicate check
-        const duplicate = await tx.student.findFirst({
-          where: {
-            schoolId,
-            classId: student.class,
-            sectionId: student.sectionId,
-            rollNo: student.rollNo,
-          },
-        });
-
-        if (duplicate) {
-          throw new Error(
-            `Roll No ${student.rollNo} already exists in section ${student.sectionId}`
-          );
-        }
         const section = await tx.section.findUnique({
           where: { id: student.sectionId },
         });
+
         if (!section) {
           throw new Error(`Section With Given Id Does Not Exist`);
         }
+        
         const newStudent = await tx.student.create({
           data: {
             name: student.name,

@@ -85,7 +85,7 @@ export const GET = Wrapper(async (req: NextRequest) => {
 
 const createStudentValidation = z.object({
   name: z.string().min(1, "Student Name is required"),
-  rollNo: z.string().min(1, "Roll Number is required"),
+  rollNo: z.string().optional(),
   classId: z.string().uuid("Invalid Class ID"),
   sectionId: z.string().uuid("Invalid Section ID"),
   parentName: z.string().min(1, "Parent Name is required"),
@@ -172,24 +172,6 @@ export const POST = Wrapper(async (req: NextRequest) => {
     const schoolId = section.class.schoolId;
 
     // Check for Duplicate Student
-    const existingStudent = await prisma.student.findFirst({
-      where: {
-        schoolId,
-        classId,
-        sectionId,
-        rollNo,
-      },
-    });
-
-    if (existingStudent) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `Student with Roll No ${rollNo} already exists in this class`,
-        },
-        { status: 409 }
-      );
-    }
 
     // Handle Parent (Link or Create)
     const existingParent = await prisma.user.findUnique({
@@ -236,7 +218,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
     const newStudent = await prisma.student.create({
       data: {
         name,
-        rollNo,
+        rollNo: rollNo || "Not provided",
         firstLanguage,
         schoolId,
         classId,
