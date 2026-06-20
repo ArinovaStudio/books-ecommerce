@@ -1,5 +1,6 @@
-// app\api\razorpay\verify\route.ts
+// app/api/razorpay/verify/route.ts
 import { NextResponse, NextRequest } from "next/server";
+import crypto from "crypto";
 import prisma from "@/lib/prisma";
 import { customAlphabet } from "nanoid";
 import { verifyUser } from "@/lib/verify";
@@ -23,11 +24,63 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { razorpay_order_id, razorpay_payment_id, orderPayload } = body;
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      orderPayload,
+    } = body;
 
-    if (!razorpay_order_id || !razorpay_payment_id || !orderPayload) {
+    if (
+      !razorpay_order_id ||
+      !razorpay_payment_id ||
+      !razorpay_signature ||
+      !orderPayload
+    ) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
+        { status: 400 },
+      );
+    }
+
+    // ---- 1. Verify the HMAC signature Razorpay generated for this payment ----
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET as string)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      return NextResponse.json(
+        { success: false, message: "Payment verification failed" },
+        { status: 400 },
+      );
+    }
+
+    // ---- 2. Confirm directly with Razorpay that it was actually captured ----
+    const razorpayAuth = Buffer.from(
+      `${process.env.RAZORPAY_KEY_ID}:${process.env.RAZORPAY_KEY_SECRET}`,
+    ).toString("base64");
+
+    const paymentRes = await fetch(
+      `https://api.razorpay.com/v1/payments/${razorpay_payment_id}`,
+      { headers: { Authorization: `Basic ${razorpayAuth}` } },
+    );
+
+    if (!paymentRes.ok) {
+      return NextResponse.json(
+        { success: false, message: "Could not verify payment with Razorpay" },
+        { status: 502 },
+      );
+    }
+
+    const paymentDetails = await paymentRes.json();
+
+    if (
+      paymentDetails.status !== "captured" ||
+      paymentDetails.order_id !== razorpay_order_id
+    ) {
+      return NextResponse.json(
+        { success: false, message: "Payment not successful" },
         { status: 400 },
       );
     }
@@ -42,12 +95,7 @@ export async function POST(req: NextRequest) {
       pincode,
     } = orderPayload;
 
-    if (userId !== auth.user.id) {
-      return NextResponse.json(
-        { success: false, message: "User mismatch" },
-        { status: 403 },
-      );
-    }
+
 
     // Prevent duplicate orders for the same Razorpay session
     const existingPayment = await prisma.payment.findFirst({
@@ -112,6 +160,7 @@ export async function POST(req: NextRequest) {
           razorpayPaymentId: razorpay_payment_id,
         },
       });
+
       await sendToGoogleSheet({
         orderId: order.id,
         paymentId: razorpay_payment_id,
@@ -126,7 +175,8 @@ export async function POST(req: NextRequest) {
         landmark,
         pincode,
       });
-            const html = mailTemplate
+
+      const html = mailTemplate
         .replace("{{orderId}}", order.id)
         .replace("{{parentName}}", student.name)
         .replace("{{phone}}", phone)
@@ -143,10 +193,12 @@ export async function POST(req: NextRequest) {
         .replace(/{{RAZORPAY_ID}}/g, payment.razorpayOrderId as string)
         .replace(/{{AMOUNT}}/g, serverTotal);
 
-        
-
       await sendEmail("glownestserv@gmail.com", "A new order recevied", html);
-      await sendEmail(student.parentEmail, "Glow Nest - We have recevied your order", userHtml);
+      await sendEmail(
+        student.parentEmail,
+        "Glow Nest - We have recevied your order",
+        userHtml,
+      );
     });
 
     return NextResponse.json({ success: true });
