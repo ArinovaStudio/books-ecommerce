@@ -118,10 +118,6 @@ export const emailTemplate = `
                         <td>{{ORDER_ID}}</td>
                     </tr>
                     <tr>
-                        <td><strong>Razorpay Payment ID</strong></td>
-                        <td>{{RAZORPAY_ID}}</td>
-                    </tr>
-                    <tr>
                         <td><strong>Amount Paid</strong></td>
                         <td>₹{{AMOUNT}}</td>
                     </tr>

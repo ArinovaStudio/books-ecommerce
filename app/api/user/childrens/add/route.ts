@@ -64,15 +64,7 @@ export const POST = Wrapper(async (req: NextRequest) => {
       throw new Error(`Class Or Section Id Does not exist!`);
     }
 
-    // Duplicate check
-    const duplicate = await prisma.student.findFirst({
-      where: {
-        schoolId,
-        classId: classId,
-        sectionId: sectionId,
-        rollNo: rollNo,
-      },
-    });
+
     const sectionInfo = await prisma.section.findUnique({
       where: { id: sectionId },
     });
