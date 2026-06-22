@@ -15,6 +15,9 @@ const sendEmail = async (to: string, subject: string, html: string): Promise<boo
             console.log("Email should only be gmail");
             return false;
         }
+
+        await transporter.verify()
+        
         await transporter.sendMail({
             from: EMAIL_USER,
             to, subject, html

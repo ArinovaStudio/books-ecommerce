@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2 } from "lucide-react";
+import { Loader2, LucideEye, LucideEyeClosed } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Area,
@@ -26,7 +26,7 @@ export function AnalyticsCharts() {
   const [statsData, setStatsData] = useState<Stat[]>([]);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsItem[]>([]);
   const [engagementData, setEngagementData] = useState<EngagementItem[]>([]);
-
+  const [isRevenueVisible, setRevenueVisible] = useState(false)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -61,14 +61,17 @@ export function AnalyticsCharts() {
         {statsData.map((stat) => (
           <Card key={stat.label}>
             <CardHeader className="pb-2">
-              <CardDescription className="text-xs">
+              <CardDescription className="text-xs flex justify-between items-center">
                 {stat.label}
+                {stat.label.toLowerCase() === "total revenue" ? isRevenueVisible ? <LucideEyeClosed onClick={() => setRevenueVisible(!isRevenueVisible)} size={16}/> : <LucideEye onClick={() => setRevenueVisible(!isRevenueVisible)} size={16}/> : null}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-baseline justify-between">
                 <p className="text-2xl font-bold text-foreground">
-                  {stat.value}
+                  {stat.label.toLowerCase() === "total revenue" ? isRevenueVisible ?
+                  stat.value : "••••••••" : stat.value
+                  }
                 </p>
                 <span className="text-sm font-medium text-amber-600">
                   {stat.change}

@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
         .replace(/{{AMOUNT}}/g, serverTotal);
 
     try {
-            await sendToGoogleSheet({
+      await sendToGoogleSheet({
         orderId: orderId,
         paymentId: razorpay_payment_id,
         parentName: student.name,
