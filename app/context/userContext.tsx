@@ -74,11 +74,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             }
 
             const data = await res.json()
-
-            // if (data.user.role !== "USER") {
-            //     throw new Error("Unauthorized")
-            // }
-
             setUser(data.user)
         } catch (error) {
             console.error("User auth failed:", error)

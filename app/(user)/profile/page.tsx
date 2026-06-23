@@ -10,32 +10,27 @@ import {
   Calendar,
   Droplets,
   Baby,
-  ChevronRight,
   LogOut,
-  Loader2Icon,
   LockKeyhole,
+  Map,
+  LucideArrowRight,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
 import { useUser, UserProfile } from "@/app/context/userContext";
 import Link from "next/link";
-import { StudentModal } from "@/components/StudentModal";
 import { AddChildrenModal } from "@/components/AddChildrenModal";
+import TrackOrders from "@/components/order/TrackingOrder";
+
+
 
 const ProfilePage = () => {
-  const { user, loading, logout,refreshUser } = useUser();
+  const { user, loading, logout, refreshUser } = useUser();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [trackingModel, setTrackingModel] = useState(false)
   useEffect(() => {
     if (!loading && user) {
       setProfile(user as any);
@@ -44,6 +39,7 @@ const ProfilePage = () => {
   const schoolId = (user as any)?.schoolId;
   return (
     <div className="min-h-screen w-full bg-gray-50/50 p-4 sm:p-6 lg:p-8 flex flex-col items-center">
+      {trackingModel && user && <TrackOrders close={() => setTrackingModel(false)} userId={user.email} />}
       <div className="w-full max-w-6xl flex flex-col gap-6">
         {/* Header */}
         <div className="flex flex-row items-center justify-between gap-4">
@@ -102,13 +98,20 @@ const ProfilePage = () => {
 
                 <div className="flex items-start gap-3 text-gray-600">
                   <div className="p-2 bg-blue-50 rounded-lg shrink-0">
-                    <MapPin size={16} className="text-blue-600" />
+                    <Map size={16} className="text-blue-600" />
                   </div>
 
                   <span className="leading-relaxed">
                     {profile?.address ?? "No Address"}{" "}
                     {profile?.pincode ? `, ${profile.pincode}` : ""}
                   </span>
+                </div>
+
+                <div onClick={() => setTrackingModel(true)} className="flex items-center justify-between gap-3 text-white cursor-pointer bg-blue-600/60  rounded-full py-2 px-2 pl-4">
+                  Track Orders
+                  <div className="p-2 bg-blue-50 rounded-full">
+                    <LucideArrowRight size={16} className="text-blue-600" />
+                  </div>
                 </div>
               </CardContent>
               <div className="grid gap-0 w-full">
