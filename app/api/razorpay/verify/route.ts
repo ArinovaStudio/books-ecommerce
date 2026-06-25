@@ -95,8 +95,6 @@ export async function POST(req: NextRequest) {
       pincode,
     } = orderPayload;
 
-
-
     // Prevent duplicate orders for the same Razorpay session
     const existingPayment = await prisma.payment.findFirst({
       where: { razorpayOrderId: razorpay_order_id },
@@ -119,66 +117,61 @@ export async function POST(req: NextRequest) {
 
     const orderId = generateOrderId();
 
-    await prisma.$transaction(async (tx) => {
-
-      const order = await tx.order.create({
-        data: {
-          id: orderId,
-          userId,
-          students: {
-            create: childIds.map((id: string) => ({
-              student: { connect: { id } },
-            })),
+    await prisma.order.create({
+      data: {
+        id: orderId,
+        userId,
+        students: {
+          create: childIds.map((id: string) => ({
+            student: { connect: { id } },
+          })),
+        },
+        academicYear: student.class.academicYear,
+        class: student.class.name,
+        section: student.section,
+        school: student.school.name,
+        status: "ORDER_PLACED",
+        totalAmount: serverTotal,
+        phone,
+        landmark,
+        pincode,
+        items: {
+          createMany: { 
+            data: validatedItems.map((item: any) => ({
+            orderId: orderId,
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        }
+        },
+        payment: {
+          create: {
+            amount: serverTotal,
+            method: "Razorpay",
+            status: "SUCCESS",
+            razorpayOrderId: razorpay_order_id,
+            razorpayPaymentId: razorpay_payment_id,
           },
-          academicYear: student.class.academicYear,
-          class: student.class.name,
-          section: student.section,
-          school: student.school.name,
-          status: "ORDER_PLACED",
-          totalAmount: serverTotal,
-          phone,
-          landmark,
-          pincode,
         },
-      });
+      },
+    });
 
-      await tx.orderItem.createMany({
-        data: validatedItems.map((item: any) => ({
-          orderId: order.id,
-          productId: item.productId,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-      });
+    const html = mailTemplate
+      .replace("{{orderId}}", orderId)
+      .replace("{{parentName}}", student.name)
+      .replace("{{phone}}", phone)
+      .replace("{{school}}", student.school.name)
+      .replace("{{class}}", student.class.name)
+      .replace("{{section}}", student.section)
+      .replace("{{landmark}}", landmark)
+      .replace("{{pincode}}", pincode)
+      .replace("{{totalAmount}}", serverTotal.toString());
 
-      await tx.payment.create({
-        data: {
-          orderId: order.id,
-          amount: serverTotal,
-          method: "Razorpay",
-          status: "SUCCESS",
-          razorpayOrderId: razorpay_order_id,
-          razorpayPaymentId: razorpay_payment_id,
-        },
-      });
-    }, { timeout: 15000 });
-
-
-      const html = mailTemplate
-        .replace("{{orderId}}", orderId)
-        .replace("{{parentName}}", student.name)
-        .replace("{{phone}}", phone)
-        .replace("{{school}}", student.school.name)
-        .replace("{{class}}", student.class.name)
-        .replace("{{section}}", student.section)
-        .replace("{{landmark}}", landmark)
-        .replace("{{pincode}}", pincode)
-        .replace("{{totalAmount}}", serverTotal.toString());
-
-      const userHtml = emailTemplate
-        .replace(/{{CUSTOMER_NAME}}/g, student.name)
-        .replace(/{{ORDER_ID}}/g, orderId)
-        .replace(/{{AMOUNT}}/g, serverTotal);
+    const userHtml = emailTemplate
+      .replace(/{{CUSTOMER_NAME}}/g, student.name)
+      .replace(/{{ORDER_ID}}/g, orderId)
+      .replace(/{{AMOUNT}}/g, serverTotal);
 
     try {
       await sendToGoogleSheet({
@@ -195,26 +188,25 @@ export async function POST(req: NextRequest) {
         landmark,
         pincode,
       });
-} catch (err) {
-  console.error("Google Sheet failed", err);
-}
+    } catch (err) {
+      console.error("Google Sheet failed", err);
+    }
 
-try {
-        await sendEmail("glownestserv@gmail.com", "A new order recevied", html);
-} catch (err) {
-  console.error("Admin email failed", err);
-}
+    try {
+      await sendEmail("glownestserv@gmail.com", "A new order recevied", html);
+    } catch (err) {
+      console.error("Admin email failed", err);
+    }
 
-try {
+    try {
       await sendEmail(
         student.parentEmail,
         "Glow Nest - We have recevied your order",
         userHtml,
       );
-} catch (err) {
-  console.error("Customer email failed", err);
-}
-
+    } catch (err) {
+      console.error("Customer email failed", err);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
