@@ -138,7 +138,6 @@ export async function POST(req: NextRequest) {
         items: {
           createMany: { 
             data: validatedItems.map((item: any) => ({
-            orderId: orderId,
             productId: item.productId,
             quantity: item.quantity,
             price: item.price,
