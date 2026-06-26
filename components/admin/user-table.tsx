@@ -31,6 +31,7 @@ import ReceiptBase from "../Receipt";
 import dynamic from "next/dynamic";
 import html2canvas from "html2canvas-pro";
 import jspdf from "jspdf";
+import Printable from "../order/Printable";
 /* ================= TYPES ================= */
 type School = {
   id: string;
@@ -115,6 +116,57 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
 
     setTimeout(async () => {
       const receipt = document.getElementById("receipt");
+      if (!receipt) return;
+
+      const canvas = await html2canvas(receipt, {
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        scale: 2,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: receipt.scrollWidth,
+        windowHeight: receipt.scrollHeight,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+
+      // Get actual canvas dimensions
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+
+      // Define max PDF width (A4 width in mm)
+      const maxPdfWidth = 210;
+
+      // Calculate PDF dimensions maintaining aspect ratio
+      // Convert pixels to mm (assuming 96 DPI: 1 inch = 25.4mm, 96px = 25.4mm)
+      const pxToMm = 25.4 / 96;
+      let pdfWidth = (imgWidth * pxToMm) / 2; // divide by 2 because we used scale: 2
+      let pdfHeight = (imgHeight * pxToMm) / 2;
+
+      // If content is wider than A4, scale down proportionally
+      if (pdfWidth > maxPdfWidth) {
+        const scaleFactor = maxPdfWidth / pdfWidth;
+        pdfWidth = maxPdfWidth;
+        pdfHeight = pdfHeight * scaleFactor;
+      }
+
+      // Create PDF with actual content dimensions
+      const pdf = new jspdf({
+        orientation: pdfHeight > pdfWidth ? "p" : "l",
+        unit: "mm",
+        format: [pdfWidth, pdfHeight],
+      });
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Receipt-${order.id}.pdf`);
+    }, 500);
+  };
+
+  const handlePrint = async (order: Order) => {
+    setReceiptData(order);
+
+    setTimeout(async () => {
+      const receipt = document.getElementById("printReceipt");
       if (!receipt) return;
 
       const canvas = await html2canvas(receipt, {
@@ -256,6 +308,7 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
   return (
     <div className="space-y-4">
       <ReceiptBase order={receiptData} />
+      <Printable order={receiptData} />
       {/* ================= HEADER ================= */}
       <div className="flex items-center gap-2">
         {selectedSchool && role === "ADMIN" && (
@@ -406,10 +459,16 @@ export function OrdersTable({ role, subAdminSchoolId }: Props) {
                             </SelectGroup>
                           </SelectContent>
                         </Select>
+                        <div className="flex justify-center items-center gap-2">
                         <Button onClick={() => handleReceipt(order)}>
                           <Download />
-                          Download Receipt
+                          Full Receipt
                         </Button>
+                        <Button onClick={() => handlePrint(order)}>
+                          <Download />
+                          Printable Receipt
+                        </Button>
+                        </div>
                       </div>
                       {/* <Badge
                       className={`py-2 h-fit ${order.status === "DELIVERED" ? "text-green-400 bg-green-500/20" : order.status === "OUT_FOR_DELIVERY" ? "bg-amber-500/20 text-amber-400" : "text-red-400 bg-red-500/20"}`}
