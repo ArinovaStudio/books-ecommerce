@@ -23,16 +23,8 @@ export default function Printable({ order }: ReceiptProps) {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Image
-              src="/logo.png"
-              className="rounded-full"
-              alt={COMPANY}
-              width={40}
-              height={40}
-            />
             <div>
               <p className="font-semibold text-sm">{COMPANY}</p>
-              <p className="text-xs text-muted-foreground">contact@glow-nest.in</p>
             </div>
           </div>
           <div className="text-right">
@@ -51,25 +43,15 @@ export default function Printable({ order }: ReceiptProps) {
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Ship To</p>
           <p className="text-base font-bold">{parent?.name ?? NOT_AVAILABLE}</p>
-          <p className="text-sm text-muted-foreground">{order?.landmark ?? NOT_AVAILABLE}</p>
-          <p className="text-sm text-muted-foreground">Pincode: {order?.pincode ?? NOT_AVAILABLE}</p>
-          <p className="text-sm text-muted-foreground">Phone: {order?.phone ?? NOT_AVAILABLE}</p>
+          <p className="text-base font-bold">{order?.landmark ?? NOT_AVAILABLE}</p>
+          <p className="text-base font-bold">Pincode: {order?.pincode ?? NOT_AVAILABLE}</p>
+          <p className="text-base font-bold">Phone: {order?.phone ?? NOT_AVAILABLE}</p>
         </div>
 
         <Separator />
-
-        {/* School Info */}
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">School Info</p>
-          <p className="text-sm">
-            {order?.school ?? NOT_AVAILABLE} &bull; {order?.class ?? NOT_AVAILABLE} &bull; Section {order?.section ?? NOT_AVAILABLE}
-          </p>
-        </div>
-
-        <Separator />
-
-        {/* Children */}
-        <div className="space-y-1">
+\
+        {/* School nfo */}
+                <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Children</p>
           {students.map(({ student }: any, index: number) => (
             <p key={student.id} className="text-sm">
@@ -77,6 +59,17 @@ export default function Printable({ order }: ReceiptProps) {
             </p>
           ))}
         </div>
+
+
+        <div className="space-y-1">
+          <p className="text-sm">
+          {order?.class ?? NOT_AVAILABLE} &bull; Section {order?.section ?? NOT_AVAILABLE}
+          </p>
+        </div>
+
+        <Separator />
+
+        {/* Children */}
 
         <Separator />
 
