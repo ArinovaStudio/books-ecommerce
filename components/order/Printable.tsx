@@ -68,10 +68,6 @@ export default function Printable({ order }: ReceiptProps) {
 
         <Separator />
 
-        {/* Children */}
-
-        <Separator />
-
         {/* Footer */}
         <div className="flex justify-between items-center text-xs text-muted-foreground">
           <p>Thanks for your order!</p>
