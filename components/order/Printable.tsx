@@ -42,19 +42,18 @@ export default function Printable({ order }: ReceiptProps) {
         {/* Ship To */}
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Ship To</p>
-          <p className="text-base font-bold">{parent?.name ?? NOT_AVAILABLE}</p>
-          <p className="text-base font-bold">{order?.landmark ?? NOT_AVAILABLE}</p>
-          <p className="text-base font-bold">Pincode: {order?.pincode ?? NOT_AVAILABLE}</p>
-          <p className="text-base font-bold">Phone: {order?.phone ?? NOT_AVAILABLE}</p>
+          <p className="text-lg font-bold">{parent?.name ?? NOT_AVAILABLE}</p>
+          <p className="text-lg font-bold">{order?.landmark ?? NOT_AVAILABLE}</p>
+          <p className="text-lg font-bold">Pincode: {order?.pincode ?? NOT_AVAILABLE}</p>
+          <p className="text-lg font-bold">Phone: {order?.phone ?? NOT_AVAILABLE}</p>
         </div>
 
         <Separator />
-\
         {/* School nfo */}
                 <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Children</p>
           {students.map(({ student }: any, index: number) => (
-            <p key={student.id} className="text-sm">
+            <p key={student.id} className="text-lg font-bold">
               {index + 1}. {student?.name ?? NOT_AVAILABLE}
             </p>
           ))}
@@ -62,7 +61,7 @@ export default function Printable({ order }: ReceiptProps) {
 
 
         <div className="space-y-1">
-          <p className="text-sm">
+          <p className="text-base">
           {order?.class ?? NOT_AVAILABLE} &bull; Section {order?.section ?? NOT_AVAILABLE}
           </p>
         </div>
