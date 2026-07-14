@@ -77,7 +77,8 @@ export function SchoolClassUsers({ schoolId, activeTab, classItem, sectionItem, 
 
     const filteredUsers = users.filter(user =>
         user.name.toLowerCase().includes(search.toLowerCase()) ||
-        user.email.toLowerCase().includes(search.toLowerCase())
+        user.email.toLowerCase().includes(search.toLowerCase()) || 
+        user.phone.toLowerCase().includes(search.toLowerCase())
     )
 
     // DELETE STUDENT
