@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import Link from "next/link";
 
 interface GuardianFormProps {
   planName: string;
@@ -152,27 +153,34 @@ export function GuardianForm() {
     }
   };
   const selectedChildrens = children.filter((child: any) => child.selected);
-  
 
-  const groupedByCategory = products.reduce((acc, product) => {
-    const category = product.category as "TEXTBOOK" | "NOTEBOOK" | "STATIONARY";
+  const groupedByCategory = products.reduce(
+    (acc, product) => {
+      const category = product.category as
+        | "TEXTBOOK"
+        | "NOTEBOOK"
+        | "STATIONARY";
 
-    const selection = selectedProducts[product.id];
-    
-    if (selection && selection.checked) {
+      const selection = selectedProducts[product.id];
 
-      if (!acc[category]) acc[category] = [];
+      if (selection && selection.checked) {
+        if (!acc[category]) acc[category] = [];
 
-      acc[category].push({ ...product, stock: selection.quantity * selectedChildrens.length});
-    }
-    return acc;
-  }, {} as Record<"TEXTBOOK" | "NOTEBOOK" | "STATIONARY", Product[]>);
+        acc[category].push({
+          ...product,
+          stock: selection.quantity * selectedChildrens.length,
+        });
+      }
+      return acc;
+    },
+    {} as Record<"TEXTBOOK" | "NOTEBOOK" | "STATIONARY", Product[]>,
+  );
 
   const categoryTotals = Object.entries(groupedByCategory).reduce(
     (acc, [category, items]) => {
       acc[category as keyof typeof acc] = items.reduce(
         (sum, product) => sum + product.price * product.stock,
-        0
+        0,
       );
       return acc;
     },
@@ -180,12 +188,12 @@ export function GuardianForm() {
       TEXTBOOK: 0,
       NOTEBOOK: 0,
       STATIONARY: 0,
-    }
+    },
   );
 
   const grandTotal = Object.values(categoryTotals).reduce(
     (sum, val) => sum + val,
-    0
+    0,
   );
 
   const sendOrder = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -234,17 +242,20 @@ export function GuardianForm() {
       if (resData.success) {
         const { user: userData } = resData;
         setUser(userData);
-        const childData = userData.children.length > 0
-            ? userData.children.filter(
-                (child: any) =>
-                  child.schoolId === schoolId &&
-                  child.classId === classId &&
-                  child.section === section
-              )?.map((child: any)=>({...child,selected: false}))
+        const childData =
+          userData.children.length > 0
+            ? userData.children
+                .filter(
+                  (child: any) =>
+                    child.schoolId === schoolId &&
+                    child.classId === classId &&
+                    child.section === section,
+                )
+                ?.map((child: any) => ({ ...child, selected: false }))
             : [];
         if (childData.length === 0) {
           toast.error(
-            "No child found for the selected school, class, and section."
+            "No child found for the selected school, class, and section.",
           );
         }
         setChildren(childData);
@@ -262,107 +273,109 @@ export function GuardianForm() {
     fetchProducts();
     fetchSchool(schoolId as string);
   }, []);
-  const handleSelectChildren = (id: string)=>{
-    const index = children.findIndex((child: any)=>child.id===id); 
-      if(index===-1){
-        return;
-      }
-      setChildren((prev: any)=>{
-        return prev.map((child: any,i: number)=>{
-          return i===index ? {...child,selected: !child.selected}:{...child}
-        });
+  const handleSelectChildren = (id: string) => {
+    const index = children.findIndex((child: any) => child.id === id);
+    if (index === -1) {
+      return;
+    }
+    setChildren((prev: any) => {
+      return prev.map((child: any, i: number) => {
+        return i === index
+          ? { ...child, selected: !child.selected }
+          : { ...child };
       });
+    });
   };
   //razorpay integration
-const startRazorpayPayment = async () => {
-  const orderItems = products
-    .filter((p) => selectedProducts[p.id]?.checked)
-    .map((p) => ({
-      productId: p.id,
-      quantity: selectedProducts[p.id]?.quantity || p.stock,
-    }));
+  const startRazorpayPayment = async () => {
+    const orderItems = products
+      .filter((p) => selectedProducts[p.id]?.checked)
+      .map((p) => ({
+        productId: p.id,
+        quantity: selectedProducts[p.id]?.quantity || p.stock,
+      }));
 
-  const res = await fetch("/api/razorpay/order", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      amount: grandTotal,
-      childIds: selectedChildrens.map((c: any) => c.id),
-      phone: formData.guardianPhone,
-      landmark: formData.landmark,
-      pincode: formData.pincode,
-      items: orderItems,
-    }),
-  });
-
-  const data = await res.json();
-  if (!data.success) throw new Error("Failed to create payment session");
-
-  // Save orderPayload returned by server — passed back at verify time
-  const { razorpayOrder, orderPayload } = data;
-
-  await import("@/lib/loadRazorpay").then((m) => m.loadRazorpay());
-
-  const options = {
-    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-    amount: razorpayOrder.amount,
-    currency: "INR",
-    name: "School Stationery",
-    description: "Stationery Order",
-    order_id: razorpayOrder.id,
-    handler: async function (response: any) {
-      await verifyAndPlaceOrder(response, orderPayload);
-    },
-    prefill: {
-      name: formData.guardianName,
-      email: formData.guardianEmail,
-      contact: formData.guardianPhone,
-    },
-    theme: { color: "#fbbf24" },
-  };
-
-  // @ts-ignore
-  const rzp = new window.Razorpay(options);
-  rzp.on("payment.failed", () => {
-    toast.error("Payment failed");
-    setLoading(false);
-  });
-  rzp.open();
-};
-
-const verifyAndPlaceOrder = async (payment: any, orderPayload: any) => {
-  try {
-    const verifyRes = await fetch("/api/razorpay/verify", {
+    const res = await fetch("/api/razorpay/order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        razorpay_order_id: payment.razorpay_order_id,
-        razorpay_payment_id: payment.razorpay_payment_id,
-        razorpay_signature: payment.razorpay_signature,
-        orderPayload,
+        amount: grandTotal,
+        childIds: selectedChildrens.map((c: any) => c.id),
+        phone: formData.guardianPhone,
+        landmark: formData.landmark,
+        pincode: formData.pincode,
+        items: orderItems,
       }),
     });
 
-    const verifyData = await verifyRes.json();
+    const data = await res.json();
+    if (!data.success) throw new Error("Failed to create payment session");
 
-    // Signature check passed + order created — happy path
-    if (verifyData.success) {
-      window.location.replace("/");
-      toast.success("Order placed successfully 🎉");
-      return;
+    // Save orderPayload returned by server — passed back at verify time
+    const { razorpayOrder, orderPayload } = data;
+
+    await import("@/lib/loadRazorpay").then((m) => m.loadRazorpay());
+
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount: razorpayOrder.amount,
+      currency: "INR",
+      name: "School Stationery",
+      description: "Stationery Order",
+      order_id: razorpayOrder.id,
+      handler: async function (response: any) {
+        await verifyAndPlaceOrder(response, orderPayload);
+      },
+      prefill: {
+        name: formData.guardianName,
+        email: formData.guardianEmail,
+        contact: formData.guardianPhone,
+      },
+      theme: { color: "#fbbf24" },
+    };
+
+    // @ts-ignore
+    const rzp = new window.Razorpay(options);
+    rzp.on("payment.failed", () => {
+      toast.error("Payment failed");
+      setLoading(false);
+    });
+    rzp.open();
+  };
+
+  const verifyAndPlaceOrder = async (payment: any, orderPayload: any) => {
+    try {
+      const verifyRes = await fetch("/api/razorpay/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          razorpay_order_id: payment.razorpay_order_id,
+          razorpay_payment_id: payment.razorpay_payment_id,
+          razorpay_signature: payment.razorpay_signature,
+          orderPayload,
+        }),
+      });
+
+      const verifyData = await verifyRes.json();
+
+      // Signature check passed + order created — happy path
+      if (verifyData.success) {
+        window.location.replace("/");
+        toast.success("Order placed successfully 🎉");
+        return;
+      }
+      toast.success("Payment received! Your order will be confirmed shortly.");
+      setTimeout(() => window.location.replace("/"), 6000);
+    } catch {
+      // Network error after payment — same treatment
+      toast.success(
+        "Payment received! But THERE WAS A NETWORK ISSUE DURING PAYMENT PLEASE CONTACT CUSTOMER CARE IF NOT RECEVIED ANY EMAIL.",
+      );
+      setTimeout(() => window.location.replace("/"), 10000);
+    } finally {
+      setLoading(false);
     }
-    toast.success("Payment received! Your order will be confirmed shortly.");
-    setTimeout(() => window.location.replace("/"), 6000);
-
-  } catch {
-    // Network error after payment — same treatment
-    toast.success("Payment received! But THERE WAS A NETWORK ISSUE DURING PAYMENT PLEASE CONTACT CUSTOMER CARE IF NOT RECEVIED ANY EMAIL.");
-    setTimeout(() => window.location.replace("/"), 10000);
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   if (loading) {
     return (
@@ -399,7 +412,12 @@ const verifyAndPlaceOrder = async (payment: any, orderPayload: any) => {
                   className="w-full flex justify-start items-center gap-3"
                 >
                   <div className="bg-gray-200 border border-gray-400 text-gray-700 p-2 px-3 rounded-lg text-sm font-medium">
-                <input type="checkbox" value={child.selected} onChange={()=>handleSelectChildren(child.id)} className="scale-105"/>
+                    <input
+                      type="checkbox"
+                      value={child.selected}
+                      onChange={() => handleSelectChildren(child.id)}
+                      className="scale-105"
+                    />
                   </div>
                   <p className="py-2 bg-gray-200 border border-gray-400 text-gray-700 px-4 w-1/3 rounded-lg text-sm font-medium">
                     NAME: {child.name}
@@ -438,7 +456,7 @@ const verifyAndPlaceOrder = async (payment: any, orderPayload: any) => {
                     className={cn(
                       "pl-10 sm:pl-11 h-11 sm:h-12 text-sm border-0 bg-transparent",
                       errors.guardianName &&
-                        "border-destructive focus-visible:ring-destructive"
+                        "border-destructive focus-visible:ring-destructive",
                     )}
                   />
                 </div>
@@ -469,13 +487,13 @@ const verifyAndPlaceOrder = async (payment: any, orderPayload: any) => {
                     onChange={(e) =>
                       handleInputChange(
                         "guardianPhone",
-                        e.target.value.replace(/\D/g, "").slice(0, 10)
+                        e.target.value.replace(/\D/g, "").slice(0, 10),
                       )
                     }
                     className={cn(
                       "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base border-0 bg-transparent",
                       errors.guardianPhone &&
-                        "border-destructive focus-visible:ring-destructive"
+                        "border-destructive focus-visible:ring-destructive",
                     )}
                     maxLength={10}
                   />
@@ -537,7 +555,7 @@ const verifyAndPlaceOrder = async (payment: any, orderPayload: any) => {
                     className={cn(
                       "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base border-0 bg-transparent",
                       errors.landmark &&
-                        "border-destructive focus-visible:ring-destructive"
+                        "border-destructive focus-visible:ring-destructive",
                     )}
                   />
                 </div>
@@ -565,13 +583,13 @@ const verifyAndPlaceOrder = async (payment: any, orderPayload: any) => {
                     onChange={(e) =>
                       handleInputChange(
                         "pincode",
-                        e.target.value.replace(/\D/g, "").slice(0, 6)
+                        e.target.value.replace(/\D/g, "").slice(0, 6),
                       )
                     }
                     className={cn(
                       "pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base border-0 bg-transparent",
                       errors.pincode &&
-                        "border-destructive focus-visible:ring-destructive"
+                        "border-destructive focus-visible:ring-destructive",
                     )}
                     maxLength={6}
                   />
@@ -617,7 +635,35 @@ const verifyAndPlaceOrder = async (payment: any, orderPayload: any) => {
                   <span>₹{grandTotal}</span>
                 </div>
               </div>
+              <div className="flex items-start gap-3">
+                <input
+                  id="terms"
+                  type="checkbox"
+                  required
+                  className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                />
 
+                <label
+                  htmlFor="terms"
+                  className="text-sm text-gray-600 leading-6"
+                >
+                  I have read and agree to the{" "}
+                  <Link
+                    href="/terms"
+                    className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                  >
+                    Terms & Conditions
+                  </Link>{" "}
+                  and{" "}
+                  <Link
+                    href="/policy"
+                    className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                  >
+                    Privacy Policy
+                  </Link>
+                  .
+                </label>
+              </div>
               {/* Submit Button */}
               {user?.children?.length > 0 ? (
                 <div className="pt-2 sm:pt-4">
@@ -625,7 +671,7 @@ const verifyAndPlaceOrder = async (payment: any, orderPayload: any) => {
                     type="submit"
                     className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium cursor-pointer flex justify-center items-center bg-amber-400 hover:bg-amber-300 text-black"
                     size="lg"
-                    disabled={loading || selectedChildrens.length===0}
+                    disabled={loading || selectedChildrens.length === 0}
                   >
                     {loading ? (
                       <LucideLoader2
